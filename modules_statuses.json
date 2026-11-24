@@ -1,0 +1,22 @@
+{
+    "Client": true,
+    "Sales": true,
+    "HR": true,
+    "Stock": true,
+    "Account": true,
+    "Purchases": true,
+    "RentalManagement": true,
+    "Sitting": true,
+    "Branches": true,
+    "Reports": true,
+    "Api": true,
+    "UserGuide": true,
+    "Subscriptions": true,
+    "Pos": true,
+    "TaskManager": true,
+    "OnlineStore": true,
+    "Ecosystem": true,
+    "Installer": true,
+    "Manufacturing": true,
+    "Integration": true
+}

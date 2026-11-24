@@ -1,0 +1,72 @@
+<?php
+
+/*
+    أسماء الحقول العربية في رسائل التحقّق — لواجهة الجوال وحدها.
+
+    تُحمَّل في SetApiLocale لطلبات /api/integration/v1 فقط، لا في ملف
+    resources/lang/ar/validation.php العام: مفاتيح مثل shift وpoints وstatus_id
+    وmanager_id تعني هنا «دوام المسؤول» و«نقاط الموقع» و«حالة العميل»، وتعني
+    في شاشات الموقع الأخرى (الورديات، نقاط الولاء، حالات المهام…) شيئاً آخر.
+*/
+
+return [
+    'per_page' => 'عدد العناصر في الصفحة',
+    'sort' => 'الترتيب',
+    'search' => 'البحث',
+    'q' => 'البحث',
+    'scope' => 'النطاق',
+    'type' => 'النوع',
+    'date_from' => 'من تاريخ',
+    'date_to' => 'إلى تاريخ',
+    'category_id' => 'التصنيف',
+    'node_id' => 'الفرع',
+    'client_tree_branch_id' => 'الفرع أو المنطقة التابع لها العميل',
+    'client_type' => 'نوع العميل',
+    'registration_stage_id' => 'وضع العميل',
+    'tax_number' => 'الرقم الضريبي',
+    'printing_method' => 'طريقة الطباعة',
+    'item_quantity_limit' => 'الحد الأقصى للكمية لكل بند',
+    'neighborhood_name_manual' => 'اسم الحي',
+    'first_name' => 'الاسم الأول',
+    'last_name' => 'اسم العائلة',
+    'street1' => 'العنوان',
+    'employee_client_id' => 'الموظفون المسؤولون',
+    'employee_client_id.*' => 'الموظف المسؤول',
+    'latitude' => 'خط العرض',
+    'longitude' => 'خط الطول',
+    'current_latitude' => 'موقعك الحالي (خط العرض)',
+    'current_longitude' => 'موقعك الحالي (خط الطول)',
+    'status_id' => 'حالة العميل',
+    'stage_id' => 'وضع العميل',
+    'manager_id' => 'المسؤول المعتمِد',
+    'employee_name' => 'اسم المسؤول',
+    'employee_phone' => 'جوال المسؤول',
+    'employee_position' => 'وظيفة المسؤول',
+    'is_primary' => 'المسؤول الرئيسي',
+    'shift' => 'دوام المسؤول',
+    'client_employee_id' => 'مسؤول العميل',
+    'deposit_count' => 'عدد العهدة',
+    'site_type' => 'نوع الموقع',
+    'competitor_documents' => 'عدد مستندات المنافسين',
+    'process' => 'الإجراء',
+    'attachments.*' => 'المرفق',
+    'competitors' => 'المنافسون',
+    'competitors.*.competitor_id' => 'المنافس',
+    'competitors.*.asset_count' => 'عدد قطع العهدة',
+    'competitors.*.photo' => 'صورة المنافس',
+    'no_competitors_photo' => 'صورة إثبات عدم وجود منافس',
+    'client_signature' => 'توقيع العميل',
+    'employee_signature' => 'توقيع الموظف',
+    'outcome_notes' => 'ملاحظات الإنهاء',
+    'return_time' => 'وقت العودة',
+    'cancel_reason' => 'سبب الإلغاء',
+    'reply_message' => 'نصّ الردّ',
+    'client_ids.*' => 'العميل',
+    'justifications' => 'التبريرات',
+    'justifications.*' => 'التبرير',
+    'justification' => 'التبرير',
+    'points' => 'نقاط الموقع',
+    'points.*.latitude' => 'خط العرض',
+    'points.*.longitude' => 'خط الطول',
+    'points.*.recorded_at' => 'وقت النقطة',
+];

@@ -1,0 +1,461 @@
+.bg-analytics {
+    background: linear-gradient(118deg, rgba(115,103,240,1), rgba(130,115,255,0.7));
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.avatar-xl {
+    width: 5rem;
+    height: 5rem;
+}
+
+.bg-rgba-primary {
+    background-color: rgba(115, 103, 240, 0.12) !important;
+}
+
+.bg-rgba-warning {
+    background-color: rgba(255, 159, 67, 0.12) !important;
+}
+
+.text-bold-700 {
+    font-weight: 700 !important;
+}
+
+.text-bold-600 {
+    font-weight: 600 !important;
+}
+
+.text-bold-500 {
+    font-weight: 500 !important;
+}
+
+.font-large-1 {
+    font-size: 1.5rem !important;
+}
+
+.font-large-2 {
+    font-size: 2rem !important;
+}
+
+.font-medium-2 {
+    font-size: 1.2rem !important;
+}
+
+.font-medium-5 {
+    font-size: 2rem !important;
+}
+
+.bg-primary {
+    background-color: #7367f0 !important;
+}
+
+.bg-warning {
+    background-color: #ff9f43 !important;
+}
+
+.text-primary {
+    color: #7367f0 !important;
+}
+
+.text-warning {
+    color: #ff9f43 !important;
+}
+
+.text-success {
+    color: #28c76f !important;
+}
+/* تحسينات للمؤشر العام */
+.card-footer {
+    background: transparent;
+    border-top: 1px solid #e0e0e0;
+}
+
+.border-right {
+    border-right: 1px solid #e0e0e0 !important;
+}
+
+@media (max-width: 576px) {
+    .border-right {
+        border-right: none !important;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.font-weight-bolder {
+    font-weight: 800 !important;
+}
+
+/* تحسينات عامة للكروت */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(34,41,47,0.15);
+}
+
+/* تحسينات للرسم البياني */
+.apexcharts-legend-text {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 12px !important;
+}
+
+.apexcharts-datalabels-group text {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-weight: 600 !important;
+}
+
+/* تحسينات للعناوين */
+.card-title {
+    font-weight: 600;
+    color: #373d3f;
+    margin-bottom: 0;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    #indicator-chart {
+        min-height: 250px !important;
+    }
+    
+    .card-footer .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .card-footer .border-right {
+        border-right: none !important;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 1rem;
+    }
+}
+.text-danger {
+    color: #ea5455 !important;
+}
+
+.card {
+    box-shadow: 0 4px 24px 0 rgba(34,41,47,0.1);
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    border: none;
+}
+
+.card-header {
+    background: transparent;
+    border-bottom: none;
+    padding: 1.5rem 1.5rem 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.285rem;
+    font-weight: 500;
+}
+
+.chart-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.apexcharts-canvas {
+    direction: ltr;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.flex-column {
+    flex-direction: column !important;
+}
+
+.justify-content-between {
+    justify-content: space-between !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.align-items-start {
+    align-items: flex-start !important;
+}
+/* تحسينات للمؤشر العام مع 4 أقسام */
+.card-footer .col-3 {
+    padding: 0.75rem;
+}
+
+.card-footer .border-right {
+    border-right: 1px solid #e0e0e0 !important;
+}
+
+.card-footer .col-3:last-child .border-right {
+    border-right: none !important;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .card-footer .col-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        margin-bottom: 1rem;
+    }
+    
+    .card-footer .col-3:nth-child(even) .border-right {
+        border-right: none !important;
+    }
+    
+    .card-footer .col-3:nth-child(3),
+    .card-footer .col-3:nth-child(4) {
+        margin-bottom: 0;
+    }
+}
+/* تحسينات لمخطط الفروع */
+.apexcharts-bar-series .apexcharts-datalabels .apexcharts-datalabel {
+    font-weight: 600 !important;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 576px) {
+    #sales-chart {
+        min-height: 250px !important;
+    }
+}
+@media (max-width: 576px) {
+    .card-footer .col-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    .card-footer .border-right {
+        border-right: none !important;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 1rem;
+    }
+    
+    .card-footer .col-3:last-child .border-right {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+/* ألوان إضافية */
+.text-warning {
+    color: #ff9f43 !important;
+}
+
+.bg-warning {
+    background-color: #ff9f43 !important;
+}
+
+/* تحسينات للرسم البياني مع 4 عناصر */
+.apexcharts-legend-series {
+    margin: 2px 4px !important;
+}
+.pb-50 {
+    padding-bottom: 3rem !important;
+}
+
+.pt-0 {
+    padding-top: 0 !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem !important;
+}
+
+.mb-25 {
+    margin-bottom: 1.5rem !important;
+}
+
+.mb-50 {
+    margin-bottom: 3rem !important;
+}
+
+.mt-0 {
+    margin-top: 0 !important;
+}
+
+.mt-1 {
+    margin-top: 0.25rem !important;
+}
+
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+
+.mt-lg-0 {
+    margin-top: 0 !important;
+}
+
+.m-0 {
+    margin: 0 !important;
+}
+
+.m-auto {
+    margin: auto !important;
+}
+
+.w-75 {
+    width: 75% !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-white {
+    color: #fff !important;
+}
+
+.text-muted {
+    color: #b9c3cd !important;
+}
+
+.dropdown-menu {
+    border: 1px solid rgba(34, 41, 47, 0.1);
+    box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+}
+
+.btn-primary {
+    background-color: #7367f0;
+    border-color: #7367f0;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #5e50ee;
+    border-color: #5e50ee;
+}
+
+.chart-info {
+    padding: 0.5rem 0;
+}
+
+.branch-selector {
+    min-width: 200px;
+}
+
+.current-branch .badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+/* تحسينات إضافية للرسم البياني */
+#payments-receipts-chart {
+    width: 100%;
+    direction: ltr;
+}
+
+.apexcharts-canvas {
+    margin: 0 auto;
+}
+
+.branch-selector .form-control {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+.current-branch .badge {
+    background: linear-gradient(118deg, #7367f0, #7367f0);
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 20px;
+}
+
+/* مؤشر التحميل */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start !important;
+    }
+    
+    .branch-selector {
+        width: 100% !important;
+    }
+    
+    .branch-selector .form-control {
+        width: 100% !important;
+    }
+    
+    #payments-receipts-chart {
+        min-height: 350px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    #payments-receipts-chart {
+        min-height: 300px !important;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .branch-selector {
+        width: 100% !important;
+    }
+    
+    #payments-receipts-chart {
+        min-height: 300px !important;
+    }
+}
+
+/* تخصيص الرسم البياني */
+.apexcharts-legend-text {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.apexcharts-tooltip {
+    direction: rtl;
+    text-align: right;
+}
+@media (max-width: 767px) {
+    .avatar-xl {
+        width: 4rem;
+        height: 4rem;
+    }
+}

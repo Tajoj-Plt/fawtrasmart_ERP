@@ -1,0 +1,412 @@
+<?php
+
+use App\Constants\planFeatures\AccountPlanFeatures;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+use Modules\Account\Http\Controllers\AccountController;
+use Modules\Account\Http\Controllers\AccountsChartController;
+use Modules\Account\Http\Controllers\AccountsSettingsController;
+use Modules\Account\Http\Controllers\AccountStatementController;
+use Modules\Account\Http\Controllers\AssetsController;
+use Modules\Account\Http\Controllers\ChecksController;
+use Modules\Account\Http\Controllers\Cheques\CheckBooksController;
+use Modules\Account\Http\Controllers\Cheques\PayableChequesController;
+use Modules\Account\Http\Controllers\Cheques\ReceivedChequesController;
+use Modules\Account\Http\Controllers\CollectionsDetailController;
+use Modules\Account\Http\Controllers\CostCentersController;
+use Modules\Account\Http\Controllers\Finance\ExpensesController;
+use Modules\Account\Http\Controllers\Finance\FinanceSettingsController;
+use Modules\Account\Http\Controllers\Finance\IncomesController;
+use Modules\Account\Http\Controllers\Finance\TreasuryController;
+use Modules\Account\Http\Controllers\Finance\TreasuryEmployeeController;
+use Modules\Account\Http\Controllers\GeneralAccountsController;
+use Modules\Account\Http\Controllers\JournalEntryController;
+use Modules\Account\Http\Controllers\YearClosingReportController;
+
+Route::middleware(['auth'])->group(function () {
+
+    // Route removed as tree data is now passed from index method
+    // Route::get('/accounts/tree', [AccountsChartController::class, 'getTree']);
+    // Route::get('/accounts/{id}/children', [AccountsChartController::class, 'getChildren']);
+    Route::get('/accounts/parents', [AccountsChartController::class, 'getParents'])->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    /*
+        كودُ الحساب التالي — بأبٍ وبلا أب.
+
+        كان المسارُ يُلزم `{parent}`، فشاشةُ الإضافة تعرض «حساب رئيسي»
+        خياراً ثم لا تجد له كوداً: لا أبَ فلا مسار. و`{parent?}` تجعل
+        الجذرَ حالةً مشروعةً لا استثناءً متعذّراً.
+    */
+    /*
+        كودُ الحساب التالي — مسارٌ بأبٍ وآخرُ بلا أب.
+
+        كان المسارُ يُلزم `{parent}`، فشاشةُ الإضافة تعرض «حساب رئيسي»
+        خياراً ثم لا تجد له كوداً: لا أبَ فلا مسار.
+
+        ومسارٌ واحدٌ بـ`{parent?}` لا يكفي: المعاملُ الاختياريُّ في وسط
+        العنوان لا يُطابَق في لارافل، فـ`/accounts/next-code` تسقط إلى
+        الاحتياط وتردّ ٤٠٤. فمساران صريحان، واللفظيُّ أوّلاً كي لا يبتلعه
+        نظيرُه ذو المعامل.
+    */
+    Route::get('/accounts/next-code', [AccountsChartController::class, 'getNextCode'])->name('accounts_chart.next_code_root')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    Route::get('/accounts/{parent}/next-code', [AccountsChartController::class, 'getNextCode'])->name('accounts_chart.next_code')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // نُقل من routes/web.php الجذري — يستعمله Modules\Stock\resources\views\storehouse\show.blade.php عبر route('account.showDetails', ...)
+    Route::get('/accounts/showDetails/{id}', [AccountsChartController::class, 'showDetails'])->name('account.showDetails')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    Route::post('/set-error', function (Request $request) {
+        session()->flash('error', $request->message);
+
+        return response()->json(['success' => true]);
+    });
+
+    Route::delete('/accounts/{parentId}/delete', [AccountsChartController::class, 'destroy'])->middleware(['permission.role:account.chart.delete', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    Route::post('/accounts/store_account', [AccountsChartController::class, 'store_account'])->middleware(['permission.role:account.chart.create', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    Route::get('/accounts/{id}/edit', [AccountsChartController::class, 'edit'])->middleware(['permission.role:account.chart.edit', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    Route::put('/accounts/{id}/update', [AccountsChartController::class, 'update'])->middleware(['permission.role:account.chart.edit', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Add the new route for updating account balances
+    Route::post('/accounts/update-balances', [AccountsChartController::class, 'updateAllBalances'])->name('accounts.update_balances')->middleware(['permission.role:account.chart.recalculate', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    Route::post('/accounts/update-balances-from-journal-entries', [AccountsChartController::class, 'updateBalancesFromJournalEntries'])->name('accounts.update_balances_from_journal_entries')->middleware(['permission.role:account.chart.recalculate', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - تحديث أرصدة الحسابات الأب من قيودها وأرصدة أبنائها
+    Route::post('/accounts/update-parent-accounts-balances', [AccountsChartController::class, 'update_parent_accounts_balances'])->name('accounts.update_parent_accounts_balances')->middleware(['permission.role:account.chart.recalculate', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    Route::post('/accounts/migrate-client-opening-balances', [AccountsChartController::class, 'migrateClientOpeningBalances'])->name('accounts.migrate_client_opening_balances')->middleware(['permission.role:account.chart.migrate_opening_balances', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - إنشاء قيود افتتاحية من الأرصدة الحالية
+    Route::post('/accounts/create-opening-balances-from-balance', [AccountsChartController::class, 'createOpeningBalancesFromBalance'])->name('accounts.create_opening_balances_from_balance')->middleware(['permission.role:account.chart.create_opening_entries', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - Reorder client account codes
+    Route::post('/accounts/reorder-client-account-codes', [AccountsChartController::class, 'reorder_client_account_codes'])->name('accounts.reorder_client_account_codes')->middleware(['permission.role:account.chart.reorder_client_codes', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - مزامنة القيود المحاسبية للفواتير
+    Route::post('/accounts/sync-missing-invoice-journal-entries', [AccountController::class, 'syncMissingInvoiceJournalEntries'])->name('accounts.sync_missing_invoice_journal_entries')->middleware(['permission.role:account.chart.sync_invoice_entries', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - إجمالي أرصدة العملاء
+    Route::post('/accounts/clients-total-balance', [AccountsChartController::class, 'get_clients_total_balance'])->name('accounts.clients_total_balance')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - إعادة حساب أرصدة الآباء من الأسفل إلى الأعلى (مجموع أرصدة الأبناء فقط)
+    Route::post('/accounts/recompute-parent-balances-bottom-up', [AccountsChartController::class, 'recompute_parent_balances_bottom_up'])->name('accounts.recompute_parent_balances_bottom_up')->middleware(['permission.role:account.chart.recalculate', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - تصفير حسابات الإيرادات والمصروفات وحذف القيود الافتتاحية
+    Route::post('/accounts-chart/reset-revenue-expense', [AccountsChartController::class, 'reset_revenue_expense_accounts'])->name('accounts-chart.reset-revenue-expense')->middleware(['permission.role:account.chart.reset_revenue_expense', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - حذف جميع القيود المعتمدة لحسابات الإيرادات والمصروفات وأبنائها
+    Route::post('/accounts-chart/delete-approved-entries', [AccountsChartController::class, 'delete_approved_journal_entries_for_revenue_expense'])->name('accounts-chart.delete-approved-entries')->middleware(['permission.role:account.chart.delete_entries_bulk', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - تصفير حسابات الخزائن وحذف القيود الافتتاحية
+    Route::post('/accounts-chart/reset-treasuries', [AccountsChartController::class, 'reset_treasuries_accounts'])->name('accounts-chart.reset-treasuries')->middleware(['permission.role:account.chart.reset_treasuries', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+    // Generated by Copilot - حذف جميع القيود الافتتاحية لحسابات الخزائن وأبنائها
+    Route::post('/accounts-chart/delete-treasuries-entries', [AccountsChartController::class, 'delete_approved_journal_entries_for_treasuries'])->name('accounts-chart.delete-treasuries-entries')->middleware(['permission.role:account.chart.delete_entries_bulk', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+
+    // Route for getting journal entry details
+    Route::get('/accounts/journal-entry/{entryId}/details', [AccountsChartController::class, 'getJournalEntryDetails'])->name('accounts.journal_entry_details')->middleware(['permission.role:account.chart.entries', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+
+    Route::get('/cost_centers/tree', [CostCentersController::class, 'getTree'])->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    // الشجرةُ صفوفاً مرتّبةً بالعمق — تُبنى منها شاشةُ الطيّ والفتح دفعةً واحدة
+    Route::get('/cost_centers/tree-rows', [CostCentersController::class, 'treeRows'])->name('cost_centers.tree_rows')->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    Route::get('/cost_centers/parents', [CostCentersController::class, 'getParents'])->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    Route::get('/cost_centers/{id}/children', [CostCentersController::class, 'getChildren'])->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    Route::get('/cost_centers/{parent}/next-code', [CostCentersController::class, 'getNextCode'])->middleware(['permission.role:account.cost_centers.create', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    Route::get('/cost_centers/{parentId}/details', [CostCentersController::class, 'getAccountDetails'])->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    Route::delete('/cost_centers/{parentId}/delete', [CostCentersController::class, 'destroy'])->middleware(['permission.role:account.cost_centers.delete', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    Route::post('/cost_centers/store_account', [CostCentersController::class, 'store_account'])->middleware(['permission.role:account.cost_centers.create', 'plan:'.AccountPlanFeatures::COST_CENTERS, 'plan.limit:'.AccountPlanFeatures::LIMIT_COST_CENTERS]);
+    Route::get('/cost_centers/{id}/edit', [CostCentersController::class, 'edit'])->middleware(['permission.role:account.cost_centers.edit', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+    Route::put('/cost_centers/{id}/update', [CostCentersController::class, 'update'])->middleware(['permission.role:account.cost_centers.edit', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+
+    Route::group(
+        [
+            'prefix' => LaravelLocalization::setLocale(),
+            'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath', 'check.branch', 'accounting.period'],
+        ],
+        function () {
+            Route::prefix('Accounts')
+                // سورٌ خارجي بشرط «واحدةٌ على الأقل»: باقةٌ لا تشمل
+                // شيئاً من الحسابات تُردّ من هنا، وحارسُ كل شاشةٍ
+                // داخلَها يتكفّل بالباقي
+                ->middleware(['auth', 'plan:'.implode('|', AccountPlanFeatures::all())])
+                ->group(function () {
+                    Route::get('/dashboard', [AccountController::class, 'index'])->name('account.department.dashboard');
+                    Route::prefix('journal')->middleware('plan:'.AccountPlanFeatures::JOURNAL_ENTRIES)->group(function () {
+                        Route::get('/index', [JournalEntryController::class, 'index'])->name('journal.index')->middleware('permission.role:account.journal.view');
+                        Route::get('/create', [JournalEntryController::class, 'create'])->name('journal.create')->middleware(['permission.role:account.journal.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_JOURNAL_ENTRIES]);
+                        Route::post('/store', [JournalEntryController::class, 'store'])->name('journal.store')->middleware(['permission.role:account.journal.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_JOURNAL_ENTRIES]);
+                        Route::get('/show/{id}', [JournalEntryController::class, 'show'])->name('journal.show')->middleware('permission.role:account.journal.view');
+                        Route::get('/edit/{id}', [JournalEntryController::class, 'edit'])->name('journal.edit')->middleware('permission.role:account.journal.edit');
+                        Route::put('/update/{id}', [JournalEntryController::class, 'update'])->name('journal.update')->middleware('permission.role:account.journal.edit');
+                        Route::delete('/destroy/{id}', [JournalEntryController::class, 'destroy'])->name('journal.destroy')->middleware('permission.role:account.journal.delete');
+                        Route::get('/generalLedger', [AccountsChartController::class, 'generalLedger'])->name('journal.generalLedger')->middleware(['permission.role:account.chart.general_ledger', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+
+                        // New search endpoints for AJAX
+                        Route::get('/search/accounts', [JournalEntryController::class, 'searchAccounts'])->name('journal.search.accounts')->middleware('permission.role:account.journal.modifications');
+                        Route::get('/search/cost-centers', [JournalEntryController::class, 'searchCostCenters'])->name('journal.search.cost_centers')->middleware('permission.role:account.journal.modifications');
+                        Route::get('/next-reference-number', [JournalEntryController::class, 'getNextReferenceNumber'])->name('journal.next_reference_number')->middleware('permission.role:account.journal.create');
+                    });
+
+                    Route::prefix('cost_centers')->middleware('plan:'.AccountPlanFeatures::COST_CENTERS)->group(function () {
+                        Route::get('/index', [CostCentersController::class, 'index'])->name('cost_centers.index')->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+
+                        /*
+                            شاشة المركز الواحد — على نمط `accounts_chart/view`.
+                            تعرض مساره وأبناءه وحركته، وهو ما لم تكن الشجرة
+                            الكاملة تُظهره لمركزٍ بعينه.
+                        */
+                        Route::get('/view', [CostCentersController::class, 'view'])->name('cost_centers.view_root')->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+                        Route::get('/view/{id}', [CostCentersController::class, 'view'])->name('cost_centers.view')->middleware(['permission.role:account.cost_centers.view', 'plan:'.AccountPlanFeatures::COST_CENTERS]);
+                    });
+                    Route::prefix('accounts_chart')->middleware('plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS)->group(function () {
+                        // Main tree view - supports hierarchical navigation with optional parent parameter
+                        /*
+                            شاشة `/index` القديمة أُلغيت، وحلّت محلّها `/view`.
+
+                            المساران يبقيان **موجَّهَين** لا محذوفَين: روابط
+                            محفوظة ومفضّلات وصفحاتٌ في وحداتٍ أخرى تشير إليهما،
+                            وحذفهما يحوّل كل واحدٍ منها إلى 404 بلا ما يدلّ على
+                            البديل. والتوجيه يحمل معه معرّف الحساب المطلوب —
+                            `parent_id` أو `account_id` — فلا يضيع ما كان
+                            المستخدم ذاهباً إليه.
+                        */
+                        Route::get('/index', [AccountsChartController::class, 'index'])->name('accounts_chart.index')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/tree/{parentId?}', [AccountsChartController::class, 'index'])->name('accounts_chart.tree')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+
+                        // `/view` تقبل معرّف حساب، فتصلح للروابط العميقة
+                        Route::get('/view/{id}', [AccountsChartController::class, 'showAccount'])->name('accounts_chart.view')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        // ✨ النظام المحسَّن الجديد: شريط جانبي + لوحة رئيسية (children + direct entries)
+                        Route::get('/index/{id}', [AccountsChartController::class, 'showAccount'])->name('accounts_chart.show_account')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/view', [AccountsChartController::class, 'showAccount'])->name('accounts_chart.view_root')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/api/flat-tree', [AccountsChartController::class, 'getFlatTreeJson'])->name('accounts_chart.api.flat_tree')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/api/{id}/direct-entries', [AccountsChartController::class, 'getDirectEntriesJson'])->name('accounts_chart.api.direct_entries')->middleware(['permission.role:account.chart.entries', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::post('/api/{id}/recalculate', [AccountsChartController::class, 'recalculateAccountBalance'])->name('accounts_chart.api.recalculate')->middleware(['permission.role:account.chart.recalculate', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        // Edit and update routes for blade view consistency
+                        Route::get('/edit/{id}', [AccountsChartController::class, 'edit'])->name('accounts_chart.edit')->middleware(['permission.role:account.chart.edit', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::put('/update/{id}', [AccountsChartController::class, 'update'])->name('accounts_chart.update')->middleware(['permission.role:account.chart.edit', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        // Account entries view for accounts without children
+                        Route::get('/entries/{accountId}', [AccountsChartController::class, 'showAccountEntries'])->name('accounts_chart.entries')->middleware(['permission.role:account.chart.entries', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        // Search with hierarchical support
+                        Route::get('/search', [AccountsChartController::class, 'search'])->name('accounts_chart.search')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        // New route for showData method
+                        Route::get('/show-data/{accountId}', [AccountsChartController::class, 'showData'])->name('accounts_chart.show_data')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        // Legacy routes - keeping for backward compatibility
+                        Route::get('/account-details/{accountId}', [AccountsChartController::class, 'getAccountDetailsHtml'])->name('accounts_chart.account_details')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/getJournalEntries/{accountId}/journal-entries', [AccountsChartController::class, 'getJournalEntries'])->name('accounts_chart.getJournalEntries')->middleware(['permission.role:account.chart.entries', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/accounts/{accountId}/balance', [AccountsChartController::class, 'getAccountWithBalance'])->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::delete('/destroy/{id}', [AccountsChartController::class, 'destroy'])->name('accounts_chart.destroy')->middleware(['permission.role:account.chart.delete', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/showDetails/{id}', [AccountsChartController::class, 'showDetails'])->name('accounts_chart.showDetails')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/chart/details/{accountId}', [AccountsChartController::class, 'getAccountDetails'])->name('accounts_chart.details')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::get('/accounts/{parentId}/parent-details', [AccountsChartController::class, 'getParentAccountDetails'])->name('accounts_chart.parent_details')->middleware(['permission.role:account.chart.view', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                        Route::post('/store', [AccountsChartController::class, 'store_account'])->name('accounts_chart.store_account')->middleware(['permission.role:account.chart.create', 'plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS]);
+                    });
+
+                    // Account Statement Routes - كشف الحسابات
+                    Route::prefix('account_statement')->middleware('plan:'.AccountPlanFeatures::ACCOUNT_STATEMENT)->group(function () {
+                        Route::get('/{accountId}', [AccountStatementController::class, 'statement'])->name('account_statement.statement')->middleware('permission.role:account.statement.view');
+                        Route::get('/{accountId}/export-pdf', [AccountStatementController::class, 'exportPdf'])->name('account_statement.export_pdf')->middleware('permission.role:account.statement.export');
+                        Route::get('/journal-entry/{journalEntryId}/details', [AccountStatementController::class, 'showJournalEntryDetails'])->name('account_statement.journal_entry_details')->middleware('permission.role:account.statement.view');
+                    });
+
+                    Route::prefix('Assets')->middleware('plan:'.AccountPlanFeatures::ASSETS)->group(function () {
+                        Route::get('/index', [AssetsController::class, 'index'])->name('Assets.index')->middleware('permission.role:account.assets.view');
+                        Route::get('/create', [AssetsController::class, 'create'])->name('Assets.create')->middleware(['permission.role:account.assets.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_ASSETS]);
+                        Route::post('/store', [AssetsController::class, 'store'])->name('Assets.store')->middleware(['permission.role:account.assets.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_ASSETS]);
+                        Route::get('/show/{id}', [AssetsController::class, 'show'])->name('Assets.show')->middleware('permission.role:account.assets.show');
+                        Route::get('/edit/{id}', [AssetsController::class, 'edit'])->name('Assets.edit')->middleware('permission.role:account.assets.edit');
+                        Route::put('/update/{id}', [AssetsController::class, 'update'])->name('Assets.update')->middleware('permission.role:account.assets.edit');
+                        Route::delete('/destroy/{id}', [AssetsController::class, 'destroy'])->name('Assets.destroy')->middleware('permission.role:account.assets.delete');
+                        Route::get('/pdf/{id}', [AssetsController::class, 'generatePdf'])->name('Assets.generatePdf')->middleware('permission.role:account.assets.print');
+                        Route::get('/sell/{id}', [AssetsController::class, 'showSellForm'])->name('Assets.showSell')->middleware('permission.role:account.assets.sell');
+                        Route::post('/sell/{id}', [AssetsController::class, 'sell'])->name('Assets.sell')->middleware('permission.role:account.assets.sell');
+                        Route::get('/transactions/{id}', [AssetsController::class, 'transactions'])->name('Assets.transactions')->middleware('permission.role:account.assets.transactions');
+                        Route::get('/next-code', [AssetsController::class, 'getNextAssetCode'])->name('Assets.nextCode')->middleware('permission.role:account.assets.create');
+                        Route::get('/generate-account-code/{parentId}', [AssetsController::class, 'generateNextCode'])->name('Assets.generateAccountCode')->middleware('permission.role:account.assets.create');
+                    });
+
+                    Route::prefix('accounts_settings')->middleware('plan:'.AccountPlanFeatures::CHART_OF_ACCOUNTS)->group(function () {
+                        Route::get('/index', [AccountsSettingsController::class, 'index'])->name('accounts_settings.index')->middleware('permission.role:account.settings.view');
+                        Route::get('/financial_years', [AccountsSettingsController::class, 'financial_years'])->name('accounts_settings.financial_years')->middleware('permission.role:account.settings.fiscal_years');
+                        Route::post('/financial_years', [AccountsSettingsController::class, 'store_financial_year'])->name('accounts_settings.store_financial_year')->middleware('permission.role:account.settings.fiscal_years');
+                        Route::get('/closed_periods', [AccountsSettingsController::class, 'closed_periods'])->name('accounts_settings.closed_periods')->middleware('permission.role:settings.accounting_periods.view');
+                        Route::get('/accounts_routing', [AccountsSettingsController::class, 'accounts_routing'])->name('accounts_settings.accounts_routing')->middleware('permission.role:account.settings.routing');
+                        Route::get('/accounting_general', [AccountsSettingsController::class, 'accounting_general'])->name('accounts_settings.accounting_general')->middleware('permission.role:account.settings.general');
+                        Route::post('/accounting_general', [AccountsSettingsController::class, 'store_accounting_general'])->name('accounts_settings.store_accounting_general')->middleware('permission.role:account.settings.general');
+
+                        // AccountsChartController::class,
+                    });
+
+                    Route::prefix('expenses')->middleware('plan:'.AccountPlanFeatures::EXPENSES)->group(function () {
+                        Route::get('/index', [ExpensesController::class, 'index'])->name('expenses.index')->middleware('permission.role:account.expenses.view');
+                        Route::get('/expenses/data', [ExpensesController::class, 'getData'])->name('expenses.data')->middleware('permission.role:account.expenses.view');
+                        Route::get('/create', [ExpensesController::class, 'create'])->name('expenses.create')->middleware(['permission.role:account.expenses.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_EXPENSES]);
+                        Route::post('/store', [ExpensesController::class, 'store'])->name('expenses.store')->middleware(['permission.role:account.expenses.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_EXPENSES]);
+                        Route::get('/show/{id}', [ExpensesController::class, 'show'])->name('expenses.show')->middleware('permission.role:account.expenses.view');
+                        Route::get('/edit/{id}', [ExpensesController::class, 'edit'])->name('expenses.edit')->middleware('permission.role:account.expenses.edit');
+                        Route::post('/update/{id}', [ExpensesController::class, 'update'])->name('expenses.update')->middleware('permission.role:account.expenses.edit');
+                        Route::delete('/delete/{id}', [ExpensesController::class, 'delete'])->name('expenses.delete')->middleware('permission.role:account.expenses.delete');
+                        Route::post('/expenses/{id}/cancel', [ExpensesController::class, 'cancel'])->name('expenses.cancel')->middleware('permission.role:account.expenses.cancel');
+                        Route::get('/expenses/print/{id}/{type}', [ExpensesController::class, 'print'])->name('expenses.print')->middleware('permission.role:account.expenses.print');
+                    });
+
+                    // incomes routes
+                    Route::prefix('incomes')->middleware('plan:'.AccountPlanFeatures::INCOMES)->group(function () {
+                        Route::get('/index', [IncomesController::class, 'index'])->name('incomes.index')->middleware('permission.role:account.incomes.view');
+                        Route::get('/data', [IncomesController::class, 'getData'])->name('incomes.data')->middleware('permission.role:account.incomes.view');
+                        Route::get('/create', [IncomesController::class, 'create'])->name('incomes.create')->middleware(['permission.role:account.incomes.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_INCOMES]);
+
+                        Route::post('/store', [IncomesController::class, 'store'])->name('incomes.store')->middleware(['permission.role:account.incomes.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_INCOMES]);
+                        Route::get('/show/{id}', [IncomesController::class, 'show'])->name('incomes.show')->middleware('permission.role:account.incomes.view');
+                        Route::get('/edit/{id}', [IncomesController::class, 'edit'])->name('incomes.edit')->middleware('permission.role:account.incomes.edit');
+                        Route::put('/update/{id}', [IncomesController::class, 'update'])->name('incomes.update')->middleware('permission.role:account.incomes.edit');
+                        Route::get('/incomes/print/{id}/{type}', [IncomesController::class, 'print'])->name('incomes.print')->middleware('permission.role:account.incomes.print');
+                        Route::post('/incomes/{id}/cancel', [IncomesController::class, 'cancel'])->name('incomes.cancel')->middleware('permission.role:account.incomes.cancel');
+                    });
+
+                    // treasury routes
+                    Route::prefix('treasury')->middleware('plan:'.AccountPlanFeatures::TREASURY)->group(function () {
+                        Route::get('/index', [TreasuryController::class, 'index'])->name('treasury.index')->middleware('permission.role:account.treasury.view');
+                        Route::post('/transfer', [TreasuryController::class, 'transfer'])->name('treasury.transfer')->middleware('permission.role:account.treasury_transfers.create');
+                        Route::post('/transferTreasuryStore', [TreasuryController::class, 'transferTreasuryStore'])->name('treasury.transferTreasuryStore')->middleware('permission.role:account.treasury_transfers.create');
+                        Route::get('/transferCreate', [TreasuryController::class, 'transferCreate'])->name('treasury.transferCreate')->middleware('permission.role:account.treasury_transfers.create');
+                        Route::get('/treasury/transfer/{id}/edit', [TreasuryController::class, 'transferEdit'])->name('treasury.transferEdit')->middleware('permission.role:account.treasury_transfers.edit');
+                        Route::put('/treasury/transfer/{id}/update', [TreasuryController::class, 'transferTreasuryUpdate'])->name('treasury.transferUpdate')->middleware('permission.role:account.treasury_transfers.edit');
+                        Route::get('/create', [TreasuryController::class, 'create'])->name('treasury.create')->middleware(['permission.role:account.treasury.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_TREASURIES]);
+                        Route::get('/updateStatus/{id}', [TreasuryController::class, 'updateStatus'])->name('treasury.updateStatus')->middleware('permission.role:account.treasury.toggle_status');
+
+                        Route::get('/create/account_bank', [TreasuryController::class, 'create_account_bank'])->name('treasury.create_account_bank')->middleware('permission.role:account.treasury.bank_create');
+                        Route::post('/store', [TreasuryController::class, 'store'])->name('treasury.store')->middleware(['permission.role:account.treasury.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_TREASURIES]);
+                        Route::post('/store/account_bank', [TreasuryController::class, 'store_account_bank'])->name('treasury.store_account_bank')->middleware(['permission.role:account.treasury.bank_create', 'plan.limit:'.AccountPlanFeatures::LIMIT_TREASURIES]);
+                        Route::get('/show/{id}', [TreasuryController::class, 'show'])->name('treasury.show')->middleware('permission.role:account.treasury.show');
+                        Route::get('/operations/{id}', [TreasuryController::class, 'getOperationsData'])->name('treasury.operations')->middleware('permission.role:account.treasury.show');
+                        Route::get('/transfers/{id}', [TreasuryController::class, 'getTransfersData'])->name('treasury.transfers')->middleware('permission.role:account.treasury_transfers.view');
+                        Route::get('/edit/{id}', [TreasuryController::class, 'edit'])->name('treasury.edit')->middleware('permission.role:account.treasury.edit');
+                        Route::get('/edit/account_bank/{id}', [TreasuryController::class, 'edit_account_bank'])->name('treasury.edit_account_bank')->middleware('permission.role:account.treasury.bank_edit');
+                        Route::post('/update/{id}', [TreasuryController::class, 'update'])->name('treasury.update')->middleware('permission.role:account.treasury.edit');
+                        Route::post('/update/update_account_bank/{id}', [TreasuryController::class, 'update_account_bank'])->name('treasury.update_account_bank')->middleware('permission.role:account.treasury.bank_edit');
+                        Route::delete('/destroy/{id}', [TreasuryController::class, 'destroy'])->name('treasury.destroy')->middleware('permission.role:account.treasury.delete');
+                    });
+
+                    // finance_settings routes
+                    Route::prefix('finance_settings')->middleware('plan:'.AccountPlanFeatures::TREASURY)->group(function () {
+                        Route::get('/index', [FinanceSettingsController::class, 'index'])->name('finance_settings.index')->middleware('permission.role:account.settings.view');
+                        Route::get('/expenses_category', [FinanceSettingsController::class, 'expenses_category'])->name('finance_settings.expenses_category')->middleware('permission.role:account.settings.expense_categories');
+                        Route::post('/expenses_category/store', [FinanceSettingsController::class, 'expenses_category_store'])->name('finance_settings.expenses_category_store')->middleware('permission.role:account.settings.expense_categories');
+                        Route::post('/expenses_category/update/{id}', [FinanceSettingsController::class, 'expenses_category_update'])->name('finance_settings.expenses_category_update')->middleware('permission.role:account.settings.expense_categories');
+                        Route::delete('/expenses_category/delete/{id}', [FinanceSettingsController::class, 'expenses_category_delete'])->name('finance_settings.expenses_category_delete')->middleware('permission.role:account.settings.expense_categories');
+
+                        // receipt_category
+                        Route::get('/receipt_category', [FinanceSettingsController::class, 'receipt_category'])->name('finance_settings.receipt_category')->middleware('permission.role:account.settings.receipt_categories');
+                        Route::post('/receipt_category/store', [FinanceSettingsController::class, 'receipt_category_store'])->name('finance_settings.receipt_category_store')->middleware('permission.role:account.settings.receipt_categories');
+                        Route::post('/receipt_category/update/{id}', [FinanceSettingsController::class, 'receipt_category_update'])->name('finance_settings.receipt_category_update')->middleware('permission.role:account.settings.receipt_categories');
+                        Route::delete('/receipt_category/delete/{id}', [FinanceSettingsController::class, 'receipt_category_delete'])->name('finance_settings.receipt_category_delete')->middleware('permission.role:account.settings.receipt_categories');
+
+                        // treasury_employee
+                        Route::get('/treasury_employee', [TreasuryEmployeeController::class, 'index'])->name('finance_settings.treasury_employee')->middleware('permission.role:account.treasury_employees.view');
+                        Route::get('/treasury_employee/create', [TreasuryEmployeeController::class, 'create'])->name('treasury_employee.create')->middleware('permission.role:account.treasury_employees.create');
+                        Route::delete('/treasury_employee/delete/{id}', [TreasuryEmployeeController::class, 'delete'])->name('treasury_employee.delete')->middleware('permission.role:account.treasury_employees.delete');
+                        Route::get('/treasury_employee/edit/{id}', [TreasuryEmployeeController::class, 'edit'])->name('treasury_employee.edit')->middleware('permission.role:account.treasury_employees.edit');
+                        Route::post('/treasury_employee/update/{id}', [TreasuryEmployeeController::class, 'update'])->name('treasury_employee.update')->middleware('permission.role:account.treasury_employees.edit');
+                        Route::post('/treasury_employee/store', [TreasuryEmployeeController::class, 'store'])->name('treasury_employee.store')->middleware('permission.role:account.treasury_employees.create');
+                    });
+                    Route::prefix('payable_cheques')->middleware('plan:'.AccountPlanFeatures::PAYABLE_CHEQUES)->group(function () {
+                        Route::get('/index', [PayableChequesController::class, 'index'])->name('payable_cheques.index')->middleware('permission.role:account.payable_cheques.view');
+                        Route::get('/create', [PayableChequesController::class, 'create'])->name('payable_cheques.create')->middleware(['permission.role:account.payable_cheques.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_PAYABLE_CHEQUES]);
+                        Route::get('/show/{id}', [PayableChequesController::class, 'show'])->name('payable_cheques.show')->middleware('permission.role:account.payable_cheques.show');
+                        Route::get('/edit/{id}', [PayableChequesController::class, 'edit'])->name('payable_cheques.edit')->middleware('permission.role:account.payable_cheques.edit');
+                        Route::post('/store', [PayableChequesController::class, 'store'])->name('payable_cheques.store')->middleware(['permission.role:account.payable_cheques.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_PAYABLE_CHEQUES]);
+                        Route::post('/update/{id}', [PayableChequesController::class, 'update'])->name('payable_cheques.update')->middleware('permission.role:account.payable_cheques.edit');
+                        Route::delete('/delete/{id}', [PayableChequesController::class, 'delete'])->name('payable_cheques.delete')->middleware('permission.role:account.payable_cheques.delete');
+                        Route::get('/get-checkbooks/{bankId}', [PayableChequesController::class, 'getCheckbooks'])->name('get.checkbooks')->middleware('permission.role:account.payable_cheques.view');
+                        Route::get('/get-checkbook-info/{id}', [PayableChequesController::class, 'getCheckbookInfo'])->name('get.checkbook.info')->middleware('permission.role:account.payable_cheques.view');
+                        // عمليات الشيكات المستحقة
+                        Route::post('/cash/{id}', [PayableChequesController::class, 'cash'])->name('payable_cheques.cash')->middleware('permission.role:account.payable_cheques.cash');
+                        Route::post('/reject/{id}', [PayableChequesController::class, 'reject'])->name('payable_cheques.reject')->middleware('permission.role:account.payable_cheques.reject');
+                        Route::post('/cancel/{id}', [PayableChequesController::class, 'cancel'])->name('payable_cheques.cancel')->middleware('permission.role:account.payable_cheques.cancel');
+                    });
+
+                    // Received Cheques
+                    Route::prefix('received_cheques')->middleware('plan:'.AccountPlanFeatures::RECEIVED_CHEQUES)->group(function () {
+                        Route::get('/index', [ReceivedChequesController::class, 'index'])->name('received_cheques.index')->middleware('permission.role:account.received_cheques.view');
+                        Route::get('/create', [ReceivedChequesController::class, 'create'])->name('received_cheques.create')->middleware(['permission.role:account.received_cheques.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_RECEIVED_CHEQUES]);
+                        Route::get('/show/{id}', [ReceivedChequesController::class, 'show'])->name('received_cheques.show')->middleware('permission.role:account.received_cheques.show');
+                        Route::get('/edit/{id}', [ReceivedChequesController::class, 'edit'])->name('received_cheques.edit')->middleware('permission.role:account.received_cheques.edit');
+                        Route::post('/store', [ReceivedChequesController::class, 'store'])->name('received_cheques.store')->middleware(['permission.role:account.received_cheques.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_RECEIVED_CHEQUES]);
+                        Route::post('/update/{id}', [ReceivedChequesController::class, 'update'])->name('received_cheques.update')->middleware('permission.role:account.received_cheques.edit');
+                        Route::get('/get-checkbooks/{bankId}', [ReceivedChequesController::class, 'getCheckbooks'])->name('get.checkbooks')->middleware('permission.role:account.received_cheques.view');
+                        // عمليات الشيكات المستلمة
+                        Route::post('/deposit/{id}', [ReceivedChequesController::class, 'deposit'])->name('received_cheques.deposit')->middleware('permission.role:account.received_cheques.deposit');
+                        Route::post('/collect/{id}', [ReceivedChequesController::class, 'collect'])->name('received_cheques.collect')->middleware('permission.role:account.received_cheques.collect');
+                        Route::post('/reject/{id}', [ReceivedChequesController::class, 'reject'])->name('received_cheques.reject')->middleware('permission.role:account.received_cheques.reject');
+                        Route::post('/endorse/{id}', [ReceivedChequesController::class, 'endorse'])->name('received_cheques.endorse')->middleware('permission.role:account.received_cheques.endorse');
+                        Route::delete('/delete/{id}', [ReceivedChequesController::class, 'delete'])->name('received_cheques.delete')->middleware('permission.role:account.received_cheques.delete');
+                    });
+
+                    // Check books
+                    Route::prefix('check_books')->middleware('plan:'.AccountPlanFeatures::CHECK_BOOKS)->group(function () {
+                        Route::get('/index', [CheckBooksController::class, 'index'])->name('check_books.index')->middleware('permission.role:account.cheque_books.view');
+                        Route::get('/create', [CheckBooksController::class, 'create'])->name('check_books.create')->middleware(['permission.role:account.cheque_books.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_CHECK_BOOKS]);
+                        Route::get('/show/{id}', [CheckBooksController::class, 'show'])->name('check_books.show')->middleware('permission.role:account.cheque_books.show');
+                        Route::get('/edit/{id}', [CheckBooksController::class, 'edit'])->name('check_books.edit')->middleware('permission.role:account.cheque_books.edit');
+                        Route::post('/store', [CheckBooksController::class, 'store'])->name('check_books.store')->middleware(['permission.role:account.cheque_books.create', 'plan.limit:'.AccountPlanFeatures::LIMIT_CHECK_BOOKS]);
+                        Route::post('/update/{id}', [CheckBooksController::class, 'update'])->name('check_books.update')->middleware('permission.role:account.cheque_books.edit');
+                        Route::delete('/delete/{id}', [CheckBooksController::class, 'delete'])->name('check_books.delete')->middleware('permission.role:account.cheque_books.delete');
+                    });
+
+                });
+
+            // تقارير الحسابات العامة - GeneralAccountReports
+            Route::prefix('GeneralAccountReports')->middleware(['auth', 'plan:'.AccountPlanFeatures::ACCOUNT_REPORTS])->group(function () {
+                Route::get('/', [GeneralAccountsController::class, 'index'])->name('GeneralAccountReports.index')->middleware('permission.role:account.reports.view');
+                Route::get('/taxReport', [GeneralAccountsController::class, 'taxReport'])->name('GeneralAccountReports.taxReport')->middleware('permission.role:account.reports.tax');
+                Route::get('/taxDeclaration', [GeneralAccountsController::class, 'taxDeclaration'])->name('GeneralAccountReports.taxDeclaration')->middleware('permission.role:account.reports.tax_declaration');
+                Route::get('/by-employee', [GeneralAccountsController::class, 'journalEntriesByEmployee'])->name('GeneralAccountReports.JournalEntriesByEmployee')->middleware('permission.role:account.reports.by_employee');
+                Route::get('/by-employee/ajax', [GeneralAccountsController::class, 'journalEntriesByEmployeeAjax'])->name('GeneralAccountReports.JournalEntriesByEmployeeAjax')->middleware('permission.role:account.reports.by_employee');
+                Route::get('/trialBalance', [GeneralAccountsController::class, 'trialBalance'])->name('GeneralAccountReports.trialBalance')->middleware('permission.role:account.reports.trial_balance');
+                Route::get('trial-balance-ajax', [GeneralAccountsController::class, 'trialBalanceAjax'])->name('GeneralAccountReports.trialBalanceAjax')->middleware('permission.role:account.reports.trial_balance');
+                // تقرير ميزان مراجعة مجاميع وأرصدة
+                Route::get('/trialBalanceTotals', [GeneralAccountsController::class, 'trialBalanceTotals'])->name('GeneralAccountReports.trialBalanceTotals')->middleware('permission.role:account.reports.trial_balance_totals');
+                Route::get('/trialBalanceTotalsChildren', [GeneralAccountsController::class, 'trialBalanceTotalsChildren'])->name('GeneralAccountReports.trialBalanceTotalsChildren')->middleware('permission.role:account.reports.trial_balance_totals');
+                Route::get('/incomeStatement', [GeneralAccountsController::class, 'incomeStatement'])->name('GeneralAccountReports.incomeStatement')->middleware('permission.role:account.reports.income_statement');
+                // تقرير الإقفال السنوي — المصدرُ نفسُه في شاشة الفترات (`YearEndClosingService::report()`)
+                Route::get('/yearClosing', [YearClosingReportController::class, 'index'])->name('GeneralAccountReports.yearClosing')->middleware('permission.role:account.reports.year_closing');
+                Route::get('/income-statement-ajax', [GeneralAccountsController::class, 'incomeStatementAjax'])->name('GeneralAccountReports.incomeStatementAjax')->middleware('permission.role:account.reports.income_statement');
+                Route::get('/income-statement-excel', [GeneralAccountsController::class, 'exportIncomeStatementExcel'])->name('GeneralAccountReports.incomeStatementExcel')->middleware('permission.role:account.reports.income_statement');
+                Route::get('/income-statement-pdf', [GeneralAccountsController::class, 'exportIncomeStatementPdf'])->name('GeneralAccountReports.incomeStatementPdf')->middleware('permission.role:account.reports.income_statement');
+                Route::get('/income-statement-print', [GeneralAccountsController::class, 'printIncomeStatement'])->name('GeneralAccountReports.incomeStatementPrint')->middleware('permission.role:account.reports.income_statement');
+                // التدفقات النقدية التفصيلية (الاسم الجديد لتقرير profitAndLoss)
+                Route::get('/detailedCashFlow', [GeneralAccountsController::class, 'detailedCashFlow'])->name('GeneralAccountReports.detailedCashFlow')->middleware('permission.role:account.reports.cash_flow_detailed');
+                // صفحة تفاصيل حساب واحد ضمن التدفقات النقدية التفصيلية
+                Route::get('/detailedCashFlow/account/{accountId}', [GeneralAccountsController::class, 'detailedCashFlowAccount'])->name('GeneralAccountReports.detailedCashFlowAccount')->middleware('permission.role:account.reports.cash_flow_detailed');
+                // alias قديم للحفاظ على التوافق مع روابط/مفضلات سابقة
+                Route::get('/profitAndLoss', [GeneralAccountsController::class, 'detailedCashFlow'])->name('GeneralAccountReports.profitAndLoss')->middleware('permission.role:account.reports.profit_loss');
+                // النسخة القديمة (الشهرية) متاحة عبر مسار منفصل لمن يحتاجها
+                Route::get('/profitLossLegacy', [GeneralAccountsController::class, 'profitLossLegacy'])->name('GeneralAccountReports.profitLossLegacy')->middleware('permission.role:account.reports.profit_loss');
+                Route::get('/balanceSheet', [GeneralAccountsController::class, 'balanceSheet'])->name('GeneralAccountReports.balanceSheet')->middleware('permission.role:account.reports.balance_sheet');
+                // «مراجعة أرصدة الحسابات» دُمجت في «مراجعة الحسابات» وحُذفت دالّتاها — المساران
+                // الباقيان كانا يسقطان بـ500 لمن يفتحهما من رابطٍ قديم، فيُحوَّلان إلى التقرير الجديد
+                Route::get('/accountBalanceReview', fn () => redirect()->route('GeneralAccountReports.accountReview', request()->query()))->name('GeneralAccountReports.accountBalanceReview')->middleware('permission.role:account.reports.account_review');
+                Route::get('account-balance-review-ajax', fn () => redirect()->route('GeneralAccountReports.accountReview', request()->query()))->name('GeneralAccountReports.accountBalanceReviewAjax')->middleware('permission.role:account.reports.account_review');
+                // تقرير حساب المراجعة
+                Route::get('/accountReview', [GeneralAccountsController::class, 'accountReview'])->name('GeneralAccountReports.accountReview')->middleware('permission.role:account.reports.account_review');
+                Route::get('/CostCentersReport', [GeneralAccountsController::class, 'CostCentersReport'])->name('GeneralAccountReports.CostCentersReport')->middleware('permission.role:account.reports.cost_centers');
+                Route::get('/CostCentersReportAjax', [GeneralAccountsController::class, 'CostCentersReportAjax'])->name('GeneralAccountReports.CostCentersReportAjax')->middleware('permission.role:account.reports.cost_centers');
+                Route::get('/ReportJournal', [GeneralAccountsController::class, 'ReportJournal'])->name('GeneralAccountReports.ReportJournal')->middleware('permission.role:account.reports.journal');
+                Route::get('/ChartOfAccounts', [GeneralAccountsController::class, 'ChartOfAccounts'])->name('GeneralAccountReports.ChartOfAccounts')->middleware('permission.role:account.reports.chart_of_accounts');
+                Route::get('/financialTransactions', [GeneralAccountsController::class, 'financialTransactions'])->name('GeneralAccountReports.financialTransactions')->middleware('permission.role:account.reports.financial_transactions');
+                Route::get('/financialTransactions/export', [GeneralAccountsController::class, 'financialTransactionsExport'])->name('GeneralAccountReports.financialTransactionsExport')->middleware('permission.role:account.reports.financial_transactions');
+                Route::get('/cashFlowStatement', [GeneralAccountsController::class, 'cashFlowStatement'])->name('GeneralAccountReports.cashFlowStatement')->middleware('permission.role:account.reports.cash_flow');
+                Route::get('/assetsReport', [GeneralAccountsController::class, 'assetsReport'])->name('GeneralAccountReports.assetsReport')->middleware('permission.role:account.reports.assets');
+                // ميزان مراجعة المخزون (مستقل عن trialBalance العام)
+                Route::get('/inventoryTrialBalance', [GeneralAccountsController::class, 'inventoryTrialBalance'])->name('GeneralAccountReports.inventoryTrialBalance')->middleware('permission.role:account.reports.inventory_trial_balance');
+
+                // تقارير المصروفات
+                Route::get('/expensesByCategory', [GeneralAccountsController::class, 'expensesByCategory'])->name('GeneralAccountReports.expensesByCategory')->middleware('permission.role:account.reports.expenses');
+                Route::get('/expensesByPeriod', [GeneralAccountsController::class, 'expensesByPeriod'])->name('GeneralAccountReports.expensesByPeriod')->middleware('permission.role:account.reports.expenses');
+
+                // تقارير سندات القبض
+                Route::get('/receiptsByCategory', [GeneralAccountsController::class, 'receiptsByCategory'])->name('GeneralAccountReports.receiptsByCategory')->middleware('permission.role:account.reports.receipts');
+                Route::get('/receiptsByPeriod', [GeneralAccountsController::class, 'receiptsByPeriod'])->name('GeneralAccountReports.receiptsByPeriod')->middleware('permission.role:account.reports.receipts');
+            });
+
+            Route::prefix('checksReports')->middleware('plan:'.AccountPlanFeatures::ACCOUNT_REPORTS)->group(function () {
+                Route::get('/checks-index', [ChecksController::class, 'index'])->name('checksReports.index')->middleware('permission.role:account.reports.cheques');
+                Route::get('/checks-delivered', [ChecksController::class, 'deliveredChecks'])->name('checksReports.deliveredChecks')->middleware('permission.role:account.reports.cheques');
+                Route::get('/checks-delivered-ajax', [ChecksController::class, 'deliveredChequesReportAjax'])->name('checksReports.deliveredChequesReportAjax')->middleware('permission.role:account.reports.cheques');
+                Route::get('/received', [ChecksController::class, 'received'])->name('checksReports.received')->middleware('permission.role:account.reports.cheques');
+                // جلب بيانات تقرير الشيكات المستلمة عبر AJAX
+                Route::get('/received-ajax', [ChecksController::class, 'receivedChequesReportAjax'])->name('checksReports.receivedChequesReportAjax')->middleware('permission.role:account.reports.cheques');
+            });
+
+            // تقارير التحصيلات - Collections Reports
+            Route::prefix('collections')->middleware(['auth', 'plan:'.AccountPlanFeatures::ACCOUNT_REPORTS])->group(function () {
+                Route::get('/detail', [CollectionsDetailController::class, 'index'])->name('collections.detail')->middleware('permission.role:account.collections.view');
+            });
+        },
+    );
+
+});

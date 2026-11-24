@@ -1,0 +1,47 @@
+<?php
+
+use App\Support\SchemaGuard;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('invoices', function (Blueprint $table) {
+            if (! SchemaGuard::hasForeignKey('invoices', 'invoices_client_id_foreign')) {
+                $table->foreign(['client_id'])->references(['id'])->on('clients')->onUpdate('restrict')->onDelete('set null');
+            }
+            if (! SchemaGuard::hasForeignKey('invoices', 'invoices_created_by_foreign')) {
+                $table->foreign(['created_by'])->references(['id'])->on('users')->onUpdate('restrict')->onDelete('restrict');
+            }
+            if (! SchemaGuard::hasForeignKey('invoices', 'invoices_employee_id_foreign')) {
+                $table->foreign(['employee_id'])->references(['id'])->on('employees')->onUpdate('restrict')->onDelete('set null');
+            }
+            if (! SchemaGuard::hasForeignKey('invoices', 'invoices_treasury_id_foreign')) {
+                $table->foreign(['treasury_id'])->references(['id'])->on('treasuries')->onUpdate('restrict')->onDelete('set null');
+            }
+            if (! SchemaGuard::hasForeignKey('invoices', 'invoices_updated_by_foreign')) {
+                $table->foreign(['updated_by'])->references(['id'])->on('users')->onUpdate('restrict')->onDelete('restrict');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->dropForeign('invoices_client_id_foreign');
+            $table->dropForeign('invoices_created_by_foreign');
+            $table->dropForeign('invoices_employee_id_foreign');
+            $table->dropForeign('invoices_treasury_id_foreign');
+            $table->dropForeign('invoices_updated_by_foreign');
+        });
+    }
+};

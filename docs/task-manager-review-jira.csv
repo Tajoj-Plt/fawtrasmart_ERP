@@ -1,0 +1,70 @@
+﻿"Summary","Issue Type","Priority","Labels","Component","Description","Status","Resolution Note"
+"عزل البيانات غائب: كل مستخدم يرى ويعدّل مهام كل المشاريع","Bug","Highest","security access-control","TaskManager","كل الاستعلامات Project::all() و Task::… و Sprint::all() و User::all() بلا تقييد بعضوية المشروع أو الفرع. من يملك tasks.items.view يرى ويعدّل مهام كل المشاريع، ودور viewer وجدول project_user لا يُفحصان في أي مكان. الاستثناء معكوس: مساحات العمل مقيّدة بـ admin_id فقط فلا يراها حتى الأعضاء.
+الملف: Modules/TaskManager/Http/Controllers/WorkspaceController.php:47 وكل متحكّمات الوحدة.
+المطلوب: تقييد كل الاستعلامات بعضوية المشروع، ومنع الكتابة على دور viewer.","Done","خدمة ProjectAccess + صلاحية tasks.projects.view_all؛ كل الاستعلامات مقيّدة بالعضوية، والمراقب يقرأ ولا يكتب."
+"مسارات إعدادات قديمة محمّلة بلا صلاحيات (routes/task-settings.php)","Bug","Highest","security legacy","TaskManager","الملف routes/task-settings.php محمّل فعلاً وحارسه auth فقط، ويشير إلى App\Http\Controllers\TaskSettingsController القديم الذي يكتب أعمدة (team_config, sprint_config) لا يعرفها النموذج الحالي App\Models\TaskSettings. والمسارات تشير إلى دوال workflow/tags.
+المطلوب: إزالة الملف من RouteServiceProvider وحذف المتحكّم القديم.","Done","حُذف الملف والمتحكّم القديم وقالبه."
+"مسار sprints.get-user-stories يشير إلى دالة غير موجودة (500)","Bug","High","broken-route","TaskManager","المسار يستدعي SprintController::getUserStoriesForSprint وهي غير معرّفة.
+الملف: Modules/TaskManager/routes/web.php:251
+المطلوب: تعريف الدالة أو حذف المسار.","Done","عُرّفت الدالة getUserStoriesForSprint."
+"دعوة عضو حالي أو إعادة دعوة من رفض تعطي خطأ 500","Bug","Highest","invitations","TaskManager","فحص «مدعو مسبقاً» يبحث بـ email، والأعضاء المضافون عند إنشاء المشروع يُدرجون بلا email، فيصطدم الإدراج بالقيد unique(project_id, user_id).
+الملف: Modules/TaskManager/Http/Controllers/ProjectController.php:493
+المطلوب: الفحص بـ user_id وتحديث الصف المرفوض/المنتهي بدل إدراج جديد.","Done","الفحص بـ user_id وتجديد الصف المرفوض/المنتهي."
+"الدعوة مقصورة على منشئ المشروع رغم وجود صلاحية ودور مدير","Bug","High","invitations access-control","TaskManager","inviteUser يرفض كل من ليس created_by، فصلاحية tasks.projects.invite ودور manager لا يكفيان.
+الملف: ProjectController.php:447","Done","الدعوة لمنشئ المشروع ومديريه."
+"بريد الدعوة يعرض كلمة مرور مؤقتة وهمية","Bug","High","invitations email","TaskManager","تُولَّد كلمة مرور عشوائية وتُعرض في البريد ولا تُحفظ على أي حساب.
+الملفات: ProjectController.php:550 و resources/views/emails/project_invite.blade.php:117","Done","أُزيلت كلمة المرور من الكود والقالب."
+"فشل إرسال بريد الدعوة يُبتلع ويُردّ «تم الإرسال بنجاح»","Bug","Medium","invitations email","TaskManager","استثناء Mail يُسجَّل في السجل فقط والمستخدم يرى نجاحاً.
+الملف: ProjectController.php:564","Done","الرد يحمل email_sent=false ورسالة واضحة."
+"تعديل المشروع يمسح عضويات المدعوّين والدعوات المعلّقة","Bug","Highest","data-loss projects","TaskManager","update() يحذف كل صفوف role=member ثم يعيد إدراج team_members، فيضيع من انضم بدعوة والدعوات المعلّقة و joined_at. وإن كان أحد المختارين له صف manager أو viewer يقع خرق القيد الفريد و500.
+الملف: ProjectController.php:358","Done","مزامنة الأعضاء بالفرق؛ المدعوّون والمراقبون والدعوات المعلّقة لا تُمسّ."
+"روابط AJAX للحذف والدعوة بلا بادئة اللغة","Bug","High","frontend routing","TaskManager","الطلبات تُرسل إلى /projects/{id} و /workspaces/{id} و /sprints/{id} و /projects/{id}/invite والمسارات مسجّلة تحت /{locale}/…
+الملفات: project/show.blade.php:444 و548، project/index.blade.php:447، sprint/index.blade.php:210، workspaces/index.blade.php:443، workspaces/show.blade.php:233
+المطلوب: توليد الروابط بـ route().","Won't Do","ليس عطلاً: الطلبات غير GET بلا بادئة لغة تعمل (LaravelLocalization يتجاهلها). حُوّلت الروابط إلى route() احتياطاً."
+"حذف المشروع يترك مهامه وسبرنتاته وعضوياته يتيمة","Bug","High","data-integrity projects","TaskManager","لا مفاتيح أجنبية على tasks.project_id ولا sprints.project_id ولا project_user، و destroy() يحذف المشروع وحده فتبقى التوابع وتظهر في التقارير.
+الملف: ProjectController.php:760","Done","الحذف في معاملة واحدة يشمل المهام والسبرنتات والعضويات والتعليقات والإعدادات."
+"XSS مخزَّن: عنوان المهمة واسم السبرنت يُحقنان دون تهريب","Bug","Highest","security xss","TaskManager","القيم تُحقن بـ .html() في tasks/index.blade.php:850 و1487 و1498 و task-dropdowns.js:82. وفي لوحة المؤشرات {!! $type->type !!} و {!! $month !!} داخل JavaScript (dashboard/task/index.blade.php:491 و530).","Done","تهريب القيم في ملفات JS والواجهات، و @json في لوحة المؤشرات."
+"ردود الأخطاء تسرّب مسار الملف ورقم السطر ورسالة الاستثناء","Bug","High","security","TaskManager","TaskController::store/update تعيد error و file و line، وأغلب دوال السبرنت تعيد getMessage().
+الملفات: TaskController.php:531 و721، SprintController.php","Done","التفاصيل إلى السجل فقط."
+"حالة «متأخرة» لا تُضبط آلياً","Improvement","Medium","business-logic","TaskManager","لا مهمة مجدولة ولا مراقب يضبط overdue، و Task::isOverdue() غير مستعملة، فالتقارير تعدّ ما سُحب يدوياً فقط.
+المطلوب: أمر مجدول مسجَّل في CronRegistry.","Done","أمر tasks:mark-overdue مسجَّل في CronRegistry ومزروع معطَّلاً — يُفعَّل من شاشة المهام المجدولة."
+"حقول completed_date و actual_hours و completion_percentage لا تُملأ","Improvement","Medium","business-logic","TaskManager","لا كود يكتب هذه الحقول، ونسبة إنجاز المشروع تُدخل يدوياً ولا تُحسب من المهام.","In Progress","completed_date يُضبط آلياً مع الحالة. actual_hours و completion_percentage ونسبة إنجاز المشروع ما زالت يدوية (تحتاج قراراً)."
+"تواريخ المهمة مفروضة عند الإنشاء (اليوم و +7 أيام)","Improvement","Medium","business-logic","TaskManager","لا حقول تاريخ في نموذج الإنشاء.
+الملف: TaskController.php:453","Done","حقلا التاريخ في نموذج الإنشاء، والخادم يقبلهما."
+"إعادة الترتيب تغيّر حالة أي مهام دون تحقق ولا سجل","Bug","High","security business-logic","TaskManager","reorder يقبل أي task_ids ويغيّر حالتها جماعياً دون فحص المشروع ودون سجل نشاط، وبصلاحية reorder وحدها يتجاوز update_status.
+الملف: TaskController.php:836","Done","فحص عضوية كل مهمة، وتغيير العمود يمرّ بصلاحية الحالة وسجلّها."
+"توريث الحالة للأب ناقص ومكرر","Improvement","Medium","business-logic","TaskManager","الأب يتبع أبناءه لمستوى واحد فقط ودون سجل. المنطق مكرر في SprintController::updateTaskStatus التي لا تسجّل تغيير الحالة أصلاً.","Done","TaskStatusService: صعود لكل المستويات مع السجل، ومسار واحد للمتحكّمَين."
+"الحالات والأنواع والأولويات المخصّصة لا تتوافق مع قاعدة البيانات","Bug","High","settings","TaskManager","الشاشة تسمح بإضافة قيم مخصّصة، والأعمدة enum ثابتة والتحقق مكتوب يدوياً، فالقيمة المخصّصة تظهر عموداً ثم يرفضها الحفظ. و priority_label لا يعرف urgent في القيم الافتراضية (app/Models/Task.php:90).","Done","TaskVocabulary: المعرّفات ثابتة والإعدادات تخصّص الاسم واللون فقط."
+"«السبرنت الحالي» هو الأحدث إنشاءً لا النشط","Bug","Medium","sprints","TaskManager","وإن لم يوجد يُصنع كائن وهمي غير محفوظ، ولوحة المؤشرات تأخذ الأحدث عبر كل المشاريع.
+الملف: TaskManagerController.php:41 و204","Done","Sprint::currentFor: النشط أولاً، وأُزيل السبرنت الوهمي."
+"السبرنت: حفظ بـ request->all() ولا منع لتداخل أو تعدد النشط","Bug","Medium","sprints","TaskManager","Sprint::create($request->all()) و update($request->all()) دون validated(). لا منع لأكثر من سبرنت نشط، ويمكن تغيير project_id لسبرنت فيه مهام، والإقفال لا يرحّل غير المكتمل خلاف التعليق، وإسناد السبرنت بالوراثة ليس داخل معاملة.","Done","validated()، سبرنت نشط واحد لكل مشروع، منع نقل سبرنت فيه مهام، الوراثة في معاملة. تداخل التواريخ غير ممنوع، والإقفال لا يرحّل (صُحّح التعليق)."
+"مؤشرات «نسبة الإنجاز» في لوحة المعلومات مقلوبة","Bug","Medium","reports","TaskManager","projectCompletionRate و workspaceCompletionRate تحسبان نسبة غير المكتمل. و«المكتمل شهرياً» يعتمد updated_at.
+الملف: TaskManagerController.php:256","Done","النسبة = المكتمل ÷ الكل، والشهري من completed_date."
+"تعديل المهمة يمسح المكلّفين إن لم يُرسل الحقل","Bug","Medium","tasks","TaskManager","عند غياب assigned_users تُنفَّذ sync([])، ولا تحقق من أن المعرّفات مستخدمون موجودون.
+الملف: TaskController.php:671","Done","تحقق من وجود المستخدمين. غياب الحقل = لا أحد مقصود (النموذج يرسله دائماً)."
+"تغيير أب المهمة لا يحدّث الأحفاد ولا ساعات الإبيك القديم","Bug","Medium","tasks","TaskManager","project_id و sprint_id للأبناء لا يتغيران، وساعات الإبيك القديم لا يُعاد حسابها، والمقارنة !== بين نص وعدد صحيحة دائماً.
+الملف: TaskController.php:605","Done","نقل الأحفاد وإعادة حساب ساعات الإبيكين."
+"لا إشعارات عند الإسناد أو التعليق أو تغيير الحالة","Improvement","Medium","notifications","TaskManager","شاشة إعدادات الإشعارات موجودة كاملة ولا شيء يرسل إشعاراً.","Done","TaskNotifier: إشعار داخلي عند الإسناد والتعليق وتغيير الحالة، يحترم إعدادات التنبيهات."
+"هجرات 2026_09_03 أنشأت جداول لا يستعملها أي كود","Task","Low","tech-debt","TaskManager","التبعيات، المرفقات، قوائم التحقق، الوسوم، التحديث اليومي، الاستعادة، story_points، acceptance_criteria، scrum_role، capacity.
+المطلوب: قرار — إكمال الميزات أو التراجع عن الهجرات.","To Do","يحتاج قراراً: إكمال الميزات أو التراجع عن الهجرات. لم يُمسّ."
+"التعليقات شبه معطّلة","Bug","Medium","comments","TaskManager","لا واجهة ترسل إلى comments.store. getComments بلا مسار. toggleLike بلا مسار وتستدعي علاقة likes() غير موجودة. canAccessTask تستدعي hasRole('admin') الذي لا يعمل في هذا النظام (CommentController.php:493). والنوع App\Models\Post مسموح.","Done","تصحيح: واجهة التعليقات موجودة في public/modules/taskmanager/js/tasks.js. أُصلح فحص الوصول وحُذفت الدوال الميتة ونوع Post."
+"تصدير التقارير وهمي","Bug","Medium","reports","TaskManager","export() تعيد رسالة ثابتة مع وجود صلاحية ومسار.
+الملف: ReportsController.php:1554","Done","تصدير CSV فعلي من الخادم بالفلاتر وبعزل المشاريع. أزرار الشاشات ما زالت تصدّر من المتصفح."
+"routes/api.php للوحدة يسجّل مسارات معطوبة وبلا صلاحيات","Bug","Medium","api security","TaskManager","apiResource على TaskManagerController الذي لا يملك دوال الموارد، ومسارات هرمية بـ auth:sanctum فقط.","Done","أُفرغ الملف."
+"ملفات JS ميتة تشير إلى مسار غير موجود","Task","Low","tech-debt","TaskManager","settings.js و settings-enhanced.js (نحو 1700 سطر) تستهدفان /en/tasks/taskmanager/settings ولا يحمّلهما أي عرض.","Done","حُذفت."
+"رابط «Todo» في ترويسة الوحدة يذهب إلى وحدة HR","Bug","Low","frontend","TaskManager","route('task.index') تابع لـ Modules/HR.
+الملف: layouts/header.blade.php:16 و header_client.blade.php:16","Done","يشير إلى لوحة المهام."
+"تكرارات: نموذجان TaskSettings وخدمتان GlobalSettingsService وقالبا بريد","Task","Low","tech-debt","TaskManager","أيضاً header.blade.php و header_client.blade.php متطابقتا الحجم، و routes/task.php فارغ، و Task::addFile() فارغة.","Done","حُذف النموذج والخدمات والقالب المكرر و Task::addFile. الترويستان مختلفتان فعلاً فبقيتا."
+"حارس الباقة plan: لا يمنع شيئاً حالياً","Task","Low","billing","TaskManager","مفاتيح TaskManagerPlanFeatures ليست في كتالوج فوترة و SubscriptionGate::allows() تمرّر المجهول. موثّق في ملف المسارات.","To Do","خارج الكود: ينتظر مفاتيح الباقة من فوترة."
+"لوحة المؤشرات والتقارير تحمّل كل البيانات في الذاكرة","Improvement","Medium","performance","TaskManager","Task::get() ثم فلترة بالمجموعات، و User::all()->map مع assignedUsers لكل مهمة (N×M)، و $project->tasks داخل حلقات بلا eager loading. النمط يتكرر في عشر دوال تقارير.","In Progress","لوحة المؤشرات أُعيدت كتابتها. التقارير: تحميل مسبق للعلاقات، وما زالت تعدّ في الذاكرة."
+"$appends الستة على Task تستدعي الإعدادات لكل مهمة","Improvement","Low","performance","TaskManager","كل تحويل إلى JSON يستدعي TaskSettingsHelper ست مرات لكل مهمة.
+الملف: app/Models/Task.php:19","Done","قراءة واحدة لكل مشروع في الطلب."
+"صفحة Backlog ولوحة المهام تعيدان قوائم كاملة في كل طلب","Improvement","Low","performance","TaskManager","خمسة استعلامات مرقّمة مع قوائم كاملة و User::all()، و getTaskManagerData تعيد كل المستخدمين والمشاريع في كل تحديث.","Done","قوائم الفلاتر أخفّ والرد بلا قوائم المستخدمين والمشاريع."
+"EnsureProjectSettings يكتب الجلسة والكاش في كل طلب","Improvement","Low","performance","TaskManager","ويستعلم AccountSetting في كل طلب للوحدة.
+الملف: app/Http/Middleware/EnsureProjectSettings.php","Done","من الكاش فقط دون كتابة الجلسة."
+"تغطية الاختبارات ناقصة","Task","Medium","tests","TaskManager","مجلدا اختبارات الوحدة فارغان، ولا شيء يغطي الدعوات أو الصلاحيات أو التعليقات أو التقارير.","Done","63 اختباراً في tests/Feature/TaskManager، وحُذف 18 اختباراً قديماً لا يعمل."
+"أعمدة لوحة المهام لا تطابق قيم قاعدة البيانات","Bug","Highest","board settings","TaskManager","الحالات الافتراضية في الإعدادات كانت todo/in_review/done/blocked، وعمود tasks.status يقبل not_started/in_progress/completed/overdue. فلوحة أي مشروع لا تعرض المهام «لم تبدأ» و«مكتملة».
+اكتُشف أثناء الإصلاح.","Done","TaskVocabulary مصدر واحد للمعرّفات."
+"الإعدادات العامّة للمهام لا تُحفظ إطلاقاً","Bug","High","settings","TaskManager","task_settings.project_id إلزامي والإعداد العام يُحفظ بـ project_id = null، فكل حفظ ينتهي باستثناء SQL.
+اكتُشف أثناء الإصلاح.","Done","هجرة 2026_10_06_100100 تجعل العمود يقبل NULL."
+"هجرات بصيغة MySQL فقط تمنع تشغيل الاختبارات على SQLite","Bug","Medium","tests migrations","Core","خمس هجرات (information_schema، UPDATE … JOIN) تُسقط migrate على SQLite، فكل اختبارات المشروع تفشل قبل أن تبدأ.","Done","أُضيف شرط المحرّك لكل منها."

@@ -1,0 +1,344 @@
+/**
+ * Salary Formula Autocomplete Styles
+ * تنسيقات نظام الإكمال التلقائي للصيغ الحسابية
+ */
+
+/* قائمة الإكمال التلقائي */
+.formula-autocomplete-list {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 10000;
+    display: none;
+    min-width: 320px;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* عنصر في القائمة */
+.formula-autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background-color 0.2s ease;
+}
+
+.formula-autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.formula-autocomplete-item:hover {
+    background-color: #e8f4fd !important;
+}
+
+.formula-autocomplete-item.selected {
+    background-color: #e8f4fd;
+}
+
+/* اسم المتغير */
+.formula-variable-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+    direction: ltr;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 4px;
+}
+
+/* الوصف العربي */
+.formula-variable-description {
+    color: #7f8c8d;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* مثال الاستخدام */
+.formula-variable-example {
+    color: #95a5a6;
+    font-size: 11px;
+    direction: ltr;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #ecf0f1;
+}
+
+/* زر المساعدة */
+.formula-help-btn {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.formula-help-btn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.formula-help-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* حاوية الحقل مع الزر */
+.formula-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+/* تنسيق حقل الإدخال */
+input[name*="calculation_formula"] {
+    padding-left: 45px !important;
+    direction: ltr;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+}
+
+/* شريط التمرير المخصص */
+.formula-autocomplete-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.formula-autocomplete-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.formula-autocomplete-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.formula-autocomplete-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* رسالة "لا توجد نتائج" */
+.formula-autocomplete-empty {
+    padding: 16px;
+    text-align: center;
+    color: #95a5a6;
+    font-size: 13px;
+}
+
+/* تلميحات للمستخدم */
+.formula-hint {
+    display: block;
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 4px;
+    direction: rtl;
+}
+
+.formula-hint-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    margin-left: 4px;
+    font-weight: bold;
+}
+
+/* أنيميشن الظهور */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.formula-autocomplete-list[style*="display: block"] {
+    animation: fadeIn 0.2s ease;
+}
+
+/* للأجهزة المحمولة */
+@media (max-width: 768px) {
+    .formula-autocomplete-list {
+        min-width: 280px;
+        max-height: 250px;
+    }
+
+    .formula-autocomplete-item {
+        padding: 10px 12px;
+    }
+
+    .formula-help-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    input[name*="calculation_formula"] {
+        padding-left: 40px !important;
+        font-size: 13px;
+    }
+}
+
+/* وضع الطباعة */
+@media print {
+    .formula-help-btn,
+    .formula-autocomplete-list {
+        display: none !important;
+    }
+}
+
+/* حالة التركيز */
+input[name*="calculation_formula"]:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* حالة الخطأ */
+input[name*="calculation_formula"].is-invalid {
+    border-color: #dc3545;
+}
+
+input[name*="calculation_formula"].is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* رسالة الخطأ */
+.formula-error-message {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #dc3545;
+}
+
+/* رسالة النجاح */
+.formula-success-message {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #28a745;
+}
+
+/* شارة التمييز */
+.formula-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 3px;
+    margin-right: 4px;
+}
+
+.formula-badge-variable {
+    background-color: #667eea;
+    color: white;
+}
+
+.formula-badge-function {
+    background-color: #f093fb;
+    color: white;
+}
+
+.formula-badge-operator {
+    background-color: #4facfe;
+    color: white;
+}
+
+/* تنسيقات إضافية لتحسين المظهر */
+.formula-group {
+    margin-bottom: 1rem;
+}
+
+.formula-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.formula-label .required {
+    color: #dc3545;
+    margin-right: 4px;
+}
+
+/* أيقونة المعلومات */
+.formula-info-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border: 1px solid #6c757d;
+    border-radius: 50%;
+    font-size: 12px;
+    color: #6c757d;
+    cursor: help;
+    margin-right: 4px;
+}
+
+.formula-info-icon:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* تلميح عند التحويم */
+[data-formula-tooltip] {
+    position: relative;
+}
+
+[data-formula-tooltip]:hover::after {
+    content: attr(data-formula-tooltip);
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background: #2c3e50;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 5px;
+}
+
+[data-formula-tooltip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    right: 10px;
+    border: 5px solid transparent;
+    border-top-color: #2c3e50;
+}

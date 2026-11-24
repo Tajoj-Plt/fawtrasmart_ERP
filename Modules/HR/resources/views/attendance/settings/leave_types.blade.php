@@ -1,0 +1,13 @@
+@extends('hr::master')
+
+@section('title', 'نوع الأجازات')
+
+@section('content')
+    <!-- Header Section -->
+    {{-- ترويسةُ نظام التصميم — كانت مكتوبةً يدوياً بستّة مستويات
+         من `div` وفتاتِ تنقّلٍ رابطُه الأوّل فارغ. --}}
+    @include('stock::components.page-head', [
+        'title' => 'نوع الأجازات',
+        'crumbs' => ['الرئيسية' => null, 'إضافة' => null],
+    ])
+    @endsection

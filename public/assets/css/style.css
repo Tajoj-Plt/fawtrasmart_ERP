@@ -1,0 +1,651 @@
+.timeline {
+    position: relative;
+    margin: 20px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 50px;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #28a745 0%, #218838 100%);
+    right: 50px;
+    margin-right: -2px;
+}
+
+.timeline-item {
+    margin: 0 0 20px;
+    padding-right: 100px;
+    position: relative;
+    text-align: right;
+}
+
+.timeline-item::before {
+    content: "\f067";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 30px;
+    top: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #28a745, #218838);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-content {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.timeline-content .time {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.filter-bar {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.timeline-day {
+    background-color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    position: relative;
+    top: 0;
+    right: 50px;
+    transform: translateX(50%);
+}
+
+.filter-bar .form-control {
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-bar .btn-outline-secondary {
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* تدرج خطي بسيط */
+.bg-royal-linear {
+    background: linear-gradient(135deg, #7367F0 0%, #8b83f3 50%, #c5c1fa 100%);
+    color: white;
+}
+
+/* تدرج خطي عميق */
+.bg-royal-deep {
+    background: linear-gradient(135deg, #6256ee 0%, #7367F0 40%, #8b83f3 100%);
+    color: white;
+
+}
+
+/* تدرج شعاعي (radial) */
+.bg-royal-radial {
+    background: radial-gradient(1200px circle at 20% 20%, #8b83f3 0%, #7367F0 35%, #6256ee 80%);
+    color: white;
+
+}
+
+/* تدرج مخروطي (conic) */
+.bg-royal-conic {
+    background: conic-gradient(from 220deg at 50% 50%, #8b83f3, #7367F0, #6256ee, #8b83f3);
+    color: white;
+
+}
+
+/* تدرج يتلاشى إلى شفاف (للأوفرلاي) */
+.bg-royal-fade {
+    background: linear-gradient(180deg, #7367F0 0%, rgba(115, 103, 240, 0.85) 40%, rgba(115, 103, 240, 0) 100%);
+    color: white;
+}
+
+/* خلفية متدرجة متحركة */
+.bg-royal-animated {
+    background: radial-gradient(1000px circle at 10% 20%, #8b83f3, transparent 40%),
+        radial-gradient(1200px circle at 80% 30%, #7367F0, transparent 45%),
+        radial-gradient(900px circle at 30% 80%, #6256ee, transparent 40%),
+        #1b1b2f;
+    color: white;
+
+    background-size: 140% 140%;
+    animation: royalShift 18s ease-in-out infinite;
+}
+
+@keyframes royalShift {
+
+    0%,
+    100% {
+        background-position: 0% 0%, 100% 0%, 0% 100%;
+    }
+
+    50% {
+        background-position: 50% 50%, 50% 30%, 30% 50%;
+    }
+}
+
+/* تدرج ملكي أنيق (مائل نحو الأزرق) */
+.bg-royal-luxury {
+    background: linear-gradient(135deg, #7367F0 0%, #5A6FF0 50%, #42A5F5 100%);
+    color: white;
+}
+
+/* تدرج غروب بنفسجي ناعم */
+.bg-royal-sunset {
+    background: linear-gradient(135deg, #7367F0 0%, #9A6BFC 40%, #FF8ACF 100%);
+    color: white;
+}
+
+/* تدرج نيون بنفسجي أزرق */
+.bg-royal-neon {
+    background: linear-gradient(135deg, #7367F0 0%, #00C6FF 100%);
+    box-shadow: 0 0 20px rgba(115, 103, 240, 0.6), 0 0 40px rgba(0, 198, 255, 0.4);
+    color: white;
+}
+
+/* تدرج فخم غامق */
+.bg-royal-dark {
+    background: linear-gradient(145deg, #2E2B5F 0%, #4B47A0 40%, #7367F0 100%);
+    color: white;
+}
+
+/* تدرج ضباب بنفسجي أنيق */
+.bg-royal-soft {
+    background: linear-gradient(120deg, #C9C2FF 0%, #A39BFF 40%, #7367F0 100%);
+    color: #fff;
+}
+
+/* تدرج زجاجي شفاف (للكروت فوق خلفية) */
+.bg-royal-glass {
+    background: linear-gradient(135deg, rgba(115, 103, 240, 0.3), rgba(115, 103, 240, 0.1));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+/* تدرج نبضي متحرك */
+.bg-royal-pulse {
+    background: linear-gradient(270deg, #7367F0, #9C6BFC, #42A5F5);
+    background-size: 600% 600%;
+    animation: pulseGradient 12s ease infinite;
+    color: white;
+}
+/* كلاسات الشفافية للون البنفسجي #667eea */
+
+.bg-purple-transparent-5 {
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+.bg-purple-transparent-10 {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+.bg-purple-transparent-15 {
+    background-color: rgba(102, 126, 234, 0.15);
+}
+
+.bg-purple-transparent-20 {
+    background-color: rgba(102, 126, 234, 0.2);
+}
+
+.bg-purple-transparent-25 {
+    background-color: rgba(102, 126, 234, 0.25);
+}
+
+.bg-purple-transparent-30 {
+    background-color: rgba(102, 126, 234, 0.3);
+}
+
+.bg-purple-transparent-40 {
+    background-color: rgba(102, 126, 234, 0.4);
+    color: white;
+
+}
+
+.bg-purple-transparent-50 {
+    background-color: rgba(102, 126, 234, 0.5);
+    color: white;
+
+}
+
+.bg-purple-transparent-60 {
+    background-color: rgba(102, 126, 234, 0.6);
+    color: white;
+
+}
+
+.bg-purple-transparent-70 {
+    background-color: rgba(102, 126, 234, 0.7);
+}
+
+.bg-purple-transparent-80 {
+    background-color: rgba(102, 126, 234, 0.8);
+    color: white;
+}
+
+.bg-purple-transparent-90 {
+    background-color: rgba(102, 126, 234, 0.9);
+}
+
+.bg-purple-transparent-100 {
+    background-color: rgba(102, 126, 234, 1);
+    color: white;
+
+}
+@keyframes pulseGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Container */
+.checks-reports-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem 2rem;
+    margin-top: 15px;
+}
+
+/* Header Card */
+.checks-header-card {
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.checks-header-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 250px;
+    height: 250px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.checks-header-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.checks-header-content {
+    position: relative;
+    z-index: 1;
+}
+
+.checks-header-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.checks-header-highlight {
+    color: #ffd700;
+    font-weight: 900;
+    text-shadow: 0 2px 15px rgba(255, 215, 0, 0.3);
+}
+
+.checks-header-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+/* Grid Layout */
+.checks-reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.75rem;
+    align-items: stretch;
+}
+
+/* Report Cards */
+.checks-report-card {
+    border-radius: 18px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    background: #ffffff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1.75rem;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.checks-report-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.checks-report-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.checks-report-card:hover::before {
+    transform: scaleX(1);
+}
+
+.checks-card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 1rem;
+}
+
+/* Icon Styles */
+.checks-card-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    transition: all 0.3s ease;
+}
+
+.checks-report-card:hover .checks-card-icon-wrapper {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.checks-icon-received {
+    background: linear-gradient(135deg, rgba(40, 199, 111, 0.2), rgba(40, 199, 111, 0.1));
+    color: #28C76F;
+    box-shadow: 0 4px 15px rgba(40, 199, 111, 0.2);
+}
+
+.checks-icon-payable {
+    background: linear-gradient(135deg, rgba(234, 84, 85, 0.2), rgba(234, 84, 85, 0.1));
+    color: #EA5455;
+    box-shadow: 0 4px 15px rgba(234, 84, 85, 0.2);
+}
+
+/* Text Content */
+.checks-card-text-content {
+    flex-grow: 1;
+}
+
+.checks-card-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.checks-card-description {
+    font-size: 0.95rem;
+    color: #7f8c8d;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Action Buttons */
+.checks-action-buttons {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding-top: 0.8rem;
+}
+
+.checks-btn {
+    flex: 1;
+    padding: 0.7rem 1.1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 2px solid;
+    white-space: nowrap;
+}
+
+.checks-btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: transparent;
+}
+
+.checks-btn-primary:hover {
+    background: linear-gradient(135deg, #5568d3, #64398c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.checks-btn-outline {
+    background: transparent;
+    color: #667eea;
+    border-color: #667eea;
+}
+
+.checks-btn-outline:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #5568d3;
+    color: #5568d3;
+}
+
+.checks-btn i {
+    font-size: 0.85rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .checks-reports-grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .checks-reports-wrapper {
+        padding: 1.25rem 1rem;
+    }
+
+    .checks-header-card {
+        padding: 1.5rem 1.25rem;
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+    }
+
+    .checks-header-title {
+        font-size: 1.6rem;
+    }
+
+    .checks-header-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .checks-reports-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .checks-report-card {
+        padding: 1.25rem;
+    }
+
+    .checks-card-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        font-size: 1.4rem;
+    }
+
+    .checks-card-title {
+        font-size: 1.05rem;
+    }
+
+    .checks-action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .checks-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .checks-header-title {
+        font-size: 1.5rem;
+    }
+
+    .checks-card-title {
+        font-size: 1rem;
+    }
+
+    .checks-card-description {
+        font-size: 0.85rem;
+    }
+
+    .checks-btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.85rem;
+    }
+}
+
+.stat-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+.chart-container-sm {
+    height: 200px;
+    position: relative;
+}
+
+.recent-entries-table th {
+    background-color: #f8f9fa;
+}
+
+.progress-bar-success {
+    background-color: #28a745;
+}
+
+.progress-bar-warning {
+    background-color: #ffc107;
+}
+
+.progress-bar-danger {
+    background-color: #dc3545;
+}
+
+.financial-summary-card {
+    border-left: 4px solid #007bff;
+}
+
+.income-card {
+    border-left: 4px solid #28a745;
+}
+
+.expense-card {
+    border-left: 4px solid #dc3545;
+}
+
+.net-card {
+    border-left: 4px solid #6f42c1;
+}
+
+.treasury-card {
+    border-left: 4px solid #fd7e14;
+}
+
+.cheque-card {
+    border-left: 4px solid #6610f2;
+}
+
+.account-card {
+    border-left: 4px solid #20c997;
+}
+
+.cost-center-card {
+    border-left: 4px solid #e83e8c;
+}
+
+.section-title {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}

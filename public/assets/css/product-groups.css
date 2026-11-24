@@ -1,0 +1,121 @@
+/**
+ * Product Groups CSS
+ * أنماط مجموعات المنتجات
+ * ==============================================
+ */
+
+/* ===== أنماط مستويات الشجرة ===== */
+.group-level-0 { padding-right: 10px !important; }
+.group-level-1 { padding-right: 35px !important; }
+.group-level-2 { padding-right: 60px !important; }
+.group-level-3 { padding-right: 85px !important; }
+.group-level-4 { padding-right: 110px !important; }
+
+/* ===== صفوف الشجرة ===== */
+.group-row {
+    transition: all 0.15s ease;
+}
+
+.group-row:hover {
+    background-color: #f5f5f5 !important;
+}
+
+.group-row.parent-row {
+    font-weight: 600;
+}
+
+/* ===== زر التوسيع ===== */
+.expand-btn {
+    cursor: pointer;
+    color: #007bff;
+    margin-left: 5px;
+    display: inline-block;
+}
+
+.expand-btn:hover {
+    color: #0056b3;
+}
+
+/* ===== أيقونة المجموعة ===== */
+.group-icon {
+    margin-left: 8px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.parent-row .group-icon {
+    color: #495057;
+}
+
+/* ===== اسم المجموعة ===== */
+.group-name {
+    display: inline;
+}
+
+.group-name.parent-name {
+    font-weight: 600;
+}
+
+/* ===== أزرار العمليات ===== */
+.btn-action-group {
+    white-space: nowrap;
+}
+
+.btn-action-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+.btn-action-group .btn + .btn {
+    margin-right: 0.25rem;
+}
+
+/* ===== الجدول ===== */
+.thead-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.thead-gradient th {
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 12px 8px;
+}
+
+/* ===== حالة فارغة ===== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: #cbd5e0;
+    margin-bottom: 15px;
+}
+
+/* ===== تصميم expand-btn مطابق لشجرة الحسابات ===== */
+.expand-btn.expanded .expand-icon::before {
+    content: "\f146";
+}
+
+.expand-icon::before {
+    content: "\f0fe";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+/* ===== أنماط النماذج ===== */
+.form-card {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.info-box {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}

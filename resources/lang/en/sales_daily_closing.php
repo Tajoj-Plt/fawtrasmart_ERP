@@ -1,0 +1,203 @@
+<?php
+
+/**
+ * Daily closing screen strings — English counterpart of `ar/sales_daily_closing.php`.
+ *
+ * Keys must stay in sync with the Arabic file: the in-app translation editor
+ * lists a key as missing when it exists in one locale only.
+ */
+return [
+
+    'title' => 'Daily Closing',
+    'subtitle' => 'Match what the employee reports for the day against what the system actually recorded — sales, collections, returns, expenses and stock.',
+    'menu' => 'Daily Closing',
+    'one' => 'daily closing',
+    'empty' => 'No closing records yet',
+    'empty_hint' => 'Use “Auto close” to record today from system data, or “Review system” to inspect it first.',
+
+    'cards' => [
+        'closings' => 'Closings',
+        'net_sales' => 'Net sales',
+        'collections' => 'Total collected',
+        'returns' => 'Returns',
+        'expenses' => 'Expenses',
+        'closings_hint' => 'Closings in the shown period',
+    ],
+
+    'fields' => [
+        'date' => 'Date',
+        'employee' => 'Employee',
+        'all_employees' => 'All employees',
+        'from_date' => 'From date',
+        'to_date' => 'To date',
+        'sales' => 'Gross sales',
+        'net_sales' => 'Net sales',
+        'cash_sales' => 'Cash sales',
+        'receipts' => 'Receipt vouchers',
+        'collections' => 'Total collected',
+        'returns' => 'Returns',
+        'expenses' => 'Expenses',
+        'stock' => 'Stock',
+        'stock_quantity' => 'Stock quantity',
+        'status' => 'Status',
+        'notes' => 'Notes',
+        'reference' => 'Reference',
+        'client' => 'Customer',
+        'description' => 'Description',
+        'amount' => 'Amount',
+        'account' => 'Account',
+        'product' => 'Product',
+        'quantity' => 'Quantity',
+        'system_value' => 'System value',
+        'reported_value' => 'Reported',
+        'difference' => 'Difference',
+        'total' => 'Total',
+        'unit_piece' => 'pcs',
+        'client_code' => 'Client code',
+        'started_at' => 'Started at',
+        'completed_at' => 'Completed at',
+        'visits_completed' => 'Completed visits',
+        'visits_missed' => 'Missed visits',
+        'visits_success' => 'Successful visits',
+        'visits_negative' => 'Negative visits',
+        'visit_duration' => 'Time at customer',
+        'visits_total_duration' => 'Time with customers',
+        'visit_outcome' => 'Outcome',
+        'unplanned_visit' => 'Off itinerary',
+        'arrived_at' => 'Arrived at',
+        'departed_at' => 'Left at',
+        'travel_time' => 'Travel from previous customer',
+        'visits_total_travel' => 'Travel time between customers',
+        'custody' => 'Custody',
+        'custody_hint' => 'Last custody count recorded today in the visit note',
+        'custody_total' => 'Total custody',
+        'last_custody' => 'Last custody',
+        'last_custody_date' => 'Recorded on',
+        'minute_short' => 'min',
+        'hour_short' => 'h',
+        'cash_refunds' => 'Cash refunds',
+        'cash_refunds_hint' => 'Cash handed back to customers from the treasury on sales returns',
+        'collections_formula' => 'Cash sales + receipt vouchers − cash refunds',
+    ],
+
+    'actions' => [
+        'auto_close' => 'Auto close',
+        'auto_close_hint' => 'Records today using the system figures as they are',
+        'bulk_close' => 'Bulk close',
+        'bulk_close_hint' => 'Close every employee for one day — managers only',
+        'review' => 'Review system',
+        'review_hint' => 'Show the system figures before recording the closing',
+        'manual_close' => 'Manual close',
+        'print_details' => 'Print details',
+        'print_report' => 'Print report',
+        'bulk_report' => 'Bulk report',
+        'bulk_report_hint' => 'All employees for one day — view and print without storing',
+        'delete' => 'Delete closing',
+        'confirm' => 'Confirm',
+        'close_now' => 'Close now',
+    ],
+
+    'sections' => [
+        'sales' => 'Sales invoices',
+        'cash_sales' => 'Cash sales',
+        'receipts' => 'Receipt vouchers',
+        'returns' => 'Returns and credit notes',
+        'expenses' => 'Expenses',
+        'stock' => 'Stock count',
+        'summary' => 'Summary',
+        'collection_details' => 'Collection details',
+        'system_data' => 'System data',
+        'visits_completed' => 'Completed visits',
+        'visits_missed' => 'Missed visits',
+        'cash_refunds' => 'Cash refunds paid out',
+    ],
+
+    'status' => [
+        'success' => 'Matched',
+        'mismatch' => 'Not matched',
+        'skipped' => 'Skipped',
+        'failed' => 'Failed',
+        'has_return' => 'Returned',
+        'visit_success' => 'Successful',
+        'visit_negative' => 'Negative',
+    ],
+
+    'messages' => [
+        'already_closed' => 'This day (:date) has already been closed',
+        'auto_closed' => 'Auto closing completed successfully',
+        'stored' => 'Daily closing saved — every figure matches the system',
+        'deleted' => 'Closing deleted successfully',
+        'delete_confirm' => 'Delete the closing for :date?',
+        'no_activity' => 'No activity',
+        'mismatch_intro' => 'The closing does not match what the system recorded:',
+        'mismatch_field' => ':field — you entered :reported, the system has :system',
+        'mismatch_stock' => 'Stock — :product: you entered :reported, the system has :system',
+        'bulk_done' => 'Bulk closing done — :success succeeded, :skipped skipped, :failed failed (of :total employees)',
+        'bulk_failed_one' => 'This employee could not be closed',
+        'period_locked' => 'Closing refused: :reason',
+        'load_failed' => 'Could not load the system data',
+        'no_stock' => 'No products in your warehouse',
+        'no_visits' => 'No visits',
+        'no_entries' => 'No movements',
+        'cash_refund_line' => 'Cash paid to customer — sales return',
+        'auto_note' => 'Automatic closing from system data',
+        'bulk_note' => 'Bulk automatic closing by management',
+        'manual_note' => 'Closing verified against the system',
+    ],
+
+    'print' => [
+        'tax_number' => 'Tax number',
+        'details_title' => 'Daily closing details',
+        'period_title' => 'Daily closings report',
+        'bulk_title' => 'Daily closing — all employees',
+        'no_data' => 'Nothing to show for this period',
+    ],
+
+    'denied' => [
+        'view' => 'You are not allowed to view the daily closing',
+        'delete' => 'You are not allowed to delete this closing',
+        'bulk' => 'You are not allowed to run a bulk closing',
+        'report' => 'You are not allowed to view this report',
+    ],
+
+    'log' => [
+        'created' => 'Daily closing for :date — employee :employee',
+        'auto_created' => 'Automatic daily closing for :date — employee :employee',
+        'bulk_created' => 'Bulk daily closing for :date — :count employees',
+        'deleted' => 'Deleted the daily closing for :date — employee :employee',
+        'rejected' => 'Closing for :date rejected — figures did not match',
+    ],
+
+    'guide' => [
+        'title' => 'What this closing is, and what recording it causes',
+        'lead' => 'A daily closing is a reconciliation: the rep states what they hold, the system states what it recorded, and the closing is only saved when the two agree.',
+
+        'what_is' => [
+            'title' => 'What gets reconciled',
+            'a' => 'For the rep\'s day the system totals: net sales, cash sales, receipts, returns, expenses, and the stock quantity in their custody.',
+            'b' => 'The rep then enters what they actually hold. If a single figure differs the closing is refused and the differing figure is named — no "approximate" closing is stored.',
+            'c' => '"Auto close" takes the system figures as they stand with no data entry, for days that are not in dispute. "Review" shows the figures before recording, for anyone who wants to look first.',
+        ],
+
+        'scope' => [
+            'title' => 'Who sees what',
+            'a' => 'Whoever holds "view all employees\' closings" sees the whole table, the employee column and its filter; everyone else sees only their own closings.',
+            'b' => '"Bulk close" and "Bulk report" are a separate administrative permission: the first writes a day\'s closing for every employee at once, the second exposes everyone\'s figures.',
+            'c' => 'Deleting a closing is a third permission, and whoever holds it deletes their own — or everyone\'s, if they can see them.',
+        ],
+
+        'effects' => [
+            'title' => 'What happens on save',
+            'a' => 'The closing row is saved with its figures and its stock detail line by line, and the action is written to the activity and event logs.',
+            'b' => 'One day is never closed twice for the same rep: a second attempt is refused with a message naming the date.',
+            'c' => 'The closing date is checked against "Accounting periods" — a date inside a closed period is refused, whether creating or deleting.',
+        ],
+
+        'settings' => [
+            'title' => 'Settings that govern this screen from outside it',
+            'a' => 'The account numbers the amounts are read from come from "Chart of accounts", not from constants written in code.',
+            'b' => '"Accounting periods" decides which dates may be closed and deleted.',
+            'c' => 'The warehouse and custody attached to the rep are set on the employee screen, and the stock quantity to be reconciled is read from them.',
+        ],
+    ],
+];

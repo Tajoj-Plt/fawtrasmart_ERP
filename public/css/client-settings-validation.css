@@ -1,0 +1,244 @@
+/* ==========================================
+   Client Settings Validation Styles
+   ========================================== */
+
+/* تنبيهات الإعدادات */
+.settings-alert {
+    border-left: 4px solid #667eea;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+
+.settings-alert.required {
+    border-left-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.settings-alert.optional {
+    border-left-color: #17a2b8;
+    background-color: #f0f8fb;
+}
+
+.settings-alert.warning {
+    border-left-color: #ffc107;
+    background-color: #fffbf0;
+}
+
+.settings-alert .icon {
+    margin-left: 10px;
+    font-size: 1rem;
+}
+
+/* مؤشر الحالة */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-indicator.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-indicator.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-indicator.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-indicator i {
+    font-size: 0.9rem;
+}
+
+/* تسميات الحقول المطلوبة */
+.required-indicator {
+    color: #dc3545;
+    font-weight: bold;
+    margin-left: 3px;
+}
+
+.optional-indicator {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-left: 5px;
+    font-style: italic;
+}
+
+/* حقول الموقع */
+#locationIndicator {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#locationIndicator.d-none {
+    display: none !important;
+}
+
+#locationIndicator i {
+    color: #28a745;
+}
+
+/* خريطة العميل */
+#map-container {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+#map {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* تنبيهات الصلاحيات */
+.permission-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.permission-alert.denied {
+    background-color: #fff5f5;
+    border-left: 4px solid #dc3545;
+    color: #721c24;
+}
+
+.permission-alert.denied i {
+    color: #dc3545;
+    font-size: 1.1rem;
+    margin-top: 2px;
+}
+
+.permission-alert.allowed {
+    background-color: #f0f8fb;
+    border-left: 4px solid #17a2b8;
+    color: #0c5460;
+}
+
+.permission-alert.allowed i {
+    color: #17a2b8;
+    font-size: 1.1rem;
+    margin-top: 2px;
+}
+
+/* حقول معطلة */
+textarea:disabled,
+select:disabled,
+input:disabled {
+    background-color: #e9ecef !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* رسائل مساعدة */
+.help-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.help-text.warning {
+    color: #856404;
+}
+
+.help-text.info {
+    color: #0c5460;
+}
+
+/* الأزرار */
+.btn-map {
+    transition: all 0.3s ease;
+}
+
+.btn-map:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.btn-map:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* رسائل الخطأ */
+.invalid-feedback {
+    display: block !important;
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.is-invalid:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* استجابة الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .settings-alert {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .status-indicator {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    #map {
+        height: 300px !important;
+    }
+
+    .permission-alert {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* تأثيرات الحركة */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-alert,
+#locationIndicator,
+.permission-alert {
+    animation: slideIn 0.3s ease-out;
+}

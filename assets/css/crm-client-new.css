@@ -1,0 +1,413 @@
+/* تحسينات إدارة العلاقات الجديدة */
+
+/* التخطيط الرئيسي */
+#clientSidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #fff;
+}
+
+#clientSidebar > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.search-bar {
+    flex-shrink: 0;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem;
+}
+
+/* قسم قائمة المجموعات */
+#groupsListContainer {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+}
+
+#groupsListContainer .accordion {
+    border: none;
+    margin-bottom: 0;
+}
+
+#groupsListContainer .accordion-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#groupsListContainer .accordion-button {
+    padding: 0.75rem;
+    font-weight: 500;
+    border: none;
+    background-color: transparent;
+}
+
+#groupsListContainer .accordion-button:not(.collapsed) {
+    background-color: #f8f9fa;
+    box-shadow: none;
+}
+
+#groupsListContainer .accordion-button:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: none;
+}
+
+/* قسم تفاصيل العميل */
+.clients-details {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #fff;
+    padding: 0;
+}
+
+.control-header {
+    flex-shrink: 0;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.control-header .btn-group {
+    width: auto;
+}
+
+/* تحسينات عناصر العملاء */
+.client-item {
+    cursor: pointer;
+    padding: 0.75rem !important;
+    transition: all 0.2s ease;
+    border: none !important;
+    border-bottom: 1px solid #f1f1f1 !important;
+}
+
+.client-item:hover {
+    background-color: #f8f9fa;
+    padding-left: 0.75rem;
+}
+
+.client-item.selected {
+    background-color: #e7f3ff;
+    border-left: 3px solid #0d6efd !important;
+    padding-left: calc(0.75rem - 3px) !important;
+}
+
+.client-item .client-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.client-item .client-number {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.client-item .client-contact {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* معلومات العميل الأساسية */
+.client-basic-info {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.client-basic-info .info-item {
+    margin-bottom: 0.5rem;
+}
+
+.client-basic-info .info-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+}
+
+.client-basic-info .info-value {
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* علامات التبويب */
+.nav-tabs {
+    border-bottom: 1px solid #dee2e6;
+    margin: 0;
+    padding: 0.5rem 1rem;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-right: 1rem;
+    padding: 0.5rem 0;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #0d6efd;
+    border-bottom-color: #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom-color: #0d6efd;
+    background-color: transparent;
+}
+
+/* محتوى التبويبات */
+.tab-content {
+    padding: 1rem;
+}
+
+.tab-pane {
+    padding: 0;
+}
+
+/* تحسينات الاستجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+    #clientSidebar {
+        display: grid;
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    #groupsListContainer {
+        position: absolute;
+        left: 0;
+        top: 80px;
+        right: 0;
+        width: 100%;
+        height: auto;
+        max-height: calc(100vh - 80px);
+        background-color: white;
+        z-index: 1000;
+        border-radius: 0;
+        display: none;
+    }
+
+    #groupsListContainer.show {
+        display: block;
+    }
+
+    .clients-details {
+        width: 100%;
+        height: auto;
+        border-left: none;
+    }
+
+    .mobile-toggle-btn {
+        display: flex !important;
+        position: fixed;
+        bottom: 2rem;
+        right: 1rem;
+        z-index: 999;
+    }
+
+    .search-bar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+}
+
+/* تحسينات الفواتير */
+.invoice-table {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.invoice-table thead th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.75rem;
+}
+
+.invoice-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.amount-cell {
+    font-weight: 500;
+    color: #0d6efd;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.65rem;
+}
+
+/* تحسينات الملاحظات */
+.note-card-item {
+    border-left: 3px solid #0d6efd;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.note-card-item:hover {
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+    transform: translateY(-2px);
+}
+
+.note-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.note-description {
+    line-height: 1.4;
+    color: #495057;
+}
+
+/* الإحصائيات السريعة */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.stats-row .card {
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.stats-row .card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-row .card-body {
+    padding: 1rem;
+}
+
+.stats-row h6 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.stats-row h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* الحالات الفارغة */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #d3d3d3;
+    margin-bottom: 1rem;
+}
+
+.empty-state h5,
+.empty-state h6 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* تحسينات الأيقونات */
+.badge i,
+.status-badge i {
+    margin-right: 0.25rem;
+}
+
+/* الروابط والأزرار */
+a.btn:disabled,
+a.btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* تحسينات الخطوط */
+@media (max-width: 992px) {
+    .nav-tabs .nav-link {
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+    }
+
+    .client-item .client-name {
+        font-size: 0.9rem;
+    }
+}
+
+/* تحسينات التبويبات */
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 1rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.nav-tabs .nav-link {
+    color: #666;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #0d6efd;
+    border-bottom-color: #0d6efd;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom-color: #0d6efd;
+    background-color: transparent;
+    border-top: none;
+}
+
+.tab-content {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* الرسوم المتحركة السلسة */
+* {
+    scroll-behavior: smooth;
+}
+
+.client-details-section {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

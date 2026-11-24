@@ -1,0 +1,727 @@
+/**
+ * Product Backlog Enhanced Styles
+ * Modern, clean, and professional design
+ */
+
+:root {
+    --primary-color: #7367f0;
+    --primary-dark: #5e50ee;
+    --primary-light: #9e95f5;
+    --success-color: #28c76f;
+    --danger-color: #ea5455;
+    --warning-color: #ff9f43;
+    --info-color: #00cfe8;
+    --secondary-color: #82868b;
+    --light-bg: #f8f8f8;
+    --card-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+    --card-hover-shadow: 0 8px 32px 0 rgba(34, 41, 47, 0.15);
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* ============================================
+   Card Styles - Modern & Clean
+   ============================================ */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    margin-bottom: 2rem;
+}
+
+.card:hover {
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border: none;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.card-header h4,
+.card-header h5 {
+    color: white;
+    margin: 0;
+    font-weight: 600;
+}
+
+.card-header .btn {
+    margin-top: 0.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* ============================================
+   Button Styles - Premium Look
+   ============================================ */
+.btn {
+    border-radius: 6px;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    transition: var(--transition);
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28c76f 0%, #1fa35f 100%);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ff9f43 0%, #ff8510 100%);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ea5455 0%, #d63031 100%);
+}
+
+.btn-light {
+    background: white;
+    border: 1px solid #e0e0e0;
+    color: #5e5873;
+}
+
+.btn-light:hover {
+    background: #f8f8f8;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* ============================================
+   Alert Styles
+   ============================================ */
+.alert {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-right: 4px solid;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #e8f5ff 0%, #d4ecff 100%);
+    border-right-color: var(--info-color);
+    color: #00647a;
+}
+
+.alert-info .alert-heading {
+    color: #00647a;
+    font-weight: 600;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #e8fdf1 0%, #d1f8e0 100%);
+    border-right-color: var(--success-color);
+    color: #1a7a41;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff8e8 0%, #ffedd1 100%);
+    border-right-color: var(--warning-color);
+    color: #7a4a1a;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #ffe8e8 0%, #ffd1d1 100%);
+    border-right-color: var(--danger-color);
+    color: #7a1a1a;
+}
+
+/* ============================================
+   Tab Styles - Modern Navigation
+   ============================================ */
+.nav-tabs {
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 2rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6e6b7b;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    transition: var(--transition);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    margin-bottom: -2px;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-color);
+    background: rgba(115, 103, 240, 0.05);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background: white;
+    border-bottom: 3px solid var(--primary-color);
+    font-weight: 600;
+}
+
+.nav-tabs .nav-link i {
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   Table Styles - Clean & Professional
+   ============================================ */
+.table-responsive {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #f8f8f8 0%, #f0f0f0 100%);
+    color: #5e5873;
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+    text-align: right;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: var(--transition);
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:hover {
+    background: rgba(115, 103, 240, 0.03);
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: #6e6b7b;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* ============================================
+   Badge Styles - Colorful & Informative
+   ============================================ */
+.badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #28c76f 0%, #1fa35f 100%);
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #ff9f43 0%, #ff8510 100%);
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #ea5455 0%, #d63031 100%);
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #82868b 0%, #6e7278 100%);
+}
+
+.badge-light {
+    background: #f8f8f8;
+    color: #6e6b7b;
+    border: 1px solid #e0e0e0;
+}
+
+/* ============================================
+   Sprint Card Styles
+   ============================================ */
+.sprint-card {
+    border-right: 4px solid var(--primary-color);
+    transition: var(--transition);
+}
+
+.sprint-card:hover {
+    border-right-width: 6px;
+}
+
+.sprint-card .card-header {
+    padding: 1.25rem;
+}
+
+.sprint-card .card-header.bg-success {
+    background: linear-gradient(135deg, #28c76f 0%, #1fa35f 100%) !important;
+}
+
+.sprint-card .card-header.bg-warning {
+    background: linear-gradient(135deg, #ff9f43 0%, #ff8510 100%) !important;
+}
+
+.sprint-card .card-header.bg-secondary {
+    background: linear-gradient(135deg, #82868b 0%, #6e7278 100%) !important;
+}
+
+/* ============================================
+   Form Styles
+   ============================================ */
+.form-control,
+.select2-container--default .select2-selection--single {
+    border: 1px solid #d8d6de;
+    border-radius: 6px;
+    padding: 0.625rem 1rem;
+    transition: var(--transition);
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1);
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #5e5873;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.text-danger {
+    color: var(--danger-color);
+}
+
+/* ============================================
+   Modal Styles
+   ============================================ */
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 1.5rem;
+}
+
+.modal-header .modal-title {
+    font-weight: 600;
+}
+
+.modal-header .close {
+    color: white;
+    opacity: 0.8;
+    text-shadow: none;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #f0f0f0;
+    padding: 1.25rem 2rem;
+}
+
+/* ============================================
+   Filter Section
+   ============================================ */
+.row.mb-3 {
+    background: var(--light-bg);
+    padding: 1.25rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem !important;
+}
+
+/* ============================================
+   Section Header
+   ============================================ */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.section-header h4 {
+    color: #5e5873;
+    font-weight: 600;
+    margin: 0;
+}
+
+.section-header i {
+    margin-left: 0.5rem;
+    color: var(--primary-color);
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #b9b9c3;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    color: #6e6b7b;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+    color: #b9b9c3;
+    font-size: 0.95rem;
+}
+
+/* ============================================
+   Skeleton Loader
+   ============================================ */
+.skeleton-loader {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.skeleton-header,
+.skeleton-content {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    height: 20px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-header {
+    width: 60%;
+    height: 24px;
+}
+
+.skeleton-content:last-child {
+    width: 80%;
+    margin-bottom: 0;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ============================================
+   Pagination
+   ============================================ */
+.pagination {
+    margin: 0;
+}
+
+.page-item .page-link {
+    border: 1px solid #e0e0e0;
+    color: #6e6b7b;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.page-item .page-link:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.page-item.active .page-link {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.page-item.disabled .page-link {
+    background: #f8f8f8;
+    border-color: #e0e0e0;
+    color: #b9b9c3;
+}
+
+.pagination-info {
+    color: #6e6b7b;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   Breadcrumb
+   ============================================ */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+.breadcrumb-item {
+    color: #6e6b7b;
+}
+
+.breadcrumb-item.active {
+    color: var(--primary-color);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: #b9b9c3;
+}
+
+.breadcrumb-item a {
+    color: #6e6b7b;
+    transition: var(--transition);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* ============================================
+   Content Header
+   ============================================ */
+.content-header-title {
+    color: #5e5873;
+    font-weight: 700;
+    font-size: 1.75rem;
+}
+
+/* ============================================
+   Animation Classes
+   ============================================ */
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+@media (max-width: 768px) {
+    .card-header {
+        padding: 1rem;
+    }
+
+    .card-header h4,
+    .card-header h5 {
+        font-size: 1.1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .section-header .btn {
+        margin-top: 0.75rem;
+    }
+
+    .modal-body {
+        padding: 1.25rem;
+    }
+
+    .row.mb-3 {
+        padding: 1rem;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+    .btn,
+    .pagination,
+    .breadcrumb,
+    .section-header button {
+        display: none !important;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid #e0e0e0;
+    }
+}
+
+/* ============================================
+   Select2 Custom Styling
+   ============================================ */
+.select2-container--default .select2-selection--single {
+    height: calc(1.5em + 1.25rem + 2px);
+    border: 1px solid #d8d6de;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: calc(1.5em + 1.25rem);
+    padding-right: 1rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(1.5em + 1.25rem);
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: var(--primary-color);
+}
+
+.select2-dropdown {
+    border: 1px solid var(--primary-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary-color);
+}
+
+/* ============================================
+   User Story Schedule Status Styles
+   ============================================ */
+
+/* Scheduled User Stories - Primary Color */
+.task-row.user-story-scheduled {
+    border-left: 4px solid var(--primary-color);
+    background-color: rgba(115, 103, 240, 0.03);
+}
+
+.task-row.user-story-scheduled:hover {
+    background-color: rgba(115, 103, 240, 0.08);
+}
+
+.user-story-scheduled .schedule-badge {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.user-story-scheduled .schedule-icon {
+    color: var(--primary-color);
+}
+
+/* Unscheduled User Stories - Primary Color (lighter) */
+.task-row.user-story-unscheduled {
+    border-left: 4px solid var(--primary-light);
+    background-color: rgba(115, 103, 240, 0.015);
+}
+
+.task-row.user-story-unscheduled:hover {
+    background-color: rgba(115, 103, 240, 0.05);
+}
+
+.user-story-unscheduled .schedule-badge {
+    background-color: var(--primary-light);
+    color: #4a3f8a;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.user-story-unscheduled .schedule-icon {
+    color: var(--primary-light);
+}

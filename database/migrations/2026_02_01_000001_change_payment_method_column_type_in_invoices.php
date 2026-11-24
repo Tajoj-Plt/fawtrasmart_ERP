@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     * تغيير نوع عمود payment_method من tinyInteger إلى text
+     * لدعم تخزين: رقم (1, 2, 3) أو نص ("cash") أو JSON ([{"method_id":1}])
+     */
+    public function up(): void
+    {
+        Schema::table('invoices', function (Blueprint $table) {
+            // تغيير إلى text ليقبل أي نوع من البيانات
+            $table->text('payment_method')->nullable()->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->tinyInteger('payment_method')->nullable()->default(1)->change();
+        });
+    }
+};

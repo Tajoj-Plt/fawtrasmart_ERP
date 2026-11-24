@@ -1,0 +1,93 @@
+{{--
+    ترقيم مدفوعات العملاء — تُحمَّل الصفحات بـAjax عبر `loadData(page)`.
+
+    نسخةٌ عن `sales::invoices.partials.pagination` بمتغيّرها: الشاشتان
+    تُحمّلان صفحاتهما بـAjax عبر `loadData(page)` و`data-page`.
+--}}
+
+@if ($payments->hasPages())
+    @php
+        $current = $payments->currentPage();
+        $last = $payments->lastPage();
+        $from = max(1, $current - 2);
+        $to = min($last, $current + 2);
+
+        $atStart = $payments->onFirstPage();
+        $atEnd = ! $payments->hasMorePages();
+
+        $steps = [
+            'before' => [
+                ['chevrons-right', 1, __('sales_settings.ui.page_first'), $atStart],
+                ['chevron-right', $current - 1, __('sales_settings.ui.page_prev'), $atStart],
+            ],
+            'after' => [
+                ['chevron-left', $current + 1, __('sales_settings.ui.page_next'), $atEnd],
+                ['chevrons-left', $last, __('sales_settings.ui.page_last'), $atEnd],
+            ],
+        ];
+    @endphp
+
+    <div class="sl-table-foot">
+        <p class="sl-table-foot__count">
+            {{ __('sales_settings.ui.showing', [
+                'from' => $payments->firstItem(),
+                'to' => $payments->lastItem(),
+                'total' => $payments->total(),
+            ]) }}
+        </p>
+
+        <nav aria-label="{{ __('sales_settings.ui.pages') }}">
+            <ul class="pagination mb-0">
+                @foreach ($steps['before'] as [$icon, $page, $label, $off])
+                    <li class="page-item {{ $off ? 'disabled' : '' }}">
+                        @if ($off)
+                            <span class="page-link" aria-hidden="true"><i class="feather icon-{{ $icon }}"></i></span>
+                        @else
+                            <a class="page-link pagination-link" href="#" data-page="{{ $page }}"
+                               aria-label="{{ $label }}" title="{{ $label }}"><i class="feather icon-{{ $icon }}"></i></a>
+                        @endif
+                    </li>
+                @endforeach
+
+                @if ($from > 1)
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="#" data-page="1">1</a>
+                    </li>
+                    @if ($from > 2)
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    @endif
+                @endif
+
+                @for ($page = $from; $page <= $to; $page++)
+                    <li class="page-item {{ $page === $current ? 'active' : '' }}">
+                        @if ($page === $current)
+                            <span class="page-link" aria-current="page">{{ $page }}</span>
+                        @else
+                            <a class="page-link pagination-link" href="#" data-page="{{ $page }}">{{ $page }}</a>
+                        @endif
+                    </li>
+                @endfor
+
+                @if ($to < $last)
+                    @if ($to < $last - 1)
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    @endif
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="#" data-page="{{ $last }}">{{ $last }}</a>
+                    </li>
+                @endif
+
+                @foreach ($steps['after'] as [$icon, $page, $label, $off])
+                    <li class="page-item {{ $off ? 'disabled' : '' }}">
+                        @if ($off)
+                            <span class="page-link" aria-hidden="true"><i class="feather icon-{{ $icon }}"></i></span>
+                        @else
+                            <a class="page-link pagination-link" href="#" data-page="{{ $page }}"
+                               aria-label="{{ $label }}" title="{{ $label }}"><i class="feather icon-{{ $icon }}"></i></a>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
+    </div>
+@endif

@@ -1,0 +1,5605 @@
+{
+	"info": {
+		"_postman_id": "2228ae7f-13db-4dd5-812b-aa844ebe8c25",
+		"name": "Fawtra — Integration API (Flutter)",
+		"description": "واجهة تطبيق الجوال للمناديب/الموظفين — Fawtra.\n\nترتيب الاختبار المقترح:\n1) Auth → Login (يحفظ token)\n2) Clients → Client Form Options ثم Add Client (يحفظ client_tree_branch_id وcategory_id وclient_id وvisit_id)\n3) Visits → Open ثم Start ثم Add Contact ثم Visit Note ثم Competitors ثم Complete (أو Cancel)\n   استعمل الإحداثيات نفسها (24.7136, 46.6753) في إضافة العميل وفي الزيارة كي يمرّ فحص القرب.\n\nالأقسام: المصادقة، الملف الشخصي، الصلاحيات، الفروع، العملاء (قائمة/خريطة/إضافة/تعديل/حالة/مسؤولون/ملاحظات)، خط السير، الزيارة، الزيارات المنسيّة، تبرير الزيارات، الإشعارات، تتبّع الموقع، الماليّة، والمخزون.\n\nالمتغيرات:\n- base_url: عنوان النظام (مثل http://127.0.0.1:8000)\n- token: يُملأ تلقائياً بعد Login\n- بقية المعرّفات (client_id, visit_id, contact_id, note_id, …) تُملأ تلقائياً من ردود الطلبات\n\nكل الطلبات ترسل Accept: application/json.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login — تسجيل الدخول",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json && json.data && json.data.token) {",
+									"    pm.collectionVariables.set('token', json.data.token);",
+									"    console.log('Token saved to collection variable.');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"employee@example.com\",\n    \"password\": \"password\",\n    \"device_name\": \"flutter-android\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "للموظفين فقط — 401 بيانات خاطئة، 403 الحساب ليس موظفاً. الرمز يُحفظ تلقائياً في متغير token."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout — تسجيل الخروج",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "يُبطل رمز الجهاز الحالي فقط."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Password Reset",
+			"item": [
+				{
+					"name": "Forgot Password — طلب رمز الاستعادة",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"employee@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/auth/password/forgot",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"auth",
+								"password",
+								"forgot"
+							]
+						},
+						"description": "يرسل رمز 6 أرقام لبريد الموظف — صالح 10 دقائق. الاستجابة واحدة وُجد البريد أم لا."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Reset OTP — التحقق من الرمز (اختياري)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"employee@example.com\",\n    \"otp\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/auth/password/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"auth",
+								"password",
+								"verify-otp"
+							]
+						},
+						"description": "يتحقق دون استهلاك الرمز — خطوة وسطى قبل شاشة كلمة المرور الجديدة."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password — تعيين كلمة مرور جديدة",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"employee@example.com\",\n    \"otp\": \"123456\",\n    \"password\": \"new-password-123\",\n    \"password_confirmation\": \"new-password-123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/auth/password/reset",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"auth",
+								"password",
+								"reset"
+							]
+						},
+						"description": "يستهلك الرمز ويُبطل كل رموز الوصول — تسجيل دخول جديد مطلوب."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Email Verification",
+			"item": [
+				{
+					"name": "Send Email OTP — إرسال رمز التوثيق",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/auth/email/send-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"auth",
+								"email",
+								"send-otp"
+							]
+						},
+						"description": "بلا جسم — يرسل الرمز لبريد المستخدم الحالي."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email — توثيق البريد بالرمز",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"otp\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/auth/email/verify",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"auth",
+								"email",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Get Profile — جلب الملف الشخصي",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile — تعديل الملف الشخصي",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"أحمد محمد\",\n    \"phone\": \"0501234567\",\n    \"mobile_number\": \"0501234567\",\n    \"personal_email\": \"ahmad.personal@example.com\",\n    \"city\": \"الرياض\",\n    \"emergency_contact_name\": \"محمد أحمد\",\n    \"emergency_contact_phone\": \"0559876543\",\n    \"emergency_contact_relation\": \"أخ\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"profile"
+							]
+						},
+						"description": "كل الحقول اختيارية — أرسل ما تريد تعديله فقط. حقول التوظيف لا تُقبل."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Avatar — تحديث الصورة الشخصية",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/profile/avatar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"profile",
+								"avatar"
+							]
+						},
+						"description": "multipart/form-data — صورة jpg/jpeg/png/webp حتى 2MB."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password — تغيير كلمة المرور",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"password\",\n    \"password\": \"new-password-123\",\n    \"password_confirmation\": \"new-password-123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/profile/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"profile",
+								"change-password"
+							]
+						},
+						"description": "يُبطل رموز الأجهزة الأخرى ويبقي الجهاز الحالي متصلاً."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Permissions — الصلاحيات",
+			"item": [
+				{
+					"name": "User Permissions — صلاحيات المستخدم",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/permissions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"permissions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Branches — الفروع",
+			"item": [
+				{
+					"name": "Branches — الفروع",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.current_branch_id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"branch_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/branches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"branches"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clients — العملاء",
+			"item": [
+				{
+					"name": "Client Settings — إعدادات العملاء",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/settings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Clients — العملاء",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"client_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "1-100"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "branch_id",
+									"value": "{{branch_id}}",
+									"disabled": true
+								},
+								{
+									"key": "include_descendants",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true,
+									"description": "status id أو no_status"
+								},
+								{
+									"key": "registration_stage",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "category_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "",
+									"disabled": true,
+									"description": "1 / 2"
+								},
+								{
+									"key": "region",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "neighborhood",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "date_from",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "employee",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "over_credit_limit",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "customer_target_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "last_invoice_period",
+									"value": "",
+									"disabled": true,
+									"description": "today/week/two_weeks/month/three_months/six_months/year/more_than_year"
+								},
+								{
+									"key": "last_payment_period",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "last_activity_period",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "name",
+									"disabled": true,
+									"description": "newest / name"
+								},
+								{
+									"key": "latitude",
+									"value": "24.7136",
+									"disabled": true
+								},
+								{
+									"key": "longitude",
+									"value": "46.6753",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الصلاحية: clients_view_all_clients | clients_view_own_clients | clients_view_by_employee_groups | clients_view_by_daily_itinerary"
+					},
+					"response": []
+				},
+				{
+					"name": "Clients Map — الخريطة",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/map",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"map"
+							],
+							"query": [
+								{
+									"key": "branch_id",
+									"value": "{{branch_id}}",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الصلاحية: clients_view_all_clients | clients_view_own_clients | clients_view_by_employee_groups | clients_view_by_daily_itinerary"
+					},
+					"response": []
+				},
+				{
+					"name": "Client Form Options — قوائم النموذج",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.branch_tree.find(n => n.selectable).id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"client_tree_branch_id\", v); } } catch (e) {}",
+									"try { const v = json.data.categories[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"category_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/options",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"options"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"disabled": true,
+									"description": "لتمهيد نموذج تعديل عميل"
+								}
+							]
+						},
+						"description": "الصلاحية: clients_add_client | clients_edit_data"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Client — إضافة عميل",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"client_id\", v); } } catch (e) {}",
+									"try { const v = json.data.visit_id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"visit_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "client_tree_branch_id",
+									"type": "text",
+									"value": "{{client_tree_branch_id}}",
+									"description": "من options → branch_tree (selectable=true)"
+								},
+								{
+									"key": "trade_name",
+									"type": "text",
+									"value": "عميل تجريبي — Postman"
+								},
+								{
+									"key": "phone",
+									"type": "text",
+									"value": "0500000001"
+								},
+								{
+									"key": "mobile",
+									"type": "text",
+									"value": "0500000002"
+								},
+								{
+									"key": "category_id",
+									"type": "text",
+									"value": "{{category_id}}"
+								},
+								{
+									"key": "commercial_registration",
+									"type": "text",
+									"value": "1010101010"
+								},
+								{
+									"key": "latitude",
+									"type": "text",
+									"value": "24.7136"
+								},
+								{
+									"key": "longitude",
+									"type": "text",
+									"value": "46.6753"
+								},
+								{
+									"key": "neighborhood_name_manual",
+									"type": "text",
+									"value": "حي تجريبي"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": [],
+									"description": "صورة العميل — إلزامية عند الإضافة إن فُعّل حقل الصورة"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients"
+							]
+						},
+						"description": "الصلاحية: clients_add_client"
+					},
+					"response": []
+				},
+				{
+					"name": "Client Details — تفاصيل عميل",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}"
+							]
+						},
+						"description": "الصلاحية: clients_view_all_clients | clients_view_own_clients | clients_view_by_employee_groups | clients_view_by_daily_itinerary"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Client — تعديل عميل",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "client_tree_branch_id",
+									"type": "text",
+									"value": "{{client_tree_branch_id}}",
+									"description": "من options → branch_tree (selectable=true)"
+								},
+								{
+									"key": "trade_name",
+									"type": "text",
+									"value": "عميل تجريبي — Postman"
+								},
+								{
+									"key": "phone",
+									"type": "text",
+									"value": "0500000001"
+								},
+								{
+									"key": "mobile",
+									"type": "text",
+									"value": "0500000002"
+								},
+								{
+									"key": "category_id",
+									"type": "text",
+									"value": "{{category_id}}"
+								},
+								{
+									"key": "commercial_registration",
+									"type": "text",
+									"value": "1010101010"
+								},
+								{
+									"key": "latitude",
+									"type": "text",
+									"value": "24.7136"
+								},
+								{
+									"key": "longitude",
+									"type": "text",
+									"value": "46.6753"
+								},
+								{
+									"key": "neighborhood_name_manual",
+									"type": "text",
+									"value": "حي تجريبي"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": [],
+									"description": "اختياري"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}"
+							]
+						},
+						"description": "الصلاحية: clients_edit_data"
+					},
+					"response": []
+				},
+				{
+					"name": "Status Options — خيارات الحالة والوضع",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = (json.data.statuses.find(x => x.id !== json.data.current_status_id) || json.data.statuses[0]).id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"status_id\", v); } } catch (e) {}",
+									"try { const v = json.data.stages[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"stage_id\", v); } } catch (e) {}",
+									"try { const v = json.data.status_approvers[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"manager_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/status-options",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"status-options"
+							]
+						},
+						"description": "الصلاحية: clients_change_status"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Status — تغيير الحالة",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status_id\": \"{{status_id}}\",\n    \"manager_id\": \"{{manager_id}}\",\n    \"notes\": \"سبب التغيير\",\n    \"visit_id\": \"{{visit_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"status"
+							]
+						},
+						"description": "الصلاحية: clients_change_status"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Stage — تغيير الوضع",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stage_id\": \"{{stage_id}}\",\n    \"manager_id\": \"{{manager_id}}\",\n    \"notes\": \"سبب التغيير\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/stage",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"stage"
+							]
+						},
+						"description": "الصلاحية: clients_change_status"
+					},
+					"response": []
+				},
+				{
+					"name": "Contacts — مسؤولو العميل",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"contact_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/contacts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"contacts"
+							]
+						},
+						"description": "الصلاحية: client_follow_up_view_notes_attachments_appointments_all|_assigned|_own"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Contact — إضافة مسؤول",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"contact_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee_name\": \"أبو خالد\",\n    \"employee_position\": \"مدير المحل\",\n    \"employee_phone\": \"0555555555\",\n    \"shift\": \"08:00|16:00\",\n    \"is_primary\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/contacts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"contacts"
+							]
+						},
+						"description": "الصلاحية: client_follow_up_add_notes_attachments_appointments_all|_assigned|_own | clients_add_employee_note"
+					},
+					"response": []
+				},
+				{
+					"name": "Notes — الملاحظات",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"note_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/notes?per_page=15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"notes"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الصلاحية: client_follow_up_view_notes_attachments_appointments_all|_assigned|_own"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Note — إضافة ملاحظة",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"note_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "client_employee_id",
+									"type": "text",
+									"value": "{{contact_id}}"
+								},
+								{
+									"key": "description",
+									"type": "text",
+									"value": "ملاحظة متابعة"
+								},
+								{
+									"key": "deposit_count",
+									"type": "text",
+									"value": "0"
+								},
+								{
+									"key": "current_latitude",
+									"type": "text",
+									"value": "24.7136"
+								},
+								{
+									"key": "current_longitude",
+									"type": "text",
+									"value": "46.6753"
+								},
+								{
+									"key": "attachments[]",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/notes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"notes"
+							]
+						},
+						"description": "الصلاحية: client_follow_up_add_notes_attachments_appointments_all|_assigned|_own | clients_add_employee_note"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Note — تعديل ملاحظة",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "client_employee_id",
+									"type": "text",
+									"value": "{{contact_id}}"
+								},
+								{
+									"key": "description",
+									"type": "text",
+									"value": "ملاحظة معدّلة"
+								},
+								{
+									"key": "deposit_count",
+									"type": "text",
+									"value": "2"
+								},
+								{
+									"key": "site_type",
+									"type": "text",
+									"value": "markets",
+									"description": "independent_booth / grocery / supplies / markets / station"
+								},
+								{
+									"key": "competitor_documents",
+									"type": "text",
+									"value": "0"
+								},
+								{
+									"key": "shift",
+									"type": "text",
+									"value": "full"
+								},
+								{
+									"key": "attachments[]",
+									"type": "file",
+									"src": [],
+									"description": "اختياري — يُضاف للموجود"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notes/{{note_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notes",
+								"{{note_id}}"
+							]
+						},
+						"description": "الصلاحية: client_follow_up_edit_delete_notes_attachments_appointments_all|_assigned|_own"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Note Attachment — حذف مرفق",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notes/{{note_id}}/attachments/0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notes",
+								"{{note_id}}",
+								"attachments",
+								"0"
+							]
+						},
+						"description": "الصلاحية: client_follow_up_edit_delete_notes_attachments_appointments_all|_assigned|_own"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Note — حذف ملاحظة",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notes/{{note_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notes",
+								"{{note_id}}"
+							]
+						},
+						"description": "الصلاحية: client_follow_up_edit_delete_notes_attachments_appointments_all|_assigned|_own"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Itinerary — خط السير",
+			"item": [
+				{
+					"name": "Employees — المندوبون",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"employee_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/itinerary/employees",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"itinerary",
+								"employees"
+							]
+						},
+						"description": "الصلاحية: clients_daily_itinerary_view | clients_daily_itinerary_add_for_others"
+					},
+					"response": []
+				},
+				{
+					"name": "Picker Clients — عملاء للإضافة",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/itinerary/clients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"itinerary",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "node_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "date",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "employee_id",
+									"value": "{{employee_id}}",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الصلاحية: clients_daily_itinerary_add_client | clients_daily_itinerary_add_for_others"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Clients — إضافة للخط",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_ids\": [\n        \"{{client_id}}\"\n    ],\n    \"date\": null,\n    \"employee_id\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/itinerary/clients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"itinerary",
+								"clients"
+							]
+						},
+						"description": "الصلاحية: clients_daily_itinerary_add_client | clients_daily_itinerary_add_for_others"
+					},
+					"response": []
+				},
+				{
+					"name": "Day — يوم خط السير",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = (json.data.stops.find(x => [\"next\", \"planned\", \"late\"].includes(x.state)) || json.data.stops[0]).id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"itinerary_row_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/itinerary/day",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"itinerary",
+								"day"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "",
+									"disabled": true,
+									"description": "YYYY-MM-DD"
+								},
+								{
+									"key": "employee_id",
+									"value": "{{employee_id}}",
+									"disabled": true,
+									"description": "users.id — لخطّ مندوبٍ آخر"
+								}
+							]
+						},
+						"description": "الصلاحية: clients_daily_itinerary_view | clients_daily_itinerary_add_for_others"
+					},
+					"response": []
+				},
+				{
+					"name": "Postpone — تأجيل للغد",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/itinerary/{{itinerary_row_id}}/postpone",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"itinerary",
+								"{{itinerary_row_id}}",
+								"postpone"
+							]
+						},
+						"description": "الصلاحية: clients_itinerary_edit"
+					},
+					"response": []
+				},
+				{
+					"name": "Return Client — إرجاع لخط اليوم",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/return-to-itinerary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"return-to-itinerary"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Visits — الزيارة",
+			"item": [
+				{
+					"name": "Open Visit — فتح الزيارة",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.visit_id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"visit_id\", v); } } catch (e) {}",
+									"try { const v = json.data.contacts[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"contact_id\", v); } } catch (e) {}",
+									"try { const v = json.data.competitor_options[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"competitor_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/clients/{{client_id}}/visits/open",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"clients",
+								"{{client_id}}",
+								"visits",
+								"open"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view"
+					},
+					"response": []
+				},
+				{
+					"name": "Visit Details — تفاصيل الزيارة",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.client_notifications[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"notification_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view"
+					},
+					"response": []
+				},
+				{
+					"name": "Start — بدء الزيارة",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_latitude\": 24.7136,\n    \"current_longitude\": 46.6753\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"start"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Pause — إيقاف/استئناف",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/toggle-pause",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"toggle-pause"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Contact — مسؤول العميل",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"contact_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee_name\": \"أبو خالد\",\n    \"employee_position\": \"مدير المحل\",\n    \"employee_phone\": \"0555555555\",\n    \"shift\": \"08:00|16:00\",\n    \"is_primary\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/contact",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"contact"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + client_follow_up_add_notes_attachments_appointments_all|_assigned|_own | clients_add_employee_note"
+					},
+					"response": []
+				},
+				{
+					"name": "Contact Shift — دوام المسؤول",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_employee_id\": \"{{contact_id}}\",\n    \"shift\": \"full\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/contact-shift",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"contact-shift"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view"
+					},
+					"response": []
+				},
+				{
+					"name": "Visit Note — ملاحظة الزيارة",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "client_employee_id",
+									"type": "text",
+									"value": "{{contact_id}}"
+								},
+								{
+									"key": "description",
+									"type": "text",
+									"value": "ملاحظة زيارة"
+								},
+								{
+									"key": "deposit_count",
+									"type": "text",
+									"value": "2"
+								},
+								{
+									"key": "shift",
+									"type": "text",
+									"value": "",
+									"description": "اختياري — full أو HH:00|HH:00"
+								},
+								{
+									"key": "current_latitude",
+									"type": "text",
+									"value": "24.7136"
+								},
+								{
+									"key": "current_longitude",
+									"type": "text",
+									"value": "46.6753"
+								},
+								{
+									"key": "attachments[]",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/notes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"notes"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + client_follow_up_add_notes_attachments_appointments_all|_assigned|_own | clients_add_employee_note"
+					},
+					"response": []
+				},
+				{
+					"name": "Quick Competitor — منافس جديد",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"competitor_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"منافس جديد\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/competitors/quick",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"competitors",
+								"quick"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + client_follow_up_add_notes_attachments_appointments_all|_assigned|_own | clients_add_employee_note"
+					},
+					"response": []
+				},
+				{
+					"name": "Competitors — رصد المنافسين",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "competitors[0][competitor_id]",
+									"type": "text",
+									"value": "{{competitor_id}}"
+								},
+								{
+									"key": "competitors[0][asset_count]",
+									"type": "text",
+									"value": "2"
+								},
+								{
+									"key": "competitors[0][photo]",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/competitors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"competitors"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + client_follow_up_add_notes_attachments_appointments_all|_assigned|_own | clients_add_employee_note — أو no_competitors=1 + no_competitors_photo"
+					},
+					"response": []
+				},
+				{
+					"name": "No Competitors — لا يوجد منافس",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "no_competitors",
+									"type": "text",
+									"value": "1"
+								},
+								{
+									"key": "no_competitors_photo",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/competitors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"competitors"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + client_follow_up_add_notes_attachments_appointments_all|_assigned|_own | clients_add_employee_note"
+					},
+					"response": []
+				},
+				{
+					"name": "Read Client Notification — تم الاطّلاع",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/notifications/{{notification_id}}/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"notifications",
+								"{{notification_id}}",
+								"read"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view"
+					},
+					"response": []
+				},
+				{
+					"name": "Reply Client Notification — ردّ",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reply_message\": \"تم، سأتواصل\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/notifications/{{notification_id}}/reply",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"notifications",
+								"{{notification_id}}",
+								"reply"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + notifications_reply_to_notifications"
+					},
+					"response": []
+				},
+				{
+					"name": "Complete — إنهاء الزيارة",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_latitude\": 24.7136,\n    \"current_longitude\": 46.6753,\n    \"outcome_notes\": \"\",\n    \"return_later\": false,\n    \"return_time\": null,\n    \"client_signature\": null,\n    \"employee_signature\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"complete"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + clients_visit_complete"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel — إلغاء الزيارة",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cancel_reason\": \"المحل مغلق\",\n    \"current_latitude\": 24.7136,\n    \"current_longitude\": 46.6753\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/{{visit_id}}/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"{{visit_id}}",
+								"cancel"
+							]
+						},
+						"description": "الصلاحية: clients_visits_track | clients_itinerary_add | clients_visit_workspace_access | clients_must_visit_before_view + clients_visit_cancel"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Forgotten Visits — الزيارات المنسيّة",
+			"item": [
+				{
+					"name": "Forgotten Visits — القائمة",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.visits[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"forgotten_visit_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/forgotten?scope=own",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"forgotten"
+							],
+							"query": [
+								{
+									"key": "scope",
+									"value": "own",
+									"description": "own / all"
+								}
+							]
+						},
+						"description": "الصلاحية: clients_view_forgotten_visits_own | clients_view_forgotten_visits_all"
+					},
+					"response": []
+				},
+				{
+					"name": "Close Forgotten — إنهاء",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notes\": \"أُغلقت عن بُعد\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/forgotten/{{forgotten_visit_id}}/close",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"forgotten",
+								"{{forgotten_visit_id}}",
+								"close"
+							]
+						},
+						"description": "الصلاحية: clients_close_forgotten_visits_own | clients_force_close_forgotten_visits"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Forgotten — إلغاء",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cancel_reason\": \"زيارة بالخطأ\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visits/forgotten/{{forgotten_visit_id}}/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visits",
+								"forgotten",
+								"{{forgotten_visit_id}}",
+								"cancel"
+							]
+						},
+						"description": "الصلاحية: clients_cancel_forgotten_visits"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Visit Justifications — تبرير الزيارات",
+			"item": [
+				{
+					"name": "Pending — بانتظار التبرير",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data.visits[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"justification_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visit-justifications/pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visit-justifications",
+								"pending"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit — تقديم تبرير",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"justifications\": {\n        \"{{justification_id}}\": \"العميل كان مغلقاً طوال اليوم\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visit-justifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visit-justifications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "My Justifications — تبريراتي",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visit-justifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visit-justifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الصلاحية: clients_visit_justifications_view_own | clients_visit_justifications_view_all"
+					},
+					"response": []
+				},
+				{
+					"name": "Justification Details — تفاصيل",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visit-justifications/{{justification_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visit-justifications",
+								"{{justification_id}}"
+							]
+						},
+						"description": "الصلاحية: clients_visit_justifications_view_own | clients_visit_justifications_view_all"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Justification — تعديل",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"justification\": \"تعديل: العميل مسافر\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/visit-justifications/{{justification_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"visit-justifications",
+								"{{justification_id}}"
+							]
+						},
+						"description": "الصلاحية: clients_visit_justifications_view_own | clients_visit_justifications_view_all"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications — الإشعارات",
+			"item": [
+				{
+					"name": "Notifications — القائمة",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"notification_id\", v); } } catch (e) {}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notifications?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "unread",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "client_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "target",
+									"value": "",
+									"disabled": true,
+									"description": "clients / employees"
+								},
+								{
+									"key": "reply_status",
+									"value": "",
+									"disabled": true,
+									"description": "unanswered / answered"
+								},
+								{
+									"key": "date_from",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الصلاحية: sales.notifications.view + (notifications_view_all_notifications | data_scope_all)"
+					},
+					"response": []
+				},
+				{
+					"name": "Unread Count — غير المقروء",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notifications/unread-count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notifications",
+								"unread-count"
+							]
+						},
+						"description": "الصلاحية: sales.notifications.view"
+					},
+					"response": []
+				},
+				{
+					"name": "Notification Details — تفاصيل",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notifications/{{notification_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notifications",
+								"{{notification_id}}"
+							]
+						},
+						"description": "الصلاحية: sales.notifications.view"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Read — مقروء",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notifications/{{notification_id}}/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notifications",
+								"{{notification_id}}",
+								"read"
+							]
+						},
+						"description": "الصلاحية: sales.notifications.view"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Read — الكلّ مقروء",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notifications/read-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notifications",
+								"read-all"
+							]
+						},
+						"description": "الصلاحية: sales.notifications.view"
+					},
+					"response": []
+				},
+				{
+					"name": "Reply — ردّ",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reply_message\": \"تمت المراجعة\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/notifications/{{notification_id}}/reply",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"notifications",
+								"{{notification_id}}",
+								"reply"
+							]
+						},
+						"description": "الصلاحية: sales.notifications.reply + (notifications_reply_to_notifications | data_scope_all)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tracking — تتبّع الموقع",
+			"item": [
+				{
+					"name": "Send Location — إرسال الموقع",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"latitude\": 24.7136,\n    \"longitude\": 46.6753\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/tracking/location",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"tracking",
+								"location"
+							]
+						},
+						"description": "الصلاحية: clients_itinerary_edit"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Batch — دفعة نقاط",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"point_1_at\", new Date(Date.now() - 4 * 60000).toISOString());",
+									"pm.collectionVariables.set(\"point_2_at\", new Date(Date.now() - 2 * 60000).toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"points\": [\n        {\n            \"latitude\": 24.7131,\n            \"longitude\": 46.675,\n            \"recorded_at\": \"{{point_1_at}}\"\n        },\n        {\n            \"latitude\": 24.7136,\n            \"longitude\": 46.6753,\n            \"recorded_at\": \"{{point_2_at}}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/tracking/location",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"tracking",
+								"location"
+							]
+						},
+						"description": "الصلاحية: clients_itinerary_edit — حتى 100 نقطة، recorded_at خلال آخر 24 ساعة"
+					},
+					"response": []
+				},
+				{
+					"name": "My Path — مساري",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/tracking/path",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"tracking",
+								"path"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "",
+									"disabled": true,
+									"description": "YYYY-MM-DD"
+								},
+								{
+									"key": "employee_id",
+									"value": "{{employee_id}}",
+									"disabled": true,
+									"description": "users.id — من فريقي"
+								}
+							]
+						},
+						"description": "الصلاحية: clients_itinerary_view | clients_view_by_daily_itinerary"
+					},
+					"response": []
+				},
+				{
+					"name": "Team — مواقع فريقي",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/integration/v1/tracking/team",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"integration",
+								"v1",
+								"tracking",
+								"team"
+							]
+						},
+						"description": "الصلاحية: clients_itinerary_view | clients_view_by_daily_itinerary"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Finance — المالية",
+			"item": [
+				{
+					"name": "Summary — الملخّص",
+					"item": [
+						{
+							"name": "Finance Summary — الملخّص المالي",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/summary",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"summary"
+									],
+									"query": [
+										{
+											"key": "period_id",
+											"value": "",
+											"disabled": true,
+											"description": "فارغ = السنة المالية الجارية، رقم فترة، year:{id}، all، none"
+										}
+									]
+								},
+								"description": "الصلاحية: account.incomes.view أو account.expenses.view"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Receipts — سندات القبض",
+					"item": [
+						{
+							"name": "List Receipts — قائمة سندات القبض",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.incomes.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"receipt_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/receipts?per_page=25",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"receipts"
+									],
+									"query": [
+										{
+											"key": "per_page",
+											"value": "25",
+											"description": "10/25/50/100"
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "keywords",
+											"value": "",
+											"disabled": true,
+											"description": "رقم السند أو الوصف"
+										},
+										{
+											"key": "sub_account",
+											"value": "",
+											"disabled": true,
+											"description": "account_id"
+										},
+										{
+											"key": "branch",
+											"value": "",
+											"disabled": true,
+											"description": "branch_id مع الفروع التابعة"
+										},
+										{
+											"key": "cost_center_id",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "taxable",
+											"value": "",
+											"disabled": true,
+											"description": "0/1"
+										},
+										{
+											"key": "added_by",
+											"value": "",
+											"disabled": true,
+											"description": "user_id"
+										},
+										{
+											"key": "period_id",
+											"value": "",
+											"disabled": true,
+											"description": "فارغ = السنة المالية الجارية، year:{id}، all، none"
+										}
+									]
+								},
+								"description": "الصلاحية: account.incomes.view"
+							},
+							"response": []
+						},
+						{
+							"name": "Receipt Create Data — بيانات شاشة الإنشاء",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.accounts[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"account_id\", v); } } catch (e) {}",
+											"try { const v = json.data.treasury_id || json.data.treasuries[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"treasury_id\", v); } } catch (e) {}",
+											"try { const v = json.data.incomes_categories[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"receipt_category_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/receipts/create-data",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"receipts",
+										"create-data"
+									],
+									"query": [
+										{
+											"key": "client_id",
+											"value": "{{client_id}}",
+											"disabled": true,
+											"description": "اختياري — يحدد حساب العميل مسبقاً"
+										}
+									]
+								},
+								"description": "الصلاحية: account.incomes.create — الحسابات (عملاء النطاق)، الخزائن، التصنيفات، الرقم التالي."
+							},
+							"response": []
+						},
+						{
+							"name": "Show Receipt — تفاصيل سند قبض",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.code; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"receipt_code\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/receipts/{{receipt_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"receipts",
+										"{{receipt_id}}"
+									]
+								},
+								"description": "الصلاحية: account.incomes.view — 403 خارج النطاق، 404 غير موجود."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Receipt — إنشاء سند قبض",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"account_id\": \"{{account_id}}\",\n    \"treasury_id\": \"{{treasury_id}}\",\n    \"amount\": 100,\n    \"date\": \"2026-09-23\",\n    \"incomes_category_id\": \"{{receipt_category_id}}\",\n    \"description\": \"سند قبض من تطبيق الجوال\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/receipts",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"receipts"
+									]
+								},
+								"description": "الصلاحية: account.incomes.create\nاختياري: cost_center_id, payment_method_id, branch_id, tax1, tax2, tax1_account_id, tax2_account_id."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Receipt — تعديل سند قبض",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"{{receipt_code}}\",\n    \"account_id\": \"{{account_id}}\",\n    \"treasury_id\": \"{{treasury_id}}\",\n    \"amount\": 120,\n    \"date\": \"2026-09-23\",\n    \"incomes_category_id\": \"{{receipt_category_id}}\",\n    \"description\": \"سند قبض من تطبيق الجوال\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/receipts/{{receipt_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"receipts",
+										"{{receipt_id}}"
+									]
+								},
+								"description": "الصلاحية: account.incomes.edit — code مطلوب (رقم السند الحالي من Show Receipt)."
+							},
+							"response": []
+						},
+						{
+							"name": "Cancel Receipt — إلغاء سند قبض",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/receipts/{{receipt_id}}/cancel",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"receipts",
+										"{{receipt_id}}",
+										"cancel"
+									]
+								},
+								"description": "الصلاحية: account.incomes.cancel"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Expenses — سندات الصرف",
+					"item": [
+						{
+							"name": "List Expenses — قائمة سندات الصرف",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.expenses.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"expense_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses?per_page=25",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses"
+									],
+									"query": [
+										{
+											"key": "per_page",
+											"value": "25",
+											"description": "10/25/50/100"
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "keywords",
+											"value": "",
+											"disabled": true,
+											"description": "رقم السند أو الوصف"
+										},
+										{
+											"key": "description",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "category",
+											"value": "",
+											"disabled": true,
+											"description": "expenses_category_id"
+										},
+										{
+											"key": "sub_account",
+											"value": "",
+											"disabled": true,
+											"description": "account_id"
+										},
+										{
+											"key": "branch",
+											"value": "",
+											"disabled": true,
+											"description": "branch_id مع الفروع التابعة"
+										},
+										{
+											"key": "cost_center_id",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "taxable",
+											"value": "",
+											"disabled": true,
+											"description": "0/1"
+										},
+										{
+											"key": "amount_from",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "amount_to",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "created_at_from",
+											"value": "",
+											"disabled": true,
+											"description": "YYYY-MM-DD"
+										},
+										{
+											"key": "created_at_to",
+											"value": "",
+											"disabled": true,
+											"description": "YYYY-MM-DD"
+										},
+										{
+											"key": "added_by",
+											"value": "",
+											"disabled": true,
+											"description": "user_id"
+										},
+										{
+											"key": "period_id",
+											"value": "",
+											"disabled": true,
+											"description": "فارغ = السنة المالية الجارية، year:{id}، all، none"
+										}
+									]
+								},
+								"description": "الصلاحية: account.expenses.view"
+							},
+							"response": []
+						},
+						{
+							"name": "Expense Create Data — بيانات شاشة الإنشاء",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.expenses_categories[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"expense_category_id\", v); } } catch (e) {}",
+											"try { const v = json.data.expense_leaf_accounts[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"expense_account_id\", v); } } catch (e) {}",
+											"try { const v = json.data.accounts[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"expense_client_account_id\", v); } } catch (e) {}",
+											"try { const v = json.data.treasury_id || json.data.treasuries[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"treasury_id\", v); } } catch (e) {}",
+											"try { const v = json.data.suppliers[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"supplier_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses/create-data",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses",
+										"create-data"
+									],
+									"query": [
+										{
+											"key": "client_id",
+											"value": "{{client_id}}",
+											"disabled": true,
+											"description": "اختياري — يختار النوع client وحساب العميل مسبقاً"
+										}
+									]
+								},
+								"description": "الصلاحية: account.expenses.create — can_expense_to_supplier يحدد ظهور «سند صرف لمورد».\naccounts = حسابات العملاء (للنوع client)، expense_leaf_accounts = حسابات المصروفات (للنوع general)."
+							},
+							"response": []
+						},
+						{
+							"name": "Show Expense — تفاصيل سند صرف",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses/{{expense_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses",
+										"{{expense_id}}"
+									]
+								},
+								"description": "الصلاحية: account.expenses.view"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Expense (General) — سند صرف عام",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"expense_type\": \"general\",\n    \"amount\": 50,\n    \"date\": \"2026-09-23\",\n    \"treasury_id\": \"{{treasury_id}}\",\n    \"expenses_category_id\": \"{{expense_category_id}}\",\n    \"account_id\": \"{{expense_account_id}}\",\n    \"description\": \"سند صرف من تطبيق الجوال\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses"
+									]
+								},
+								"description": "الصلاحية: account.expenses.create — expense_type=general: expenses_category_id و account_id مطلوبان."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Expense (Client) — سند صرف لعميل",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"expense_type\": \"client\",\n    \"amount\": 50,\n    \"date\": \"2026-09-23\",\n    \"treasury_id\": \"{{treasury_id}}\",\n    \"account_id\": \"{{expense_client_account_id}}\",\n    \"description\": \"سند صرف لعميل\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses"
+									]
+								},
+								"description": "الصلاحية: account.expenses.create — expense_type=client: account_id حساب عميل من accounts في Expense Create Data. expenses_category_id اختياري (الافتراضي client_default_category_id)."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Expense (Supplier) — سند صرف لمورد",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"expense_type\": \"supplier\",\n    \"amount\": 50,\n    \"date\": \"2026-09-23\",\n    \"treasury_id\": \"{{treasury_id}}\",\n    \"expenses_category_id\": \"{{expense_category_id}}\",\n    \"supplier_id\": \"{{supplier_id}}\",\n    \"description\": \"سند صرف لمورد\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses"
+									]
+								},
+								"description": "الصلاحية: account.expenses.create — فقط إذا كانت can_expense_to_supplier = true."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Expense — تعديل سند صرف",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"expense_type\": \"general\",\n    \"amount\": 60,\n    \"date\": \"2026-09-23\",\n    \"treasury_id\": \"{{treasury_id}}\",\n    \"expenses_category_id\": \"{{expense_category_id}}\",\n    \"account_id\": \"{{expense_account_id}}\",\n    \"description\": \"سند صرف من تطبيق الجوال\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses/{{expense_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses",
+										"{{expense_id}}"
+									]
+								},
+								"description": "الصلاحية: account.expenses.edit"
+							},
+							"response": []
+						},
+						{
+							"name": "Cancel Expense — إلغاء سند صرف",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses/{{expense_id}}/cancel",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses",
+										"{{expense_id}}",
+										"cancel"
+									]
+								},
+								"description": "الصلاحية: account.expenses.cancel"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Expense — حذف سند صرف",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/expenses/{{expense_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"expenses",
+										"{{expense_id}}"
+									]
+								},
+								"description": "الصلاحية: account.expenses.delete — نفس الإلغاء."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Treasury — الخزينة والتحويل",
+					"item": [
+						{
+							"name": "List Treasuries — الخزائن",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"treasury_id\", v); } } catch (e) {}",
+											"try { const v = json.data[1].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"to_treasury_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/treasuries?direction=deposit",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"treasuries"
+									],
+									"query": [
+										{
+											"key": "direction",
+											"value": "deposit",
+											"description": "deposit / withdraw"
+										}
+									]
+								},
+								"description": "الصلاحية: account.treasury.view — direction=deposit (افتراضي) أو withdraw."
+							},
+							"response": []
+						},
+						{
+							"name": "Treasury Transfers — تحويلات خزينة",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.transfers[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"transfer_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/treasuries/{{treasury_id}}/transfers",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"treasuries",
+										"{{treasury_id}}",
+										"transfers"
+									]
+								},
+								"description": "الصلاحية: account.treasury_transfers.view — 403 خزينة خارج النطاق."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Transfer — تحويل بين خزينتين",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"from_treasury_id\": \"{{treasury_id}}\",\n    \"to_treasury_id\": \"{{to_treasury_id}}\",\n    \"amount\": 10,\n    \"transfer_date\": \"2026-09-23\",\n    \"from_currency\": \"{{currency}}\",\n    \"to_currency\": \"{{currency}}\",\n    \"notes\": \"تحويل من تطبيق الجوال\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/treasury-transfers",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"treasury-transfers"
+									]
+								},
+								"description": "الصلاحية: account.treasury_transfers.create — to_currency = from_currency."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Transfer — تعديل تحويل",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"from_treasury_id\": \"{{treasury_id}}\",\n    \"to_treasury_id\": \"{{to_treasury_id}}\",\n    \"amount\": 15\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/treasury-transfers/{{transfer_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"treasury-transfers",
+										"{{transfer_id}}"
+									]
+								},
+								"description": "الصلاحية: account.treasury_transfers.edit — يُقرأ from_treasury_id و to_treasury_id و amount فقط، والتاريخ يصبح تاريخ اليوم. transfer_id من Treasury Transfers."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Clients — العملاء",
+					"item": [
+						{
+							"name": "Linked Clients — العملاء المرتبطون",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"client_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/clients?per_page=20",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"clients"
+									],
+									"query": [
+										{
+											"key": "per_page",
+											"value": "20"
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								},
+								"description": "الصلاحية: account.incomes.view — نفس نطاق حسابات سند القبض."
+							},
+							"response": []
+						},
+						{
+							"name": "Client Statement — كشف حساب عميل",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/finance/clients/{{client_id}}/statement",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"finance",
+										"clients",
+										"{{client_id}}",
+										"statement"
+									]
+								},
+								"description": "الصلاحية: account.incomes.view — 403 عميل خارج النطاق."
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "كل طلب يخضع لصلاحية المستخدم ونطاق بياناته: data_scope_all يرى الكل، المشرف يرى نفسه ومن يديرهم، الموظف يرى نفسه فقط.\n\nالترتيب المقترح: Login ← List Treasuries ← Receipt/Expense Create Data ← Create ← List ← Show ← Update ← Cancel. المعرّفات تُحفظ تلقائياً في متغيرات المجموعة."
+		},
+		{
+			"name": "Stock — المخزون",
+			"item": [
+				{
+					"name": "Warehouses — المستودعات",
+					"item": [
+						{
+							"name": "List Warehouses — المستودعات",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"warehouse_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/warehouses?per_page=25",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"warehouses"
+									],
+									"query": [
+										{
+											"key": "per_page",
+											"value": "25",
+											"description": "10/25/50/100"
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "keywords",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "status",
+											"value": "",
+											"disabled": true
+										}
+									]
+								},
+								"description": "الصلاحية: stock.warehouses.view"
+							},
+							"response": []
+						},
+						{
+							"name": "Warehouse Details — تفاصيل المستودع",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/warehouses/{{warehouse_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"warehouses",
+										"{{warehouse_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.warehouses.view + stock.warehouses.show"
+							},
+							"response": []
+						},
+						{
+							"name": "Warehouse Movements — حركات المستودع",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/warehouses/{{warehouse_id}}/movements",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"warehouses",
+										"{{warehouse_id}}",
+										"movements"
+									],
+									"query": [
+										{
+											"key": "keywords",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "category",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "operation_type",
+											"value": "",
+											"disabled": true,
+											"description": "incoming / outgoing / transfer"
+										}
+									]
+								},
+								"description": "الصلاحية: stock.reports.summary_movement"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Permits — الأذون المخزنية",
+					"item": [
+						{
+							"name": "List Permits — الأذون",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"permit_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits?per_page=25",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits"
+									],
+									"query": [
+										{
+											"key": "per_page",
+											"value": "25",
+											"description": "10/25/50/100"
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "status",
+											"value": "",
+											"disabled": true,
+											"description": "pending / approved / rejected"
+										},
+										{
+											"key": "permission_type",
+											"value": "",
+											"disabled": true,
+											"description": "1-4"
+										},
+										{
+											"key": "keywords",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "store_house",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "product",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "from_date",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "to_date",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "period_id",
+											"value": "",
+											"disabled": true
+										}
+									]
+								},
+								"description": "الصلاحية: stock.permits.view"
+							},
+							"response": []
+						},
+						{
+							"name": "Permit Create Data — بيانات الإنشاء",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.warehouses[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"warehouse_id\", v); } } catch (e) {}",
+											"try { const v = json.data.warehouses[1].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"to_warehouse_id\", v); } } catch (e) {}",
+											"try { const v = json.data.products[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"product_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/create-data?type=1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"create-data"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "1",
+											"description": "1 / 2 / 3 / 4"
+										}
+									]
+								},
+								"description": "الصلاحية: صلاحية إنشاء النوع — type: 1 إضافة / 2 صرف / 3 تحويل / 4 رصيد افتتاحي"
+							},
+							"response": []
+						},
+						{
+							"name": "Product Stock — رصيد صنف في مستودع",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/product-stock/{{warehouse_id}}/{{product_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"product-stock",
+										"{{warehouse_id}}",
+										"{{product_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.permits.view"
+							},
+							"response": []
+						},
+						{
+							"name": "Permit Details — تفاصيل إذن",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/{{permit_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"{{permit_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.permits.show"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Permit (Addition) — إذن إضافة",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"permit_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"permission_type\": 1,\n    \"permission_date\": \"2026-09-23\",\n    \"grand_total\": 50,\n    \"product_id\": [\n        \"{{product_id}}\"\n    ],\n    \"quantity\": [\n        5\n    ],\n    \"unit_price\": [\n        10\n    ],\n    \"total\": [\n        50\n    ],\n    \"details\": \"إذن من تطبيق الجوال\",\n    \"store_houses_id\": \"{{warehouse_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits"
+									]
+								},
+								"description": "الصلاحية: stock.permits.create_addition"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Permit (Disbursement) — إذن صرف",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"permit_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"permission_type\": 2,\n    \"permission_date\": \"2026-09-23\",\n    \"grand_total\": 50,\n    \"product_id\": [\n        \"{{product_id}}\"\n    ],\n    \"quantity\": [\n        5\n    ],\n    \"unit_price\": [\n        10\n    ],\n    \"total\": [\n        50\n    ],\n    \"details\": \"إذن من تطبيق الجوال\",\n    \"store_houses_id\": \"{{warehouse_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits"
+									]
+								},
+								"description": "الصلاحية: stock.permits.create_disbursement"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Permit (Transfer) — إذن تحويل",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"permit_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"permission_type\": 3,\n    \"permission_date\": \"2026-09-23\",\n    \"grand_total\": 50,\n    \"product_id\": [\n        \"{{product_id}}\"\n    ],\n    \"quantity\": [\n        5\n    ],\n    \"unit_price\": [\n        10\n    ],\n    \"total\": [\n        50\n    ],\n    \"details\": \"إذن من تطبيق الجوال\",\n    \"from_store_houses_id\": \"{{warehouse_id}}\",\n    \"to_store_houses_id\": \"{{to_warehouse_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits"
+									]
+								},
+								"description": "الصلاحية: stock.permits.create_transfer"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Permit (Opening) — رصيد افتتاحي",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"permit_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"permission_type\": 4,\n    \"permission_date\": \"2026-09-23\",\n    \"grand_total\": 50,\n    \"product_id\": [\n        \"{{product_id}}\"\n    ],\n    \"quantity\": [\n        5\n    ],\n    \"unit_price\": [\n        10\n    ],\n    \"total\": [\n        50\n    ],\n    \"details\": \"إذن من تطبيق الجوال\",\n    \"store_houses_id\": \"{{warehouse_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits"
+									]
+								},
+								"description": "الصلاحية: stock.permits.create_opening"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Permit — تعديل إذن",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"permission_type\": 1,\n    \"permission_date\": \"2026-09-23\",\n    \"grand_total\": 70,\n    \"product_id\": [\n        \"{{product_id}}\"\n    ],\n    \"quantity\": [\n        7\n    ],\n    \"unit_price\": [\n        10\n    ],\n    \"total\": [\n        70\n    ],\n    \"details\": \"إذن من تطبيق الجوال\",\n    \"store_houses_id\": \"{{warehouse_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/{{permit_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"{{permit_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.permits.edit"
+							},
+							"response": []
+						},
+						{
+							"name": "Approve Permit — اعتماد",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/{{permit_id}}/approve",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"{{permit_id}}",
+										"approve"
+									]
+								},
+								"description": "الصلاحية: stock.permits.approve"
+							},
+							"response": []
+						},
+						{
+							"name": "Reject Permit — رفض",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"rejection_reason\": \"سبب الرفض\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/{{permit_id}}/reject",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"{{permit_id}}",
+										"reject"
+									]
+								},
+								"description": "الصلاحية: stock.permits.reject"
+							},
+							"response": []
+						},
+						{
+							"name": "Cancel Approval — إلغاء الاعتماد",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/{{permit_id}}/cancel-approval",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"{{permit_id}}",
+										"cancel-approval"
+									]
+								},
+								"description": "الصلاحية: stock.permits.cancel_approval"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Permit — حذف",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/permits/{{permit_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"permits",
+										"{{permit_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.permits.delete"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Price Lists — قوائم الأسعار",
+					"item": [
+						{
+							"name": "List Price Lists — القوائم",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"price_list_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/price-lists",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"price-lists"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "keywords",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "product",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "category",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "brand",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "status",
+											"value": "",
+											"disabled": true
+										}
+									]
+								},
+								"description": "الصلاحية: stock.price_lists.view"
+							},
+							"response": []
+						},
+						{
+							"name": "Price List Details — تفاصيل قائمة",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.items[0].item_id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"price_list_item_id\", v); } } catch (e) {}",
+											"try { const v = json.data.available_products[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"product_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/price-lists/{{price_list_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"price-lists",
+										"{{price_list_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.price_lists.show"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Price List — إنشاء قائمة",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data.id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"price_list_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"قائمة أسعار\",\n    \"status\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/price-lists",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"price-lists"
+									]
+								},
+								"description": "الصلاحية: stock.price_lists.create"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Price List — تعديل قائمة",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"قائمة أسعار معدّلة\",\n    \"status\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/price-lists/{{price_list_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"price-lists",
+										"{{price_list_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.price_lists.edit"
+							},
+							"response": []
+						},
+						{
+							"name": "Add Product — إضافة صنف",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"product_id\": \"{{product_id}}\",\n    \"sale_price\": 12.5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/price-lists/{{price_list_id}}/products",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"price-lists",
+										"{{price_list_id}}",
+										"products"
+									]
+								},
+								"description": "الصلاحية: stock.price_lists.manage_products"
+							},
+							"response": []
+						},
+						{
+							"name": "Remove Product — حذف صنف",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/price-lists/products/{{price_list_item_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"price-lists",
+										"products",
+										"{{price_list_item_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.price_lists.manage_products"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Price List — حذف قائمة",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/price-lists/{{price_list_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"price-lists",
+										"{{price_list_id}}"
+									]
+								},
+								"description": "الصلاحية: stock.price_lists.delete"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Statement — الكشف المخزني",
+					"item": [
+						{
+							"name": "Statement Warehouses — مستودعات الكشف",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"try { const v = json.data[0].id; if (v !== undefined && v !== null) { pm.collectionVariables.set(\"warehouse_id\", v); } } catch (e) {}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/statement/warehouses",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"statement",
+										"warehouses"
+									]
+								},
+								"description": "الصلاحية: stock.reports.employee_statement"
+							},
+							"response": []
+						},
+						{
+							"name": "Warehouse Statement — الكشف",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/integration/v1/stock/statement?warehouse={{warehouse_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"integration",
+										"v1",
+										"stock",
+										"statement"
+									],
+									"query": [
+										{
+											"key": "warehouse",
+											"value": "{{warehouse_id}}"
+										},
+										{
+											"key": "start_date",
+											"value": "",
+											"disabled": true,
+											"description": "YYYY-MM-DD"
+										},
+										{
+											"key": "end_date",
+											"value": "",
+											"disabled": true,
+											"description": "YYYY-MM-DD"
+										},
+										{
+											"key": "product",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "category",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "brand",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "permission_source",
+											"value": "",
+											"disabled": true
+										}
+									]
+								},
+								"description": "الصلاحية: stock.reports.employee_statement"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "client_tree_branch_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "client_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "visit_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "currency",
+			"value": "SAR",
+			"type": "string"
+		},
+		{
+			"key": "account_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "treasury_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "to_treasury_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "receipt_category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "expense_category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "expense_account_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "expense_client_account_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "supplier_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "receipt_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "receipt_code",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "expense_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "transfer_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "warehouse_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "to_warehouse_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "permit_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "price_list_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "price_list_item_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "branch_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "contact_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "note_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "competitor_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "notification_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "point_1_at",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "point_2_at",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "status_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "stage_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "manager_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "itinerary_row_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "employee_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "forgotten_visit_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "justification_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

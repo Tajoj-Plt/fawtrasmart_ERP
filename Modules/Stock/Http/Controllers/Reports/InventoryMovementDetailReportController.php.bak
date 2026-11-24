@@ -1,0 +1,1115 @@
+<?php
+
+namespace Modules\Stock\Http\Controllers\Reports;
+
+use App\Models\Category;
+use App\Models\InvoiceItem;
+use App\Models\Product;
+use App\Models\ProductDetails;
+use App\Models\StoreHouse;
+use App\Models\WarehousePermits;
+use App\Models\WarehousePermitsProducts;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
+class InventoryMovementDetailReportController extends ReportController
+{
+    public function index(Request $request)
+    {
+        // جلب البيانات الأساسية للفلترات
+        $products = Product::select('id', 'name')->orderBy('name')->get();
+        $categories = Category::select('id', 'name')->orderBy('name')->get();
+        $brands = Product::distinct()->whereNotNull('brand')->pluck('brand');
+        $warehouses = StoreHouse::select('id', 'name')->orderBy('name')->get();
+
+        // جلب البيانات المفلترة مباشرة
+        $data = $this->getInventoryMovementDataArray($request);
+        $groupedMovements = $data['grouped_movements'] ?? [];
+        $totals = $data['totals'] ?? [
+            'total_products' => 0,
+            'total_in' => 0,
+            'total_out' => 0,
+            'total_in_value' => 0,
+            'total_out_value' => 0,
+            'net_movement' => 0,
+            'total_stock_value' => 0,
+            'total_movements' => 0
+        ];
+
+        return view('stock::report.stock_report.Inventory_mov_det_product', compact(
+            'products', 'categories', 'brands', 'warehouses', 'groupedMovements', 'totals'
+        ));
+    }
+
+    public function inventoryMovementDetailAjax(Request $request)
+    {
+        return response()->json($this->getInventoryMovementDataArray($request));
+    }
+
+    /**
+     * جلب رصيد المنتج الحالي من ProductDetails
+     */
+    protected function getCurrentStockFromProductDetails($productId, $warehouseId = null)
+    {
+        $query = ProductDetails::where('product_id', $productId);
+
+        if ($warehouseId) {
+            $query->where('store_house_id', $warehouseId);
+        }
+
+        return $query->sum('quantity') ?? 0;
+    }
+
+    /**
+     * حساب إجمالي قيمة المخزون
+     */
+    protected function calculateTotalStockValue($productIds = [], $warehouseId = null)
+    {
+        $query = ProductDetails::whereIn('product_id', $productIds);
+
+        if ($warehouseId) {
+            $query->where('store_house_id', $warehouseId);
+        }
+
+        return $query->sum(DB::raw('quantity * unit_price')) ?? 0;
+    }
+
+    /**
+     * تسمية نوع الحركة
+     */
+    protected function getMovementTypeLabel($type)
+    {
+        $types = [
+            '1' => 'تعديل يدوي',
+            '2' => 'فاتورة مبيعات',
+            '3' => 'فاتورة شراء',
+            '4' => 'إشعار دائن',
+            '5' => 'نقل المخزون',
+            '6' => 'فاتورة مرتجعة',
+            '7' => 'مرتجع مشتريات',
+            '8' => 'منتج مجمع',
+            '9' => 'إذن مخزن',
+            '10' => 'منتج مجمع خارجي',
+            '14' => 'إشعار مدين المشتريات',
+            '101' => 'إذن مخزني يدوي داخلي',
+            '102' => 'إذن مخزني يدوي خارجي',
+            '103' => 'إذن مخزني فاتورة',
+            '104' => 'إذن مخزني مرتجع مبيعات',
+            '105' => 'إذن مخزني إشعار دائن',
+            '106' => 'إذن مخزني فاتورة شراء',
+            '107' => 'إذن مخزني مرتجع شراء',
+            '108' => 'نقل إذن مخزني',
+            '109' => 'نقل إذن مخزني داخلي',
+            '110' => 'نقل إذن مخزني خارجي',
+            '111' => 'إذن مخزني نقطة بيع داخلي',
+            '112' => 'إذن مخزني نقطة بيع خارجي',
+            '113' => 'جرد المخزون الخارجي',
+            '114' => 'جرد المخزون الداخلي',
+            '115' => 'إذن مخزني إشعار مدين',
+            '116' => 'طلب التصنيع',
+        ];
+
+        return $types[$type] ?? 'نوع الحركة: ' . $type;
+    }
+
+    /**
+     * جلب بيانات حركة المخزون من جميع المصادر
+     * تجمع البيانات من: ProductDetails, InvoiceItem, WarehousePermitsProducts
+     */
+    private function getInventoryMovementDataArray(Request $request)
+    {
+        try {
+            // جلب الفلترات
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $productId = $request->input('product');
+            $categoryId = $request->input('category');
+            $brand = $request->input('brand');
+            $warehouseId = $request->input('warehouse');
+
+            $allMovements = [];
+
+            // ========================
+            // 1. بيانات من ProductDetails (الرصيد والحركات)
+            // ========================
+            $productDetailsQuery = ProductDetails::with(['product', 'storeHouse']);
+
+            if ($productId) {
+                $productDetailsQuery->where('product_id', $productId);
+            }
+            if ($categoryId) {
+                $productDetailsQuery->whereHas('product', function($q) use ($categoryId) {
+                    $q->where('category_id', $categoryId);
+                });
+            }
+            if ($brand) {
+                $productDetailsQuery->whereHas('product', function($q) use ($brand) {
+                    $q->where('brand', $brand);
+                });
+            }
+            if ($warehouseId) {
+                $productDetailsQuery->where('store_house_id', $warehouseId);
+            }
+            if ($startDate && $endDate) {
+                $productDetailsQuery->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } elseif ($startDate) {
+                $productDetailsQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            } elseif ($endDate) {
+                $productDetailsQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+
+            foreach ($productDetailsQuery->get() as $detail) {
+                $quantity = $detail->quantity ?? 0;
+                $unitPrice = $detail->unit_price ?? 0;
+                $total = $quantity * $unitPrice;
+
+                $allMovements[] = [
+                    'id' => 'pd_' . $detail->id,
+                    'date' => $detail->created_at ? $detail->created_at->format('Y-m-d') : date('Y-m-d'),
+                    'type' => $detail->type_of_operation ?? 'حركة مخزون',
+                    'source' => 'تفاصيل منتج',
+                    'source_label' => 'تفاصيل منتج',
+                    'product_name' => $detail->product ? $detail->product->name : 'منتج غير محدد',
+                    'product_id' => $detail->product_id,
+                    'warehouse_name' => $detail->storeHouse ? $detail->storeHouse->name : 'مستودع غير محدد',
+                    'warehouse_id' => $detail->store_house_id,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'total' => $total,
+                    'before_quantity' => 0,
+                    'after_quantity' => $quantity,
+                ];
+            }
+
+            // ========================
+            // 2. بيانات من InvoiceItem (الفواتير)
+            // ========================
+            $invoiceItemsQuery = InvoiceItem::with(['product', 'storeHouse']);
+
+            if ($productId) {
+                $invoiceItemsQuery->where('product_id', $productId);
+            }
+            if ($categoryId) {
+                $invoiceItemsQuery->whereHas('product', function($q) use ($categoryId) {
+                    $q->where('category_id', $categoryId);
+                });
+            }
+            if ($brand) {
+                $invoiceItemsQuery->whereHas('product', function($q) use ($brand) {
+                    $q->where('brand', $brand);
+                });
+            }
+            if ($warehouseId) {
+                $invoiceItemsQuery->where('store_house_id', $warehouseId);
+            }
+            if ($startDate && $endDate) {
+                $invoiceItemsQuery->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } elseif ($startDate) {
+                $invoiceItemsQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            } elseif ($endDate) {
+                $invoiceItemsQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+
+            foreach ($invoiceItemsQuery->get() as $item) {
+                $quantity = $item->quantity ?? 0;
+                $unitPrice = $item->unit_price ?? 0;
+                $total = $item->total ?? ($quantity * $unitPrice);
+                $type = $this->getMovementTypeLabel($item->type);
+
+                $allMovements[] = [
+                    'id' => 'invoice_' . $item->id,
+                    'date' => $item->created_at ? $item->created_at->format('Y-m-d') : date('Y-m-d'),
+                    'type' => $type,
+                    'source' => 'فاتورة',
+                    'source_label' => $type,
+                    'product_name' => $item->product ? $item->product->name : 'منتج غير محدد',
+                    'product_id' => $item->product_id,
+                    'warehouse_name' => $item->storeHouse ? $item->storeHouse->name : 'مستودع غير محدد',
+                    'warehouse_id' => $item->store_house_id,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'total' => $total,
+                    'before_quantity' => 0,
+                    'after_quantity' => $quantity,
+                ];
+            }
+
+            // ========================
+            // 3. بيانات من WarehousePermitsProducts (الأذونات)
+            // ========================
+            $permitsQuery = WarehousePermitsProducts::with([
+                'product',
+                'warehousePermit.storeHouse',
+                'warehousePermit.permissionSource'
+            ]);
+
+            if ($productId) {
+                $permitsQuery->where('product_id', $productId);
+            }
+            if ($categoryId) {
+                $permitsQuery->whereHas('product', function($q) use ($categoryId) {
+                    $q->where('category_id', $categoryId);
+                });
+            }
+            if ($brand) {
+                $permitsQuery->whereHas('product', function($q) use ($brand) {
+                    $q->where('brand', $brand);
+                });
+            }
+            if ($startDate && $endDate) {
+                $permitsQuery->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } elseif ($startDate) {
+                $permitsQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            } elseif ($endDate) {
+                $permitsQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+
+            foreach ($permitsQuery->get() as $permit) {
+                $quantity = $permit->quantity ?? 0;
+                $unitPrice = $permit->unit_price ?? 0;
+                $total = $permit->total ?? ($quantity * $unitPrice);
+
+                $warehouseName = 'غير محدد';
+                if ($permit->warehousePermit && $permit->warehousePermit->storeHouse) {
+                    $warehouseName = $permit->warehousePermit->storeHouse->name;
+                }
+
+                $sourceLabel = 'أذن مخزني';
+                if ($permit->warehousePermit && $permit->warehousePermit->permissionSource) {
+                    $sourceLabel = $permit->warehousePermit->permissionSource->name;
+                }
+
+                $allMovements[] = [
+                    'id' => 'permit_' . $permit->id,
+                    'date' => $permit->created_at ? $permit->created_at->format('Y-m-d') : date('Y-m-d'),
+                    'type' => 'أذن مخزني',
+                    'source' => 'أذن مخزنية',
+                    'source_label' => $sourceLabel,
+                    'product_name' => $permit->product ? $permit->product->name : 'منتج غير محدد',
+                    'product_id' => $permit->product_id,
+                    'warehouse_name' => $warehouseName,
+                    'warehouse_id' => $permit->warehousePermit ? $permit->warehousePermit->store_houses_id : null,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'total' => $total,
+                    'before_quantity' => $permit->stock_before ?? 0,
+                    'after_quantity' => $permit->stock_after ?? 0,
+                ];
+            }
+
+            // ترتيب البيانات حسب التاريخ (الأحدث أولاً)
+            usort($allMovements, function ($a, $b) {
+                return strtotime($b['date']) - strtotime($a['date']);
+            });
+
+            // تجميع البيانات حسب المنتج
+            $groupedMovements = [];
+            $totalStats = [
+                'total_products' => 0,
+                'total_in' => 0,
+                'total_out' => 0,
+                'total_in_value' => 0,
+                'total_out_value' => 0,
+                'net_movement' => 0,
+                'total_stock_value' => 0,
+                'total_movements' => count($allMovements)
+            ];
+
+            $productIds = [];
+
+            foreach ($allMovements as $movement) {
+                $productName = $movement['product_name'];
+                $productIdKey = $movement['product_id'];
+                
+                if (!in_array($productIdKey, $productIds)) {
+                    $productIds[] = $productIdKey;
+                }
+
+                if (!isset($groupedMovements[$productName])) {
+                    $groupedMovements[$productName] = [];
+                }
+
+                // الحصول على الرصيد الحالي
+                $currentStock = $this->getCurrentStockFromProductDetails(
+                    $productIdKey,
+                    $movement['warehouse_id']
+                );
+
+                $quantity = $movement['quantity'] ?? 0;
+                $total = $movement['total'] ?? 0;
+
+                // تحديث الإحصائيات
+                if ($quantity > 0) {
+                    $totalStats['total_in'] += $quantity;
+                    $totalStats['total_in_value'] += $total;
+                } else {
+                    $totalStats['total_out'] += abs($quantity);
+                    $totalStats['total_out_value'] += abs($total);
+                }
+
+                $groupedMovements[$productName][] = array_merge($movement, [
+                    'current_stock' => $currentStock
+                ]);
+            }
+
+            // حساب الإحصائيات النهائية
+            $totalStats['total_products'] = count($productIds);
+            $totalStats['net_movement'] = $totalStats['total_in'] - $totalStats['total_out'];
+            $totalStats['total_stock_value'] = $this->calculateTotalStockValue($productIds, $warehouseId);
+
+            return [
+                'success' => true,
+                'grouped_movements' => $groupedMovements,
+                'totals' => $totalStats,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('خطأ في تحميل بيانات حركة المخزون: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return [
+                'success' => false,
+                'grouped_movements' => [],
+                'totals' => [
+                    'total_products' => 0,
+                    'total_in' => 0,
+                    'total_out' => 0,
+                    'total_in_value' => 0,
+                    'total_out_value' => 0,
+                    'net_movement' => 0,
+                    'total_stock_value' => 0,
+                    'total_movements' => 0
+                ],
+            ];
+        }
+    }
+
+    public function searchProducts(Request $request)
+    {
+        $term = $request->input('q');
+        $page = $request->input('page', 1);
+        $perPage = 20;
+
+        $products = Product::select('id', 'name')
+            ->where(function($query) use ($term) {
+                $query->where('name', 'LIKE', "%{$term}%")
+                      ->orWhere('id', 'LIKE', "%{$term}%");
+            })
+            ->orderBy('name')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $results = $products->map(function($product) {
+            return [
+                'id' => $product->id,
+                'text' => $product->name . ($product->id ? " ({$product->id})" : '')
+            ];
+        });
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => ['more' => $products->hasMorePages()]
+        ]);
+    }
+}
+
+    /**
+     * جلب رصيد المنتج من جدول ProductDetails
+     */
+    protected function getCurrentStockFromProductDetails($productId, $warehouseId = null)
+    {
+        $query = ProductDetails::where('product_id', $productId);
+
+        if ($warehouseId) {
+            $query->where('store_house_id', $warehouseId);
+        }
+
+        return $query->sum('quantity') ?? 0;
+    }
+
+    /**
+     * حساب إجمالي قيمة المخزون الحالية
+     */
+    protected function calculateTotalStockValue($productIds = [], $warehouseId = null)
+    {
+        $query = ProductDetails::whereIn('product_id', $productIds);
+
+        if ($warehouseId) {
+            $query->where('store_house_id', $warehouseId);
+        }
+
+        return $query->sum(DB::raw('quantity * unit_price')) ?? 0;
+    }
+
+    /**
+     * تحضير بيانات الرسم البياني
+     */
+    protected function prepareChartDataMovement($movements, $request)
+    {
+        try {
+            $chartData = [
+                'labels' => [],
+                'in_values' => [],
+                'out_values' => []
+            ];
+
+            // تجميع البيانات حسب التاريخ
+            $dailyData = [];
+
+            foreach ($movements as $movement) {
+                $date = isset($movement['created_at']) ? Carbon::parse($movement['created_at'])->format('Y-m-d') : date('Y-m-d');
+
+                if (!isset($dailyData[$date])) {
+                    $dailyData[$date] = ['in' => 0, 'out' => 0];
+                }
+
+                $total = $movement['total'] ?? 0;
+                if ($movement['quantity'] > 0) {
+                    $dailyData[$date]['in'] += $total;
+                } else {
+                    $dailyData[$date]['out'] += abs($total);
+                }
+            }
+
+            // ترتيب البيانات حسب التاريخ
+            ksort($dailyData);
+
+            foreach ($dailyData as $date => $data) {
+                $chartData['labels'][] = date('d/m', strtotime($date));
+                $chartData['in_values'][] = $data['in'];
+                $chartData['out_values'][] = $data['out'];
+            }
+
+            return $chartData;
+
+        } catch (\Exception $e) {
+            Log::error("خطأ في تحضير بيانات الرسم البياني: " . $e->getMessage());
+            return ['labels' => [], 'in_values' => [], 'out_values' => []];
+        }
+    }
+
+    /**
+     * البحث في المنتجات
+     */
+    public function searchProducts(Request $request)
+    {
+        $term = $request->input('q');
+        $page = $request->input('page', 1);
+        $perPage = 20;
+
+        $products = Product::select('id', 'name')
+            ->where(function($query) use ($term) {
+                $query->where('name', 'LIKE', "%{$term}%")
+                      ->orWhere('id', 'LIKE', "%{$term}%");
+            })
+            ->orderBy('name')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $results = $products->map(function($product) {
+            return [
+                'id' => $product->id,
+                'text' => $product->name . ($product->id ? " ({$product->id})" : '')
+            ];
+        });
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => [
+                'more' => $products->hasMorePages()
+            ]
+        ]);
+    }
+
+    /**
+     * الحصول على تسمية نوع الحركة
+     */
+    protected function getMovementTypeLabel($type)
+    {
+        $types = [
+            '1' => 'تعديل يدوي',
+            '2' => 'فاتورة مبيعات',
+            '3' => 'فاتورة شراء',
+            '4' => 'إشعار دائن',
+            '5' => 'نقل المخزون',
+            '6' => 'فاتورة مرتجعة',
+            '7' => 'مرتجع مشتريات',
+            '8' => 'منتج مجمع',
+            '9' => 'إذن مخزن',
+            '10' => 'منتج مجمع خارجي',
+            '14' => 'إشعار مدين المشتريات',
+            '101' => 'إذن مخزني يدوي داخلي',
+            '102' => 'إذن مخزني يدوي خارجي',
+            '103' => 'إذن مخزني فاتورة',
+            '104' => 'إذن مخزني مرتجع مبيعات',
+            '105' => 'إذن مخزني إشعار دائن',
+            '106' => 'إذن مخزني فاتورة شراء',
+            '107' => 'إذن مخزني مرتجع شراء',
+            '108' => 'نقل إذن مخزني',
+            '109' => 'نقل إذن مخزني داخلي',
+            '110' => 'نقل إذن مخزني خارجي',
+            '111' => 'إذن مخزني نقطة بيع داخلي',
+            '112' => 'إذن مخزني نقطة بيع خارجي',
+            '113' => 'جرد المخزون الخارجي',
+            '114' => 'جرد المخزون الداخلي',
+            '115' => 'إذن مخزني إشعار مدين',
+            '116' => 'طلب التصنيع',
+        ];
+
+        return $types[$type] ?? 'نوع الحركة: ' . $type;
+    }
+
+    /**
+     * الحصول على تسمية نوع المصدر
+     */
+    protected function getSourceTypeLabel($movement)
+    {
+        if (is_string($movement)) {
+            return $movement;
+        }
+
+        if (is_array($movement) && isset($movement['permission_source'])) {
+            return $movement['permission_source']['name'] ?? 'غير محدد';
+        }
+
+        if (is_array($movement) && isset($movement['type'])) {
+            return $this->getMovementTypeLabel($movement['type']);
+        }
+
+        return 'غير محدد';
+    }
+
+    /**
+     * جلب بيانات حركة المخزون - كمصفوفة (للعرض المباشر بدون JavaScript)
+     * الآن تجلب البيانات الصحيحة من جداول صحيحة
+     */
+    private function getInventoryMovementDataArray(Request $request)
+    {
+        try {
+            // جلب جميع الفلترات من الطلب
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $productId = $request->input('product');
+            $categoryId = $request->input('category');
+            $sourceType = $request->input('source_type');
+            $brand = $request->input('brand');
+            $warehouseId = $request->input('warehouse');
+
+            // 1. جلب البيانات من InvoiceItem (الفواتير)
+            $invoiceItemsQuery = InvoiceItem::with([
+                'product',
+                'storeHouse'
+            ]);
+
+            // فلترة حسب المنتج
+            if ($productId) {
+                $invoiceItemsQuery->where('product_id', $productId);
+            }
+
+            // فلترة حسب التصنيف
+            if ($categoryId) {
+                $invoiceItemsQuery->whereHas('product', function ($query) use ($categoryId) {
+                    $query->where('category_id', $categoryId);
+                });
+            }
+
+            // فلترة حسب المصدر
+            if ($sourceType) {
+                $invoiceItemsQuery->where('type', $sourceType);
+            }
+
+            // فلترة حسب العلامة التجارية
+            if ($brand) {
+                $invoiceItemsQuery->whereHas('product', function ($query) use ($brand) {
+                    $query->where('brand', $brand);
+                });
+            }
+
+            // فلترة حسب المستودع
+            if ($warehouseId) {
+                $invoiceItemsQuery->where('store_house_id', $warehouseId);
+            }
+
+            // فلترة حسب الفترة الزمنية
+            if ($startDate && $endDate) {
+                $invoiceItemsQuery->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } elseif ($startDate) {
+                $invoiceItemsQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            } elseif ($endDate) {
+                $invoiceItemsQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+
+            // 2. جلب البيانات من WarehousePermitsProducts (الأذونات)
+            $permitsQuery = WarehousePermitsProducts::with([
+                'product',
+                'warehousePermit.storeHouse',
+                'warehousePermit.fromStoreHouse',
+                'warehousePermit.toStoreHouse',
+                'warehousePermit.permissionSource'
+            ]);
+
+            // تطبيق نفس الفلترات على الأذونات
+            if ($productId) {
+                $permitsQuery->where('product_id', $productId);
+            }
+
+            if ($categoryId) {
+                $permitsQuery->whereHas('product', function ($query) use ($categoryId) {
+                    $query->where('category_id', $categoryId);
+                });
+            }
+
+            if ($brand) {
+                $permitsQuery->whereHas('product', function ($query) use ($brand) {
+                    $query->where('brand', $brand);
+                });
+            }
+
+            if ($startDate && $endDate) {
+                $permitsQuery->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } elseif ($startDate) {
+                $permitsQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            } elseif ($endDate) {
+                $permitsQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+
+            // دمج البيانات من المصدرين
+            $allMovements = [];
+
+            // إضافة بيانات الفواتير
+            foreach ($invoiceItemsQuery->get() as $item) {
+                $allMovements[] = [
+                    'id' => 'invoice_' . $item->id,
+                    'created_at' => $item->created_at,
+                    'type' => $this->getMovementTypeLabel($item->type),
+                    'source' => 'فاتورة',
+                    'source_type' => $this->getMovementTypeLabel($item->type),
+                    'product_name' => $item->product ? $item->product->name : 'منتج غير محدد',
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'purchase_price' => $item->purchase_price,
+                    'total' => $item->total,
+                    'store_house' => $item->storeHouse ? $item->storeHouse->name : 'مستودع غير محدد',
+                    'store_house_id' => $item->store_house_id,
+                ];
+            }
+
+            // إضافة بيانات الأذونات
+            foreach ($permitsQuery->get() as $permit) {
+                $warehouseName = 'غير محدد';
+                if ($permit->warehousePermit && $permit->warehousePermit->storeHouse) {
+                    $warehouseName = $permit->warehousePermit->storeHouse->name;
+                }
+
+                $sourceLabel = 'أذن مخزني';
+                if ($permit->warehousePermit && $permit->warehousePermit->permissionSource) {
+                    $sourceLabel = $permit->warehousePermit->permissionSource->name;
+                }
+
+                $allMovements[] = [
+                    'id' => 'permit_' . $permit->id,
+                    'created_at' => $permit->created_at,
+                    'type' => 'أذن مخزني',
+                    'source' => 'أذن مخزنية',
+                    'source_type' => $sourceLabel,
+                    'product_name' => $permit->product ? $permit->product->name : 'منتج غير محدد',
+                    'product_id' => $permit->product_id,
+                    'quantity' => $permit->quantity,
+                    'unit_price' => $permit->unit_price,
+                    'purchase_price' => $permit->unit_price,
+                    'total' => $permit->quantity * $permit->unit_price,
+                    'store_house' => $warehouseName,
+                    'store_house_id' => $permit->warehousePermit ? $permit->warehousePermit->store_houses_id : null,
+                ];
+            }
+
+            // ترتيب البيانات حسب التاريخ (الأحدث أولاً)
+            usort($allMovements, function ($a, $b) {
+                return strtotime($b['created_at']) - strtotime($a['created_at']);
+            });
+
+            // تجميع البيانات حسب المنتج
+            $groupedMovements = [];
+            $totalStats = [
+                'total_products' => 0,
+                'total_in' => 0,
+                'total_out' => 0,
+                'total_in_value' => 0,
+                'total_out_value' => 0,
+                'net_movement' => 0,
+                'total_stock_value' => 0,
+                'total_movements' => count($allMovements)
+            ];
+
+            $processedMovements = [];
+            $productIds = [];
+
+            foreach ($allMovements as $movement) {
+                $productName = $movement['product_name'];
+                $productIds[] = $movement['product_id'];
+
+                if (!isset($groupedMovements[$productName])) {
+                    $groupedMovements[$productName] = [];
+                }
+
+                // الحصول على الرصيد الحالي من ProductDetails
+                $currentStock = $this->getCurrentStockFromProductDetails(
+                    $movement['product_id'],
+                    $movement['store_house_id']
+                );
+
+                // الحساب التفصيلي للحركة
+                $stockAfter = $currentStock;
+                $quantity = $movement['quantity'] ?? 0;
+
+                // تحديد حالة الحركة (داخل أم خارج)
+                if ($movement['source'] === 'أذن مخزنية') {
+                    // للأذونات المخزنية نحتاج للتحقق من نوع الأذن
+                    if (strpos($movement['source_type'], 'يدوي') !== false ||
+                        strpos($movement['source_type'], 'شراء') !== false ||
+                        strpos($movement['source_type'], 'تحويل') !== false) {
+                        $stockAfter = $currentStock + $quantity;
+                    } else {
+                        $stockAfter = $currentStock - $quantity;
+                    }
+                } else {
+                    // للفواتير: المبيعات تكون خروج، الشراء يكون دخول
+                    if (strpos($movement['type'], 'شراء') !== false ||
+                        strpos($movement['type'], 'مرتجع') !== false) {
+                        $stockAfter = $currentStock + $quantity;
+                    } else {
+                        $stockAfter = $currentStock - $quantity;
+                    }
+                }
+
+                $processedMovements[] = array_merge($movement, [
+                    'stock_after' => max(0, $stockAfter),
+                    'product_id' => $movement['product_id']
+                ]);
+
+                // تحديث الإحصائيات
+                if ($quantity > 0) {
+                    $totalStats['total_in'] += $quantity;
+                    $totalStats['total_in_value'] += $movement['total'];
+                } else {
+                    $totalStats['total_out'] += abs($quantity);
+                    $totalStats['total_out_value'] += abs($movement['total']);
+                }
+
+                $groupedMovements[$productName][] = array_merge($movement, [
+                    'stock_after' => max(0, $stockAfter)
+                ]);
+            }
+
+            // حساب الإحصائيات النهائية
+            $totalStats['total_products'] = count(array_unique($productIds));
+            $totalStats['net_movement'] = $totalStats['total_in'] - $totalStats['total_out'];
+            $totalStats['total_stock_value'] = $this->calculateTotalStockValue($productIds, $warehouseId);
+
+            return [
+                'success' => true,
+                'grouped_movements' => $groupedMovements,
+                'totals' => $totalStats,
+                'products_count' => $totalStats['total_products'],
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('خطأ في تحميل بيانات حركة المخزون: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return [
+                'success' => false,
+                'grouped_movements' => [],
+                'totals' => [
+                    'total_products' => 0,
+                    'total_in' => 0,
+                    'total_out' => 0,
+                    'total_in_value' => 0,
+                    'total_out_value' => 0,
+                    'net_movement' => 0,
+                    'total_stock_value' => 0,
+                    'total_movements' => 0
+                ],
+            ];
+        }
+    }
+
+    /**
+     * جلب بيانات حركة المخزون
+     */
+    protected function getInventoryMovementData(Request $request)
+    {
+        try {
+            // جلب جميع الفلترات من الطلب
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $productId = $request->input('product');
+            $categoryId = $request->input('category');
+            $sourceType = $request->input('source_type');
+            $brand = $request->input('brand');
+            $warehouseId = $request->input('warehouse');
+            $page = $request->input('page', 1);
+            $perPage = 50;
+
+            // 1. جلب البيانات من InvoiceItem (الفواتير)
+            $invoiceItemsQuery = InvoiceItem::with([
+                'product',
+                'storeHouse'
+            ]);
+
+            // فلترة حسب المنتج
+            if ($productId) {
+                $invoiceItemsQuery->where('product_id', $productId);
+            }
+
+            // فلترة حسب التصنيف
+            if ($categoryId) {
+                $invoiceItemsQuery->whereHas('product', function ($query) use ($categoryId) {
+                    $query->where('category_id', $categoryId);
+                });
+            }
+
+            // فلترة حسب المصدر
+            if ($sourceType) {
+                $invoiceItemsQuery->where('type', $sourceType);
+            }
+
+            // فلترة حسب العلامة التجارية
+            if ($brand) {
+                $invoiceItemsQuery->whereHas('product', function ($query) use ($brand) {
+                    $query->where('brand', $brand);
+                });
+            }
+
+            // فلترة حسب المستودع
+            if ($warehouseId) {
+                $invoiceItemsQuery->where('store_house_id', $warehouseId);
+            }
+
+            // فلترة حسب الفترة الزمنية
+            if ($startDate && $endDate) {
+                $invoiceItemsQuery->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } elseif ($startDate) {
+                $invoiceItemsQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            } elseif ($endDate) {
+                $invoiceItemsQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+
+            // 2. جلب البيانات من WarehousePermitsProducts (الأذونات)
+            $permitsQuery = WarehousePermitsProducts::with([
+                'product',
+                'warehousePermit.storeHouse',
+                'warehousePermit.fromStoreHouse',
+                'warehousePermit.toStoreHouse',
+                'warehousePermit.permissionSource'
+            ]);
+
+            // تطبيق نفس الفلترات على الأذونات
+            if ($productId) {
+                $permitsQuery->where('product_id', $productId);
+            }
+
+            if ($categoryId) {
+                $permitsQuery->whereHas('product', function ($query) use ($categoryId) {
+                    $query->where('category_id', $categoryId);
+                });
+            }
+
+            if ($brand) {
+                $permitsQuery->whereHas('product', function ($query) use ($brand) {
+                    $query->where('brand', $brand);
+                });
+            }
+
+            if ($startDate && $endDate) {
+                $permitsQuery->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } elseif ($startDate) {
+                $permitsQuery->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+            } elseif ($endDate) {
+                $permitsQuery->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+            }
+
+            // دمج البيانات من المصدرين
+            $allMovements = [];
+
+            // إضافة بيانات الفواتير
+            foreach ($invoiceItemsQuery->get() as $item) {
+                $allMovements[] = [
+                    'id' => 'invoice_' . $item->id,
+                    'created_at' => $item->created_at,
+                    'type' => $this->getMovementTypeLabel($item->type),
+                    'source' => 'فاتورة',
+                    'source_type' => $this->getMovementTypeLabel($item->type),
+                    'product_name' => $item->product ? $item->product->name : 'منتج غير محدد',
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'purchase_price' => $item->purchase_price,
+                    'total' => $item->total,
+                    'store_house' => $item->storeHouse ? $item->storeHouse->name : 'مستودع غير محدد',
+                    'store_house_id' => $item->store_house_id,
+                ];
+            }
+
+            // إضافة بيانات الأذونات
+            foreach ($permitsQuery->get() as $permit) {
+                $warehouseName = 'غير محدد';
+                if ($permit->warehousePermit && $permit->warehousePermit->storeHouse) {
+                    $warehouseName = $permit->warehousePermit->storeHouse->name;
+                }
+
+                $sourceLabel = 'أذن مخزني';
+                if ($permit->warehousePermit && $permit->warehousePermit->permissionSource) {
+                    $sourceLabel = $permit->warehousePermit->permissionSource->name;
+                }
+
+                $allMovements[] = [
+                    'id' => 'permit_' . $permit->id,
+                    'created_at' => $permit->created_at,
+                    'type' => 'أذن مخزني',
+                    'source' => 'أذن مخزنية',
+                    'source_type' => $sourceLabel,
+                    'product_name' => $permit->product ? $permit->product->name : 'منتج غير محدد',
+                    'product_id' => $permit->product_id,
+                    'quantity' => $permit->quantity,
+                    'unit_price' => $permit->unit_price,
+                    'purchase_price' => $permit->unit_price,
+                    'total' => $permit->quantity * $permit->unit_price,
+                    'store_house' => $warehouseName,
+                    'store_house_id' => $permit->warehousePermit ? $permit->warehousePermit->store_houses_id : null,
+                ];
+            }
+
+            // ترتيب البيانات حسب التاريخ (الأحدث أولاً)
+            usort($allMovements, function ($a, $b) {
+                return strtotime($b['created_at']) - strtotime($a['created_at']);
+            });
+
+            // تجميع البيانات حسب المنتج
+            $groupedMovements = [];
+            $totalStats = [
+                'total_products' => 0,
+                'total_in' => 0,
+                'total_out' => 0,
+                'total_in_value' => 0,
+                'total_out_value' => 0,
+                'net_movement' => 0,
+                'total_stock_value' => 0,
+                'total_movements' => count($allMovements)
+            ];
+
+            $processedMovements = [];
+            $productIds = [];
+
+            foreach ($allMovements as $movement) {
+                $productName = $movement['product_name'];
+                $productIds[] = $movement['product_id'];
+
+                if (!isset($groupedMovements[$productName])) {
+                    $groupedMovements[$productName] = [];
+                }
+
+                // الحصول على الرصيد الحالي من ProductDetails
+                $currentStock = $this->getCurrentStockFromProductDetails(
+                    $movement['product_id'],
+                    $movement['store_house_id']
+                );
+
+                // الحساب التفصيلي للحركة
+                $stockAfter = $currentStock;
+                $quantity = $movement['quantity'] ?? 0;
+
+                // تحديد حالة الحركة (داخل أم خارج)
+                if ($movement['source'] === 'أذن مخزنية') {
+                    // للأذونات المخزنية نحتاج للتحقق من نوع الأذن
+                    if (strpos($movement['source_type'], 'يدوي') !== false ||
+                        strpos($movement['source_type'], 'شراء') !== false ||
+                        strpos($movement['source_type'], 'تحويل') !== false) {
+                        $stockAfter = $currentStock + $quantity;
+                    } else {
+                        $stockAfter = $currentStock - $quantity;
+                    }
+                } else {
+                    // للفواتير: المبيعات تكون خروج، الشراء يكون دخول
+                    if (strpos($movement['type'], 'شراء') !== false ||
+                        strpos($movement['type'], 'مرتجع') !== false) {
+                        $stockAfter = $currentStock + $quantity;
+                    } else {
+                        $stockAfter = $currentStock - $quantity;
+                    }
+                }
+
+                $processedMovements[] = array_merge($movement, [
+                    'stock_after' => max(0, $stockAfter),
+                    'product_id' => $movement['product_id']
+                ]);
+
+                // تحديث الإحصائيات
+                if ($quantity > 0) {
+                    $totalStats['total_in'] += $quantity;
+                    $totalStats['total_in_value'] += $movement['total'];
+                } else {
+                    $totalStats['total_out'] += abs($quantity);
+                    $totalStats['total_out_value'] += abs($movement['total']);
+                }
+
+                $groupedMovements[$productName][] = array_merge($movement, [
+                    'stock_after' => max(0, $stockAfter)
+                ]);
+            }
+
+            // حساب الإحصائيات النهائية
+            $totalStats['total_products'] = count(array_unique($productIds));
+            $totalStats['net_movement'] = $totalStats['total_in'] - $totalStats['total_out'];
+            $totalStats['total_stock_value'] = $this->calculateTotalStockValue($productIds, $warehouseId);
+
+            $chartData = $this->prepareChartDataMovement($processedMovements, $request);
+
+            return response()->json([
+                'success' => true,
+                'grouped_movements' => $groupedMovements,
+                'totals' => $totalStats,
+                'products_count' => $totalStats['total_products'],
+                'chart_data' => $chartData,
+                'pagination' => [
+                    'total' => count($allMovements),
+                    'per_page' => $perPage,
+                    'current_page' => $page,
+                    'last_page' => ceil(count($allMovements) / $perPage),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('خطأ في تحميل بيانات حركة المخزون: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ في تحميل البيانات',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+}

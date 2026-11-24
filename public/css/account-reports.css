@@ -1,0 +1,772 @@
+/**
+ * Account Reports Common Styles
+ * Shared CSS for all account module reports
+ */
+
+/* ==========================================
+   Summary Table Styles
+   ========================================== */
+.report.reports_currency {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report.reports_currency thead tr.report-results-head {
+    background: #f5f7fa;
+    border-bottom: 2px solid #e4e7ed;
+}
+
+.report.reports_currency thead th {
+    padding: 12px 15px;
+    font-weight: 600;
+    color: #606266;
+    text-align: right;
+    border: 1px solid #e4e7ed;
+}
+
+.report.reports_currency tbody td {
+    padding: 10px 15px;
+    border: 1px solid #e4e7ed;
+    text-align: right;
+}
+
+.report.reports_currency tbody tr:hover {
+    background-color: #f5f7fa;
+}
+
+.report.reports_currency tfoot tr.section-net {
+    background: #fafafa;
+    font-weight: bold;
+    border-top: 2px solid #e4e7ed;
+}
+
+.report.reports_currency tfoot td {
+    padding: 12px 15px;
+    border: 1px solid #e4e7ed;
+}
+
+.sar_symbol {
+    display: inline-block;
+    font-size: 0.85em;
+    color: #909399;
+}
+
+/* ==========================================
+   Tree Structure Styles
+   ========================================== */
+.account-level-0 { padding-right: 10px !important; }
+.account-level-1 { padding-right: 35px !important; }
+.account-level-2 { padding-right: 60px !important; }
+.account-level-3 { padding-right: 85px !important; }
+.account-level-4 { padding-right: 110px !important; }
+.account-level-5 { padding-right: 135px !important; }
+.account-level-6 { padding-right: 160px !important; }
+
+.main-account { 
+    font-weight: 600; 
+    background-color: #e3f2fd !important; 
+}
+
+.parent-account {
+    font-weight: 600;
+    background-color: #f0f7ff !important;
+}
+
+.sub-account { 
+    color: #606266; 
+}
+
+/* ==========================================
+   Account Type Badges
+   ========================================== */
+.badge-debit { 
+    background-color: #e6f7ff; 
+    color: #1890ff; 
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-credit { 
+    background-color: #fff7e6; 
+    color: #fa8c16; 
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* ==========================================
+   Tree Icons & Lines
+   ========================================== */
+.tree-icon {
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+.tree-line {
+    color: #ddd;
+    margin-left: 5px;
+}
+
+/* ==========================================
+   Account Code Styling
+   ========================================== */
+.account-code {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: #2c3e50;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+/* ==========================================
+   Toggle Children Button
+   ========================================== */
+.toggle-children {
+    cursor: pointer;
+    color: #409eff;
+    margin-left: 5px;
+}
+
+.toggle-children:hover {
+    color: #66b1ff;
+}
+
+/* ==========================================
+   Account Row Levels
+   ========================================== */
+.account-row-level-0 {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
+.account-row-level-1 {
+    background-color: #f1f3f5;
+}
+
+.account-row-level-2 {
+    background-color: #f8f9fa;
+}
+
+.btn-toggle-children {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.btn-toggle-children:hover {
+    color: #0056b3;
+}
+
+/* ==========================================
+   Trial Balance Table Styles
+   ========================================== */
+.trial-balance-table {
+    font-family: 'Cairo', sans-serif;
+}
+
+.trial-balance-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    padding: 1rem 0.5rem;
+}
+
+.trial-balance-table .table-section-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    font-weight: 700;
+    text-align: center;
+}
+
+.trial-balance-table .initial-section {
+    background-color: rgba(34, 197, 94, 0.1);
+    border-left: 4px solid #22c55e;
+}
+
+.trial-balance-table .movement-section {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-left: 4px solid #3b82f6;
+}
+
+.trial-balance-table .final-section {
+    background-color: rgba(168, 85, 247, 0.1);
+    border-left: 4px solid #a855f7;
+}
+
+.trial-balance-table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.08);
+    transition: all 0.3s ease;
+}
+
+.trial-balance-table .number-cell {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    text-align: left;
+    direction: ltr;
+}
+
+.trial-balance-table .positive-amount {
+    color: #22c55e;
+}
+
+.trial-balance-table .negative-amount {
+    color: #ef4444;
+}
+
+.trial-balance-table .zero-amount {
+    color: #6b7280;
+    opacity: 0.7;
+}
+
+.table-grand-total {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 1.05em !important;
+}
+
+.table-grand-total td {
+    border: none !important;
+    padding: 1rem 0.5rem !important;
+}
+
+/* ==========================================
+   Statistics Cards
+   ========================================== */
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 20px;
+    padding: 2rem;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.stats-card.success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stats-card.warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stats-card.info {
+    background: linear-gradient(135deg, #4481eb 0%, #04befe 100%);
+}
+
+.stats-card.danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff5722 100%);
+}
+
+.stats-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.stats-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* ==========================================
+   Balance Indicators
+   ========================================== */
+.balance-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 8px;
+}
+
+.balance-indicator.positive {
+    background-color: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+.balance-indicator.negative {
+    background-color: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.balance-indicator.zero {
+    background-color: #6b7280;
+}
+
+/* ==========================================
+   Select2 Improvements
+   ========================================== */
+.select2-container {
+    display: block !important;
+    width: 100% !important;
+}
+
+.select2-container .select2-selection--single {
+    height: auto !important;
+    min-height: 48px !important;
+    border: 2px solid #e9ecef !important;
+    border-radius: 12px !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+.select2-dropdown {
+    border: 2px solid #e9ecef !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+}
+
+/* ==========================================
+   Print Styles
+   ========================================== */
+@media print {
+    .no-print,
+    .card-title .btn,
+    .form-actions,
+    .breadcrumb-wrapper,
+    .content-header,
+    .sidebar,
+    .navbar,
+    footer {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .report.reports_currency {
+        font-size: 10pt;
+    }
+    
+    .report.reports_currency th,
+    .report.reports_currency td {
+        padding: 5px 8px;
+    }
+    
+    .stats-card {
+        background: #f8f9fa !important;
+        color: #333 !important;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
+
+/* ==========================================
+   Responsive Adjustments
+   ========================================== */
+@media (max-width: 768px) {
+    .trial-balance-table {
+        font-size: 0.85rem;
+    }
+
+    .trial-balance-table th,
+    .trial-balance-table td {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .stats-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-value {
+        font-size: 1.4rem;
+    }
+
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .account-level-1 { padding-right: 25px !important; }
+    .account-level-2 { padding-right: 40px !important; }
+    .account-level-3 { padding-right: 55px !important; }
+    .account-level-4 { padding-right: 70px !important; }
+    .account-level-5 { padding-right: 85px !important; }
+    .account-level-6 { padding-right: 100px !important; }
+}
+
+/* ==========================================
+   Report Filter Form
+   ========================================== */
+.report-filter-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.report-filter-form label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.report-filter-form .form-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+/* ==========================================
+   Export Buttons
+   ========================================== */
+.export-btn-group .btn {
+    margin-left: 0.5rem;
+}
+
+.export-btn-group .btn i {
+    margin-left: 0.5rem;
+}
+
+/* ==========================================
+   Summary Section
+   ========================================== */
+.report-summary {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.report-summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.report-summary-item:last-child {
+    border-bottom: none;
+}
+
+.report-summary-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.report-summary-value {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* ==========================================
+   Chart Section
+   ========================================== */
+.report-chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.report-chart-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* ==========================================
+   Empty State
+   ========================================== */
+.report-empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.report-empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.report-empty-state h4 {
+    margin-bottom: 0.5rem;
+}
+
+.report-empty-state p {
+    margin-bottom: 0;
+}
+
+/* ==========================================
+   Trial Balance Tree Styles
+   ========================================== */
+.stat-card {
+    transition: transform 0.2s ease-in-out;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+/* أحجام النصوص */
+.table-sm {
+    font-size: 12px;
+}
+.table-sm th {
+    font-size: 12px;
+    padding: 10px 8px;
+    white-space: nowrap;
+}
+.table-sm td {
+    padding: 6px 5px;
+}
+
+/* تدرج أنيق للـ header */
+.thead-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+.thead-gradient th {
+    border-color: rgba(255,255,255,0.15) !important;
+}
+
+/* تدرج أنيق للـ footer */
+.tfoot-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+.tfoot-gradient td {
+    border-color: rgba(255,255,255,0.15) !important;
+}
+
+/* ===== تصميم الشجرة المحسن ===== */
+.account-name-cell {
+    padding: 0 !important;
+}
+
+.tree-node {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    position: relative;
+    min-height: 40px;
+}
+
+/* خط التوصيل - Tree Line */
+.tree-line-connector {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(to left, #d1d5db, transparent);
+}
+
+/* زر التوسيع */
+.expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 8px;
+}
+.expand-btn:hover {
+    transform: scale(1.2);
+}
+.expand-btn .expand-icon {
+    font-size: 16px;
+    color: #667eea;
+    transition: color 0.3s ease;
+}
+.expand-btn:hover .expand-icon {
+    color: #764ba2;
+}
+.expand-btn.expanded .expand-icon {
+    color: #ea5455;
+}
+
+/* المسافة للعناصر الفرعية */
+.leaf-spacer {
+    width: 24px;
+    margin-left: 8px;
+}
+
+/* أيقونات الحسابات */
+.account-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    margin-left: 10px;
+    font-size: 14px;
+}
+.parent-icon {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(52, 152, 219, 0.25) 100%);
+}
+.leaf-icon {
+    background: linear-gradient(135deg, rgba(149, 165, 166, 0.1) 0%, rgba(149, 165, 166, 0.2) 100%);
+    color: #7f8c8d;
+}
+
+/* اسم الحساب في الشجرة */
+.account-name.parent-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+.account-name.leaf-name {
+    color: #5a6c7d;
+}
+
+/* ألوان الصفوف حسب المستوى */
+.account-row {
+    transition: all 0.2s ease;
+    border-right: 3px solid transparent;
+}
+.account-row:hover {
+    background-color: #f8faff !important;
+}
+
+/* المستوى الأول - أزرق */
+.account-row.level-0 {
+    background: linear-gradient(90deg, #e8f4fd 0%, #fff 100%);
+    border-right-color: #3498db;
+}
+.account-row.level-0:hover {
+    background: linear-gradient(90deg, #d4ebfc 0%, #f8faff 100%) !important;
+}
+
+/* المستوى الثاني - أخضر */
+.account-row.level-1 {
+    background: linear-gradient(90deg, #f0f9eb 0%, #fff 100%);
+    border-right-color: #27ae60;
+}
+.account-row.level-1:hover {
+    background: linear-gradient(90deg, #e4f5dc 0%, #f8faff 100%) !important;
+}
+
+/* المستوى الثالث - برتقالي */
+.account-row.level-2 {
+    background: linear-gradient(90deg, #fef9e7 0%, #fff 100%);
+    border-right-color: #f39c12;
+}
+.account-row.level-2:hover {
+    background: linear-gradient(90deg, #fdf3d7 0%, #f8faff 100%) !important;
+}
+
+/* المستوى الرابع - وردي */
+.account-row.level-3 {
+    background: linear-gradient(90deg, #fdf2f8 0%, #fff 100%);
+    border-right-color: #e91e63;
+}
+.account-row.level-3:hover {
+    background: linear-gradient(90deg, #fce4ec 0%, #f8faff 100%) !important;
+}
+
+/* المستوى الخامس وما بعد */
+.account-row.level-4,
+.account-row.level-5 {
+    background: linear-gradient(90deg, #f5f5f5 0%, #fff 100%);
+    border-right-color: #95a5a6;
+}
+
+/* الحسابات الفرعية (الأوراق) */
+.account-row.child-row:not(.parent-row) {
+    border-right-width: 2px;
+}
+
+/* الأرقام في الجداول */
+.table-sm td:not(:first-child):not(:nth-child(2)) {
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+}
+
+/* الكود/الرقم */
+.badge-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Animation for rows */
+.account-row {
+    animation: fadeInRow 0.3s ease;
+}
+@keyframes fadeInRow {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* أزرار التوسيع/الطي */
+#expandAll, #collapseAll {
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+#expandAll:hover {
+    background-color: #28c76f;
+    color: #fff;
+    transform: translateY(-2px);
+}
+#collapseAll:hover {
+    background-color: #ff9f43;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ==========================================
+   Print Styles for Trial Balance
+   ========================================== */
+@media print {
+    .card-title > div:last-child,
+    .form-actions,
+    #trialBalanceForm,
+    .breadcrumb-wrapper,
+    .stat-card,
+    #expandAll,
+    #collapseAll {
+        display: none !important;
+    }
+    .table {
+        font-size: 9px;
+    }
+    .thead-gradient {
+        background: #667eea !important;
+        -webkit-print-color-adjust: exact;
+    }
+    .account-row {
+        border-right: none !important;
+    }
+    .tree-node {
+        padding: 4px 5px;
+        min-height: auto;
+    }
+    .expand-btn {
+        display: none;
+    }
+}

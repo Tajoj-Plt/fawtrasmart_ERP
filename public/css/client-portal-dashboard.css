@@ -1,0 +1,824 @@
+/* =====================================================
+   Client Portal Dashboard - Modern Design
+===================================================== */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --primary-light: #60a5fa;
+    --accent: #f97316;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* =====================================================
+   Top Bar
+===================================================== */
+
+.portal-topbar {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+}
+
+.topbar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.topbar-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.topbar-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.topbar-code {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.btn-logout {
+    background: var(--danger);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.btn-logout:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+/* =====================================================
+   Main Content
+===================================================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================================================
+   Cards
+===================================================== */
+
+.portal-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.portal-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-header-portal {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.card-header-portal h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.card-body-portal {
+    padding: 24px;
+}
+
+/* =====================================================
+   Stats Grid
+===================================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-light);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, currentColor 0%, transparent 70%);
+    opacity: 0.05;
+    border-radius: 50%;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #fff;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* =====================================================
+   Tier Progress
+===================================================== */
+
+.tier-progress-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border-radius: 12px;
+    padding: 32px;
+    color: #fff;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.tier-progress-section::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 250px;
+    height: 250px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.tier-progress-section > * {
+    position: relative;
+    z-index: 1;
+}
+
+.tier-progress-bar {
+    background: rgba(255, 255, 255, 0.25);
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 20px 0 14px;
+}
+
+.tier-progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    transition: width 1s ease-in-out;
+}
+
+/* =====================================================
+   Achievements Grid
+===================================================== */
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+}
+
+.achievement-item {
+    text-align: center;
+    padding: 16px 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    cursor: default;
+    position: relative;
+}
+
+.achievement-item.achieved {
+    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+    border: 2px solid var(--success);
+}
+
+.achievement-item.locked {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    opacity: 0.65;
+}
+
+.achievement-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.achievement-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 1.35rem;
+    position: relative;
+}
+
+.achievement-item.achieved .achievement-badge {
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+}
+
+.achievement-item.locked .achievement-badge {
+    background: #cbd5e1;
+    color: #94a3b8;
+}
+
+.achievement-check {
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    width: 22px;
+    height: 22px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #fff;
+    border: 2px solid var(--card-bg);
+}
+
+.achievement-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.achievement-points {
+    font-size: 0.75rem;
+    color: var(--success);
+    font-weight: 700;
+}
+
+/* =====================================================
+   Transactions List
+===================================================== */
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.transaction-item:hover {
+    background: #f8fafc;
+    margin: 0 -4px;
+    padding: 14px 4px;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.transaction-info {
+    flex: 1;
+}
+
+.transaction-desc {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.transaction-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.transaction-points {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.transaction-points.positive {
+    color: var(--success);
+}
+
+.transaction-points.negative {
+    color: var(--danger);
+}
+
+/* =====================================================
+   Referral Section
+===================================================== */
+
+.referral-code-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fef08a 100%);
+    border: 2px solid #fcd34d;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.referral-code {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #d97706;
+    margin: 12px 0 16px;
+    font-family: 'Courier New', monospace;
+}
+
+.btn-copy {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.btn-copy:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.referral-form .form-control {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    background: var(--bg-main);
+}
+
+.referral-form .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+    background: var(--card-bg);
+}
+
+.referral-form .form-control.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.referral-form .form-control.is-invalid:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.btn-refer {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.btn-refer:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.referral-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.referral-list-item:hover {
+    background: #f8fafc;
+    margin: 0 -4px;
+    padding: 12px 4px;
+}
+
+.referral-list-item:last-child {
+    border-bottom: none;
+}
+
+/* =====================================================
+   Rewards
+===================================================== */
+
+.reward-mini-card {
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: all 0.2s;
+    background: var(--card-bg);
+}
+
+.reward-mini-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.reward-mini-card.opacity-50 {
+    opacity: 0.5;
+}
+
+.reward-points {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.reward-points small {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.reward-name {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 6px 0 8px;
+    font-weight: 500;
+}
+
+/* =====================================================
+   Expiry Banner
+===================================================== */
+
+.expiry-banner {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border: 1px solid #fde047;
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+}
+
+.expiry-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--warning), #d97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* =====================================================
+   Alerts
+===================================================== */
+
+.portal-alert {
+    border-radius: 10px;
+    border: none;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.portal-alert.success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.portal-alert.error {
+    background: #fef2f2;
+    color: #7f1d1d;
+    border: 1px solid #fecaca;
+}
+
+
+
+/* =====================================================
+   Section Title
+===================================================== */
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    margin-top: 8px;
+}
+
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.section-title h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.section-title .badge {
+    margin-left: 8px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* =====================================================
+   Scroll Animation
+===================================================== */
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(15px);
+    transition: all 0.4s ease-out;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+
+.empty-state p {
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.chart-container {
+    position: relative;
+    height: 250px;
+}
+
+/* =====================================================
+   Responsive Design
+===================================================== */
+
+@media (max-width: 1024px) {
+    .portal-content {
+        padding: 24px 16px 40px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .topbar-inner {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .achievements-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tier-progress-section {
+        padding: 24px;
+    }
+
+    .referral-code {
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .portal-content {
+        padding: 16px 12px 40px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-value {
+        font-size: 1.4rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .achievements-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .card-body-portal {
+        padding: 16px;
+    }
+
+    .tier-progress-section {
+        padding: 16px;
+    }
+
+    .topbar-inner {
+        padding: 0 12px;
+    }
+
+    .topbar-name {
+        font-size: 0.9rem;
+    }
+
+    .btn-logout {
+        padding: 7px 12px;
+        font-size: 0.8rem;
+    }
+}

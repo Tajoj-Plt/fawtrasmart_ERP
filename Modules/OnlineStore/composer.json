@@ -1,0 +1,31 @@
+{
+    "name": "nwidart/OnlineStore",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\OnlineStore\\": "app/",
+            "Modules\\OnlineStore\\Database\\Factories\\": "database/factories/",
+            "Modules\\OnlineStore\\Database\\Seeders\\": "database/seeders/",
+            "Modules\\OnlineStore\\Providers\\": "Providers/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\OnlineStore\\Tests\\": "tests/"
+        }
+    }
+}

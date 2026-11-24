@@ -1,0 +1,229 @@
+/*!
+ * bs5-compat.css — طبقة توافق Bootstrap 5 فوق قاعدة Bootstrap 4.3.1 (قالب Vuexy).
+ *
+ * لماذا يوجد هذا الملف؟
+ *   كانت القوالب تُحمّل Bootstrap 5 من stackpath.bootstrapcdn.com، وقد تَوقّف
+ *   ذلك الـCDN نهائياً وصار يُرجع 404 — بينما ظلّ Bootstrap 5 **JS** يُحمّل من
+ *   jsDelivr. فبقيَ سلوك BS5 يعمل وتنسيقه مفقود، وصارت كل أصناف BS5 الحصرية
+ *   بلا أثر (me-*, gap-*, fw-bold, form-select, btn-close, form-switch …).
+ *
+ *   إعادة تحميل Bootstrap 5 كاملاً فوق Bootstrap 4 كانت ستُعيد تنسيق كل
+ *   المكوّنات المشتركة (btn / card / modal / table) وتكسر شكل النظام كلّه،
+ *   لذلك يقتصر هذا الملف على **ما ينقص فقط**: أدوات التباعد والمحاذاة
+ *   المنطقية، وبضعة مكوّنات حصرية في BS5.
+ *
+ * ملاحظة اتجاه: نستخدم الخصائص المنطقية (margin-inline-end …) فيعمل الملف
+ * في RTL وLTR معاً دون نسختين.
+ */
+
+/* ============ التباعد المنطقي: me-* / ms-* / pe-* / ps-* ============ */
+.me-0 { margin-inline-end: 0 !important; }
+.ms-0 { margin-inline-start: 0 !important; }
+.pe-0 { padding-inline-end: 0 !important; }
+.ps-0 { padding-inline-start: 0 !important; }
+.me-1 { margin-inline-end: .25rem !important; }
+.ms-1 { margin-inline-start: .25rem !important; }
+.pe-1 { padding-inline-end: .25rem !important; }
+.ps-1 { padding-inline-start: .25rem !important; }
+.me-2 { margin-inline-end: .5rem !important; }
+.ms-2 { margin-inline-start: .5rem !important; }
+.pe-2 { padding-inline-end: .5rem !important; }
+.ps-2 { padding-inline-start: .5rem !important; }
+.me-3 { margin-inline-end: 1rem !important; }
+.ms-3 { margin-inline-start: 1rem !important; }
+.pe-3 { padding-inline-end: 1rem !important; }
+.ps-3 { padding-inline-start: 1rem !important; }
+.me-4 { margin-inline-end: 1.5rem !important; }
+.ms-4 { margin-inline-start: 1.5rem !important; }
+.pe-4 { padding-inline-end: 1.5rem !important; }
+.ps-4 { padding-inline-start: 1.5rem !important; }
+.me-5 { margin-inline-end: 3rem !important; }
+.ms-5 { margin-inline-start: 3rem !important; }
+.pe-5 { padding-inline-end: 3rem !important; }
+.ps-5 { padding-inline-start: 3rem !important; }
+.me-auto { margin-inline-end: auto !important; }
+.ms-auto { margin-inline-start: auto !important; }
+
+/* ============ mx/my/mt/mb/pt/pb المنطقية الناقصة في BS4 RTL ============ */
+.mx-auto { margin-inline: auto !important; }
+
+/* ============ gap ============ */
+.gap-0 { gap: 0 !important; }
+.row-gap-0 { row-gap: 0 !important; }
+.column-gap-0 { column-gap: 0 !important; }
+.gap-1 { gap: .25rem !important; }
+.row-gap-1 { row-gap: .25rem !important; }
+.column-gap-1 { column-gap: .25rem !important; }
+.gap-2 { gap: .5rem !important; }
+.row-gap-2 { row-gap: .5rem !important; }
+.column-gap-2 { column-gap: .5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.row-gap-3 { row-gap: 1rem !important; }
+.column-gap-3 { column-gap: 1rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+.row-gap-4 { row-gap: 1.5rem !important; }
+.column-gap-4 { column-gap: 1.5rem !important; }
+.gap-5 { gap: 3rem !important; }
+.row-gap-5 { row-gap: 3rem !important; }
+.column-gap-5 { column-gap: 3rem !important; }
+
+/* ============ حشوات الشبكة g-* ============
+   شبكة BS4 توفّر التباعد الأفقي أصلاً عبر padding الأعمدة، فنقصر g-*/gy-*
+   على التباعد الرأسي حتى لا يتضاعف الأفقي. أما g-0 فتُلغي الحشو كاملاً كما
+   تفعل BS5. */
+.row.g-1, .row.gy-1 { row-gap: .25rem; }
+.row.gx-1 { column-gap: .25rem; }
+.row.g-2, .row.gy-2 { row-gap: .5rem; }
+.row.gx-2 { column-gap: .5rem; }
+.row.g-3, .row.gy-3 { row-gap: 1rem; }
+.row.gx-3 { column-gap: 1rem; }
+.row.g-4, .row.gy-4 { row-gap: 1.5rem; }
+.row.gx-4 { column-gap: 1.5rem; }
+.row.g-5, .row.gy-5 { row-gap: 3rem; }
+.row.gx-5 { column-gap: 3rem; }
+.row.g-0, .row.gx-0 { margin-inline: 0; }
+.row.g-0 > *, .row.gx-0 > * { padding-inline: 0; }
+.row.g-0, .row.gy-0 { row-gap: 0; }
+
+/* ============ أوزان الخط ============ */
+.fw-light { font-weight: 300 !important; }
+.fw-normal { font-weight: 400 !important; }
+.fw-medium { font-weight: 500 !important; }
+.fw-semibold { font-weight: 600 !important; }
+.fw-bold { font-weight: 700 !important; }
+.fw-bolder { font-weight: bolder !important; }
+
+/* ============ أحجام الخط fs-1..6 ============ */
+.fs-1 { font-size: 2.5rem !important; }
+.fs-2 { font-size: 2rem !important; }
+.fs-3 { font-size: 1.75rem !important; }
+.fs-4 { font-size: 1.5rem !important; }
+.fs-5 { font-size: 1.25rem !important; }
+.fs-6 { font-size: 1rem !important; }
+
+/* ============ المحاذاة والعوم المنطقية ============ */
+.text-start { text-align: start !important; }
+.text-end   { text-align: end !important; }
+.float-start { float: inline-start !important; }
+.float-end   { float: inline-end !important; }
+
+/* ============ إخفاء بصري (بديل sr-only في BS4) ============ */
+.visually-hidden, .visually-hidden-focusable:not(:focus):not(:focus-within) {
+    position: absolute !important; width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important;
+}
+
+/* ============ تخطيطات متفرّقة ============ */
+.d-grid { display: grid !important; }
+.border-start { border-inline-start: 1px solid #dee2e6 !important; }
+.border-end   { border-inline-end: 1px solid #dee2e6 !important; }
+.border-start-0 { border-inline-start: 0 !important; }
+.border-end-0   { border-inline-end: 0 !important; }
+.rounded-start { border-start-start-radius: .25rem !important; border-end-start-radius: .25rem !important; }
+.rounded-end   { border-start-end-radius: .25rem !important; border-end-end-radius: .25rem !important; }
+.top-0 { top: 0 !important; } .bottom-0 { bottom: 0 !important; }
+.start-0 { inset-inline-start: 0 !important; } .end-0 { inset-inline-end: 0 !important; }
+.top-50 { top: 50% !important; } .start-50 { inset-inline-start: 50% !important; }
+.translate-middle   { transform: translate(50%, -50%) !important; }
+.translate-middle-x { transform: translateX(50%) !important; }
+.translate-middle-y { transform: translateY(-50%) !important; }
+[dir="ltr"] .translate-middle   { transform: translate(-50%, -50%) !important; }
+[dir="ltr"] .translate-middle-x { transform: translateX(-50%) !important; }
+
+/* ============ object-fit ============ */
+.object-fit-contain { object-fit: contain !important; }
+.object-fit-cover { object-fit: cover !important; }
+.object-fit-fill { object-fit: fill !important; }
+.object-fit-scale-down { object-fit: scale-down !important; }
+.object-fit-none { object-fit: none !important; }
+
+/* ==================================================================
+   مكوّنات حصرية في Bootstrap 5 — مكتوبة لتتناغم مع حقول Vuexy
+   ================================================================== */
+
+/* ---------- form-select (بديل custom-select في BS4) ---------- */
+.form-select {
+    display: block;
+    width: 100%;
+    padding: .375rem 2.25rem .375rem .75rem;
+    -moz-padding-start: calc(.75rem - 3px);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #4b4b4b;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: left .75rem center;
+    background-size: 16px 12px;
+    border: 1px solid #d8d6de;
+    border-radius: .357rem;
+    appearance: none;
+}
+[dir="ltr"] .form-select {
+    padding: .375rem .75rem .375rem 2.25rem;
+    background-position: right .75rem center;
+}
+.form-select:focus { border-color: var(--app-primary, #7367f0); outline: 0; box-shadow: 0 3px 10px 0 rgba(34, 41, 47, .1); }
+.form-select:disabled { background-color: #efefef; }
+.form-select[multiple], .form-select[size]:not([size="1"]) { padding-inline-end: .75rem; background-image: none; }
+.form-select-sm { padding-top: .25rem; padding-bottom: .25rem; padding-inline-start: .5rem; font-size: .875rem; border-radius: .25rem; }
+.form-select-lg { padding-top: .5rem; padding-bottom: .5rem; padding-inline-start: 1rem; font-size: 1.25rem; border-radius: .5rem; }
+
+/* ---------- btn-close (بديل close في BS4) ---------- */
+.btn-close {
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: .25em;
+    color: #000;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    border: 0;
+    border-radius: .25rem;
+    opacity: .5;
+}
+.btn-close:hover { color: #000; text-decoration: none; opacity: .75; }
+.btn-close:focus { outline: 0; box-shadow: 0 0 0 .25rem rgba(115, 103, 240, .25); opacity: 1; }
+.btn-close:disabled, .btn-close.disabled { pointer-events: none; opacity: .25; }
+.btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+
+/* ---------- form-switch ----------
+   مقصورٌ على .form-switch حتى لا نمسّ .form-check-input العادية التي ما زالت
+   تتبع قواعد Bootstrap 4 في بقيّة النظام. */
+.form-switch { padding-inline-start: 2.5em; }
+.form-switch .form-check-input {
+    position: relative;
+    inset-inline-start: auto;
+    float: none;
+    width: 2em;
+    height: 1em;
+    margin-top: .25em;
+    margin-inline-start: -2.5em;
+    vertical-align: top;
+    appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: contain;
+    border: 1px solid rgba(34, 41, 47, .25);
+    border-radius: 2em;
+    transition: background-position .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+    cursor: pointer;
+}
+[dir="ltr"] .form-switch .form-check-input { background-position: left center; }
+.form-switch .form-check-input:focus {
+    border-color: var(--app-primary, #7367f0);
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(115, 103, 240, .25);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28115, 103, 240, 0.5%29'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked {
+    background-color: var(--app-primary, #7367f0);
+    border-color: var(--app-primary, #7367f0);
+    background-position: left center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+[dir="ltr"] .form-switch .form-check-input:checked { background-position: right center; }
+.form-switch .form-check-input:disabled { opacity: .5; cursor: default; }

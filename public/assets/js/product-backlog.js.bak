@@ -1,0 +1,2573 @@
+/**
+ * Product Backlog JavaScript
+ */
+
+// Check if jQuery and Bootstrap are loaded
+if (typeof jQuery === 'undefined') {
+    console.error('jQuery is not loaded');
+} else {
+    console.log('jQuery version:', $.fn.jquery);
+}
+
+// Check if Bootstrap is loaded
+if (typeof bootstrap === 'undefined' && typeof $.fn.modal === 'undefined') {
+    console.error('Bootstrap is not loaded');
+} else {
+    console.log('Bootstrap is loaded');
+}
+
+// Test function to verify modal opening
+
+$(document).ready(function() {
+    console.log('Document ready');
+    console.log('Product backlog initialized');
+
+    // Check if required elements exist
+    if ($('#btnAddComponent').length === 0) {
+        console.error('Add Component button not found');
+    } else {
+        console.log('Add Component button found');
+    }
+
+    initializeSelect2();
+    initializeEventListeners();
+
+    // Load initial tab content - specifically load the backlog overview tab first
+    const activeTab = 'backlog-overview';
+    console.log('Loading initial tab:', activeTab);
+    loadTabContent(activeTab);
+
+    // Test if functions are available
+
+    // Add a test button to the page for debugging
+
+});
+
+// Also initialize when the page is fully loaded
+$(window).on('load', function() {
+    console.log('Window loaded');
+    initializeEventListeners();
+});
+
+function loadTabContent(tab) {
+    console.log('Loading tab content for:', tab);
+    // Check if this is a sprint tab
+    if (tab.startsWith('sprint-') && tab.includes('-')) {
+        const sprintId = tab.split('-')[1];
+        loadSprintTasks(sprintId);
+    } else if (tab === 'backlog') {
+        loadBacklogTasks();
+    } else {
+        switch(tab) {
+            case 'components':
+                loadComponents();
+                break;
+            case 'epics':
+                loadEpics();
+                break;
+            case 'stories':
+                loadStories();
+                break;
+            case 'subtasks':
+                loadSubTasks();
+                break;
+            case 'bugs':
+                loadBugs();
+                break;
+            default:
+                loadBacklogTasks();
+        }
+    }
+}
+
+function initializeSelect2() {
+    $('.select2').select2({
+        dir: 'rtl',
+        language: {
+            noResults: () => "لا توجد نتائج",
+            searching: () => "جاري البحث..."
+        }
+    });
+
+    $('.modal').on('shown.bs.modal', function () {
+        $(this).find('.select2').select2({
+            dropdownParent: $(this),
+            dir: 'rtl'
+        });
+    });
+}
+
+function initializeEventListeners() {
+    console.log('Initializing event listeners');
+
+    // Check if buttons exist
+    if ($('#btnAddComponent').length === 0) {
+        console.error('Add Component button not found');
+        return;
+    }
+
+    // Remove any existing event listeners to prevent duplicates
+    $('#btnAddComponent').off('click');
+    $('#btnAddEpic').off('click');
+    $('#btnAddStory').off('click');
+    $('#btnAddSubTask').off('click');
+    $('#btnAddBug').off('click');
+
+    // Add buttons
+    $('#btnAddComponent').on('click', function(e) {
+        e.preventDefault();
+        console.log('Add Component button clicked');
+        openComponentModal();
+    });
+
+    $('#btnAddEpic').on('click', function(e) {
+        e.preventDefault();
+        console.log('Add Epic button clicked');
+        loadComponentsForEpic();
+        openEpicModal();
+    });
+
+    $('#btnAddStory').on('click', function(e) {
+        e.preventDefault();
+        console.log('Add Story button clicked');
+        loadEpicsForStory();
+        openStoryModal();
+    });
+
+    $('#btnAddSubTask').on('click', function(e) {
+        e.preventDefault();
+        console.log('Add SubTask button clicked');
+        loadStoriesForSubTask();
+        openSubTaskModal();
+    });
+
+    $('#btnAddBug').on('click', function(e) {
+        e.preventDefault();
+        console.log('Add Bug button clicked');
+        loadEpicsForBug();
+        openBugModal();
+    });
+
+    // Form submissions
+    $('#componentForm').off('submit').on('submit', (e) => { e.preventDefault(); saveComponent(); });
+    $('#epicForm').off('submit').on('submit', (e) => { e.preventDefault(); saveEpic(); });
+    $('#storyForm').off('submit').on('submit', (e) => { e.preventDefault(); saveStory(); });
+    $('#subTaskForm').off('submit').on('submit', (e) => { e.preventDefault(); saveSubTask(); });
+    $('#bugForm').off('submit').on('submit', (e) => { e.preventDefault(); saveBug(); });
+
+    // Tab changes
+    $('a[data-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function (e) {
+        const target = $(e.target).attr('href').substring(1);
+        loadTabContent(target);
+    });
+
+    // Pagination
+    $(document).off('click', '.page-link').on('click', '.page-link', function(e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        const tab = $('.tab-pane.active').attr('id');
+
+        if (page) {
+            loadTabContent(tab, page);
+            $('html, body').animate({ scrollTop: $('.tab-content').offset().top - 100 }, 500);
+        }
+    });
+
+    // Modal cleanup
+    $('.modal .close, .modal .btn-secondary').off('click').on('click', function() {
+        $(this).closest('.modal').modal('hide');
+    });
+
+    $('.modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+        $(this).find('form')[0].reset();
+        $('.select2').val(null).trigger('change');
+        $('.alert').hide();
+    });
+
+    console.log('Event listeners initialized');
+}
+
+// ==================== Sprint and Backlog Loading Functions ====================
+
+function loadBacklogTasks() {
+    showSkeletonLoader('#backlogTasks');
+
+    $.ajax({
+        url: '/tasks/get', // This should return tasks without sprint assignment
+        method: 'GET',
+        data: { sprint_id: 'no_sprint' },
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderBacklogTasks(response.tasks);
+            } else {
+                showError('#backlogTasks', 'Backlog Tasks');
+            }
+        },
+        error: () => showError('#backlogTasks', 'Backlog Tasks')
+    });
+}
+
+function loadSprintTasks(sprintId) {
+    showSkeletonLoader('#sprint-' + sprintId + '-tasks');
+
+    $.ajax({
+        url: '/sprints/' + sprintId + '/tasks',
+        method: 'GET',
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderSprintTasks(sprintId, response.tasks);
+            } else {
+                showError('#sprint-' + sprintId + '-tasks', 'Sprint Tasks');
+            }
+        },
+        error: () => showError('#sprint-' + sprintId + '-tasks', 'Sprint Tasks')
+    });
+}
+
+// ==================== Task Loading Functions ====================
+
+function loadComponents(page = 1) {
+    showSkeletonLoader('#componentsList');
+
+    const filters = {
+        page: page,
+        per_page: 12,
+        sprint_id: $('#componentFilterSprint').val(),
+        user_id: $('#componentFilterUser').val(),
+        priority: $('#componentFilterPriority').val(),
+        status: $('#componentFilterStatus').val()
+    };
+
+    $.ajax({
+        url: route('tasks.get-components'),
+        method: 'GET',
+        data: filters,
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderComponents(response.tasks);
+                updatePagination('components', response.pagination);
+            } else {
+                showError('#componentsList', 'Components');
+            }
+        },
+        error: () => showError('#componentsList', 'Components')
+    });
+}
+
+function loadEpics(page = 1) {
+    showSkeletonLoader('#epicsList');
+
+    const filters = {
+        page: page,
+        per_page: 12,
+        sprint_id: $('#epicFilterSprint').val(),
+        user_id: $('#epicFilterUser').val(),
+        priority: $('#epicFilterPriority').val(),
+        status: $('#epicFilterStatus').val()
+    };
+
+    $.ajax({
+        url: route('tasks.get-epics'),
+        method: 'GET',
+        data: filters,
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderEpics(response.tasks);
+                updatePagination('epics', response.pagination);
+            } else {
+                showError('#epicsList', 'Epics');
+            }
+        },
+        error: () => showError('#epicsList', 'Epics')
+    });
+}
+
+function loadStories(page = 1) {
+    showSkeletonLoader('#storiesList');
+
+    const filters = {
+        page: page,
+        per_page: 12,
+        sprint_id: $('#storyFilterSprint').val(),
+        user_id: $('#storyFilterUser').val(),
+        priority: $('#storyFilterPriority').val(),
+        status: $('#storyFilterStatus').val()
+    };
+
+    $.ajax({
+        url: route('tasks.get-stories'),
+        method: 'GET',
+        data: filters,
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderStories(response.tasks);
+                updatePagination('stories', response.pagination);
+            } else {
+                showError('#storiesList', 'User Stories');
+            }
+        },
+        error: () => showError('#storiesList', 'User Stories')
+    });
+}
+
+function loadSubTasks(page = 1) {
+    showSkeletonLoader('#subtasksList');
+
+    const filters = {
+        page: page,
+        per_page: 12,
+        sprint_id: $('#subtaskFilterSprint').val(),
+        user_id: $('#subtaskFilterUser').val(),
+        priority: $('#subtaskFilterPriority').val(),
+        status: $('#subtaskFilterStatus').val()
+    };
+
+    $.ajax({
+        url: route('tasks.get-subtasks'),
+        method: 'GET',
+        data: filters,
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderSubTasks(response.tasks);
+                updatePagination('subtasks', response.pagination);
+            } else {
+                showError('#subtasksList', 'Sub Tasks');
+            }
+        },
+        error: () => showError('#subtasksList', 'Sub Tasks')
+    });
+}
+
+function loadBugs(page = 1) {
+    showSkeletonLoader('#subtasksList');
+
+    const filters = {
+        page: page,
+        per_page: 12,
+        sprint_id: $('#subtaskFilterSprint').val(),
+        user_id: $('#subtaskFilterUser').val(),
+        priority: $('#subtaskFilterPriority').val(),
+        status: $('#subtaskFilterStatus').val()
+    };
+
+    $.ajax({
+        url: route('tasks.get-subtasks'),
+        method: 'GET',
+        data: filters,
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderSubTasks(response.tasks);
+                updatePagination('subtasks', response.pagination);
+            } else {
+                showError('#subtasksList', 'Sub Tasks');
+            }
+        },
+        error: () => showError('#subtasksList', 'Sub Tasks')
+    });
+}
+
+function loadBugs(page = 1) {
+    showSkeletonLoader('#bugsList');
+
+    const filters = {
+        page: page,
+        per_page: 12,
+        sprint_id: $('#bugFilterSprint').val(),
+        user_id: $('#bugFilterUser').val(),
+        priority: $('#bugFilterPriority').val(),
+        status: $('#bugFilterStatus').val()
+    };
+
+    $.ajax({
+        url: route('tasks.get-bugs'),
+        method: 'GET',
+        data: filters,
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderBugs(response.tasks);
+                updatePagination('bugs', response.pagination);
+            } else {
+                showError('#bugsList', 'Bugs');
+            }
+        },
+        error: () => showError('#bugsList', 'Bugs')
+    });
+}
+
+// ==================== Filter Functions ====================
+
+function filterBacklog() { 
+    // For now, we'll just reload the backlog with sprints
+    loadBacklogWithSprints(); 
+}
+
+function resetBacklogFilters() {
+    $('#backlogFilterSprint, #backlogFilterUser').val('').trigger('change');
+    $('#backlogFilterPriority, #backlogFilterStatus').val('');
+    loadBacklogWithSprints();
+}
+
+function filterComponents() { loadComponents(1); }
+function resetComponentFilters() {
+    $('#componentFilterSprint, #componentFilterUser').val('').trigger('change');
+    $('#componentFilterPriority, #componentFilterStatus').val('');
+    loadComponents(1);
+}
+
+function filterEpics() { loadEpics(1); }
+function resetEpicFilters() {
+    $('#epicFilterSprint, #epicFilterUser').val('').trigger('change');
+    $('#epicFilterPriority, #epicFilterStatus').val('');
+    loadEpics(1);
+}
+
+function filterStories() { loadStories(1); }
+function resetStoryFilters() {
+    $('#storyFilterSprint, #storyFilterUser').val('').trigger('change');
+    $('#storyFilterPriority, #storyFilterStatus').val('');
+    loadStories(1);
+}
+
+function filterSubTasks() { loadSubTasks(1); }
+function resetSubTaskFilters() {
+    $('#subtaskFilterSprint, #subtaskFilterUser').val('').trigger('change');
+    $('#subtaskFilterPriority, #subtaskFilterStatus').val('');
+    loadSubTasks(1);
+}
+
+function filterBugs() { loadBugs(1); }
+function resetBugFilters() {
+    $('#bugFilterSprint, #bugFilterUser').val('').trigger('change');
+    $('#bugFilterPriority, #bugFilterStatus').val('');
+    loadBugs(1);
+}
+
+// ==================== Rendering Functions ====================
+
+function getSprintBadge(sprint) {
+    if (!sprint) {
+        return '<span class="badge badge-secondary">Backlog</span>';
+    }
+    return `<span class="badge badge-primary" title="${sprint.goal || ''}">${sprint.name}</span>`;
+}
+
+function renderComponents(components) {
+    if (components.length === 0) {
+        $('#componentsList').html(getEmptyState('package', 'Components'));
+        return;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th><th>Sprint</th><th>الأولوية</th><th>الحالة</th>
+            <th>المستخدمون</th><th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    components.forEach(c => {
+        html += `<tr>
+            <td>${c.title}</td>
+            <td>${getSprintBadge(c.sprint)}
+                <button class="btn btn-sm btn-outline-primary ml-1" onclick="window.assignSprintToTask(${c.id}, 'component')" title="تعيين Sprint"><i class="feather icon-calendar"></i></button>
+            </td>
+            <td>${getPriorityBadge(c.priority)}</td>
+            <td>${getStatusBadge(c.status)}</td>
+            <td>${getUsersBadges(c.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-success mr-1" onclick="addEpicToComponent(${c.id})" title="إضافة Epic">
+                    <i class="feather icon-plus"></i>
+                </button>
+                <button class="btn btn-sm btn-light mr-1" onclick="editComponent(${c.id})" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteComponent(${c.id})" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    $('#componentsList').html(html);
+}
+
+function renderEpics(epics) {
+    if (epics.length === 0) {
+        $('#epicsList').html(getEmptyState('layers', 'Epics'));
+        return;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th><th>Sprint</th><th>الأولوية</th><th>الحالة</th>
+            <th>الميزانية</th><th>Bugs</th><th>المستخدمون</th><th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    epics.forEach(e => {
+        html += `<tr>
+            <td>${e.title}</td>
+            <td>${getSprintBadge(e.sprint)}
+                <button class="btn btn-sm btn-outline-primary ml-1" onclick="window.assignSprintToTask(${e.id}, 'epic')" title="تعيين Sprint"><i class="feather icon-calendar"></i></button>
+            </td>
+            <td>${getPriorityBadge(e.priority)}</td>
+            <td>${getStatusBadge(e.status)}</td>
+            <td>${e.budget ? parseFloat(e.budget).toFixed(2) : '-'}</td>
+            <td>${e.bug_count || 0}</td>
+            <td>${getUsersBadges(e.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-success mr-1" onclick="addStoryToEpic(${e.id})" title="إضافة Story">
+                    <i class="feather icon-file-text"></i>
+                </button>
+                <button class="btn btn-sm btn-warning mr-1" onclick="addBugToEpic(${e.id})" title="إضافة Bug">
+                    <i class="feather icon-alert-triangle"></i>
+                </button>
+                <button class="btn btn-sm btn-light mr-1" onclick="editEpic(${e.id})" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteEpic(${e.id})" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    $('#epicsList').html(html);
+}
+
+function renderStories(stories) {
+    if (stories.length === 0) {
+        $('#storiesList').html(getEmptyState('file-text', 'User Stories'));
+        return;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th><th>Sprint</th><th>الأولوية</th><th>الحالة</th>
+            <th>النسبة المكتملة</th><th>المستخدمون</th><th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    stories.forEach(s => {
+        html += `<tr>
+            <td>${s.title}</td>
+            <td>${getSprintBadge(s.sprint)}
+                <button class="btn btn-sm btn-outline-primary ml-1" onclick="window.assignSprintToTask(${s.id}, 'story')" title="تعيين Sprint"><i class="feather icon-calendar"></i></button>
+            </td>
+            <td>${getPriorityBadge(s.priority)}</td>
+            <td>${getStatusBadge(s.status)}</td>
+            <td>${s.completion_percentage || 0}%</td>
+            <td>${getUsersBadges(s.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-success mr-1" onclick="addSubTaskToStory(${s.id})" title="إضافة Sub Task">
+                    <i class="feather icon-plus"></i>
+                </button>
+                <button class="btn btn-sm btn-light mr-1" onclick="editStory(${s.id})" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteStory(${s.id})" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    $('#storiesList').html(html);
+}
+
+function renderSubTasks(subtasks) {
+    if (subtasks.length === 0) {
+        $('#subtasksList').html(getEmptyState('list', 'Sub Tasks'));
+        return;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th><th>Sprint</th><th>الأولوية</th><th>الحالة</th>
+            <th>النسبة المكتملة</th><th>الوقت المقدر</th><th>المستخدمون</th><th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    subtasks.forEach(st => {
+        html += `<tr>
+            <td>${st.title}</td>
+            <td>${getSprintBadge(st.sprint)}
+                <button class="btn btn-sm btn-outline-primary ml-1" onclick="window.assignSprintToTask(${st.id}, 'subtask')" title="تعيين Sprint"><i class="feather icon-calendar"></i></button>
+            </td>
+            <td>${getPriorityBadge(st.priority)}</td>
+            <td>${getStatusBadge(st.status)}</td>
+            <td>${st.completion_percentage || 0}%</td>
+            <td>${st.estimated_hours ? st.estimated_hours + ' ساعة' : '-'}</td>
+            <td>${getUsersBadges(st.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-light mr-1" onclick="editSubTask(${st.id})" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteSubTask(${st.id})" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    $('#subtasksList').html(html);
+}
+
+function renderBugs(bugs) {
+    if (bugs.length === 0) {
+        $('#bugsList').html(getEmptyState('alert-triangle', 'Bugs'));
+        return;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th><th>Sprint</th><th>الأولوية</th><th>الحالة</th>
+            <th>النسبة المكتملة</th><th>الوقت المقدر</th><th>المستخدمون</th><th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    bugs.forEach(b => {
+        html += `<tr>
+            <td>${b.title}</td>
+            <td>${getSprintBadge(b.sprint)}
+                <button class="btn btn-sm btn-outline-primary ml-1" onclick="window.assignSprintToTask(${b.id}, 'bug')" title="تعيين Sprint"><i class="feather icon-calendar"></i></button>
+            </td>
+            <td>${getPriorityBadge(b.priority)}</td>
+            <td>${getStatusBadge(b.status)}</td>
+            <td>${b.completion_percentage || 0}%</td>
+            <td>${b.estimated_hours ? b.estimated_hours + ' ساعة' : '-'}</td>
+            <td>${getUsersBadges(b.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-light mr-1" onclick="editBug(${b.id})" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteBug(${b.id})" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    $('#bugsList').html(html);
+}
+
+// ==================== Helper Functions ====================
+
+function getPriorityBadge(priority) {
+    const classes = { low: 'success', medium: 'warning', high: 'danger', urgent: 'dark' };
+    const names = { low: 'منخفضة', medium: 'متوسطة', high: 'عالية', urgent: 'عاجلة' };
+    return `<span class="badge badge-${classes[priority] || 'secondary'}">${names[priority] || priority}</span>`;
+}
+
+function getStatusBadge(status) {
+    const classes = { not_started: 'secondary', in_progress: 'warning', completed: 'success', overdue: 'danger' };
+    const names = { not_started: 'لم تبدأ', in_progress: 'قيد التنفيذ', completed: 'مكتملة', overdue: 'متأخرة' };
+    return `<span class="badge badge-${classes[status] || 'secondary'}">${names[status] || status}</span>`;
+}
+
+function getUsersBadges(users) {
+    if (!users || users.length === 0) return '-';
+    return users.map(u => `<span class="badge badge-secondary">${u.name}</span>`).join(' ');
+}
+
+function getEmptyState(icon, type) {
+    return `<div class="empty-state">
+        <i class="feather icon-${icon}"></i>
+        <h4>لا توجد ${type}</h4>
+        <p>ابدأ بإضافة ${type} جديدة</p>
+    </div>`;
+}
+
+function showError(container, type) {
+    $(container).html(`<div class="empty-state">
+        <i class="feather icon-alert-circle"></i>
+        <h4>خطأ في تحميل ${type}</h4>
+        <p>يرجى المحاولة مرة أخرى</p>
+    </div>`);
+}
+
+function showSkeletonLoader(containerId) {
+    let html = '';
+    for (let i = 0; i < 3; i++) {
+        html += `<div class="skeleton-loader">
+            <div class="skeleton-header"></div>
+            <div class="skeleton-content"></div>
+            <div class="skeleton-content"></div>
+        </div>`;
+    }
+    $(containerId).html(html);
+}
+
+function updatePagination(type, pagination) {
+    const container = `#${type}PaginationContainer`;
+    const list = `#${type}Pagination`;
+    const info = `#${type}Info`;
+
+    if (pagination.last_page <= 1) {
+        $(container).hide();
+        return;
+    }
+
+    const curr = pagination.current_page;
+    const total = pagination.last_page;
+    let html = '';
+
+    // First & Previous
+    if (pagination.has_previous_pages) {
+        html += `<li class="page-item"><a class="page-link" href="#" data-page="1"><i class="fa fa-angle-double-right"></i></a></li>`;
+        html += `<li class="page-item"><a class="page-link" href="#" data-page="${curr - 1}"><i class="fa fa-angle-right"></i></a></li>`;
+    } else {
+        html += `<li class="page-item disabled"><span class="page-link"><i class="fa fa-angle-double-right"></i></span></li>`;
+        html += `<li class="page-item disabled"><span class="page-link"><i class="fa fa-angle-right"></i></span></li>`;
+    }
+
+    // Current page
+    html += `<li class="page-item active"><span class="page-link">${curr}</span></li>`;
+
+    // Next & Last
+    if (pagination.has_more_pages) {
+        html += `<li class="page-item"><a class="page-link" href="#" data-page="${curr + 1}"><i class="fa fa-angle-left"></i></a></li>`;
+        html += `<li class="page-item"><a class="page-link" href="#" data-page="${total}"><i class="fa fa-angle-double-left"></i></a></li>`;
+    } else {
+        html += `<li class="page-item disabled"><span class="page-link"><i class="fa fa-angle-left"></i></span></li>`;
+        html += `<li class="page-item disabled"><span class="page-link"><i class="fa fa-angle-double-left"></i></span></li>`;
+    }
+
+    $(list).html(html);
+    $(info).text(`عرض ${pagination.from || 0} إلى ${pagination.to || 0} من ${pagination.total || 0} نتيجة`);
+    $(container).show();
+}
+
+// ==================== Quick Add Functions ====================
+
+function addEpicToComponent(componentId) {
+    loadComponentsForEpic();
+    openEpicModal();
+    // Automatically select the component when adding an epic to a specific component
+    setTimeout(() => {
+        $('#epic_parent_task_id').val(componentId).trigger('change');
+    }, 300);
+}
+
+function addStoryToEpic(epicId) {
+    loadEpicsForStory();
+    openStoryModal();
+    setTimeout(() => {
+        $('#story_parent_task_id').val(epicId).trigger('change');
+    }, 300);
+}
+
+function addSubTaskToStory(storyId) {
+    loadStoriesForSubTask();
+    openSubTaskModal();
+    setTimeout(() => {
+        $('#subtask_parent_task_id').val(storyId).trigger('change');
+    }, 300);
+}
+
+function addBugToEpic(epicId) {
+    loadEpicsForBug();
+    openBugModal();
+    setTimeout(() => {
+        $('#bug_parent_task_id').val(epicId).trigger('change');
+    }, 300);
+}
+
+// ==================== Component CRUD ====================
+
+function openComponentModal(componentId = null) {
+    console.log('Opening component modal with ID:', componentId);
+
+    // Check if modal exists
+    if ($('#componentModal').length === 0) {
+        console.error('Component modal not found');
+        return;
+    }
+
+    $('#componentFormErrors').hide();
+    $('#componentForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+
+    if (componentId) {
+        $('#componentModalTitle').text('تعديل Component');
+        $('#saveComponentBtn').html('<i class="feather icon-save"></i> تحديث');
+        $.get(route('tasks.show', {id: componentId}), (response) => {
+            if (response.success) fillComponentForm(response.task);
+        });
+    } else {
+        $('#componentModalTitle').text('إضافة Component جديد');
+        $('#saveComponentBtn').html('<i class="feather icon-save"></i> حفظ');
+        $('#component_id').val('');
+    }
+
+    $('#componentModal').modal('show');
+}
+
+function fillComponentForm(task) {
+    $('#component_id').val(task.id);
+    $('#component_project_id').val(task.project_id).trigger('change');
+    $('#component_sprint_id').val(task.sprint_id || '').trigger('change');
+    $('#component_title').val(task.title);
+    $('#component_description').val(task.description);
+    $('#component_priority').val(task.priority);
+    if (task.assigned_users && task.assigned_users.length > 0) {
+        $('#component_assigned_users').val(task.assigned_users.map(u => u.id)).trigger('change');
+    }
+}
+
+function saveComponent() {
+    const formData = new FormData($('#componentForm')[0]);
+    $('#saveComponentBtn').prop('disabled', true).html('<i class="feather icon-loader"></i> جاري الحفظ...');
+
+    $.ajax({
+        url: route('tasks.store'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+// دالة لعرض المهام غير المجدولة في شكل جدول
+function renderBacklogTasksTable(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في Backlog حالياً
+        </div>`;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th>
+            <th>النوع</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+            <th>المستخدمون</th>
+            <th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    tasks.forEach(task => {
+        const taskType = getTaskTypeBadge(task.type);
+        
+        html += `<tr>
+            <td>${task.title}</td>
+            <td>${taskType}</td>
+            <td>${getPriorityBadge(task.priority)}</td>
+            <td>${getStatusBadge(task.status)}</td>
+            <td>${getUsersBadges(task.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="window.assignSprintToTask(${task.id}, '${task.type}')" title="تعيين Sprint">
+                    <i class="feather icon-calendar"></i>
+                </button>
+                <button class="btn btn-sm btn-light" onclick="editTaskByType(${task.id}, '${task.type}')" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteTaskByType(${task.id}, '${task.type}')" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+}
+
+// دالة لعرض مهام Sprint في شكل جدول
+function renderSprintTasksTable(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في هذا Sprint
+        </div>`;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th>
+            <th>النوع</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+            <th>نسبة الإنجاز</th>
+            <th>المستخدمون</th>
+            <th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    tasks.forEach(task => {
+        const taskType = getTaskTypeBadge(task.type);
+        const completionPercentage = task.completion_percentage || 0;
+        
+        html += `<tr>
+            <td>${task.title}</td>
+            <td>${taskType}</td>
+            <td>${getPriorityBadge(task.priority)}</td>
+            <td>${getStatusBadge(task.status)}</td>
+            <td>${completionPercentage}%</td>
+            <td>${getUsersBadges(task.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-light" onclick="editTaskByType(${task.id}, '${task.type}')" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteTaskByType(${task.id}, '${task.type}')" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+}
+
+// دالة للحصول على شارة نوع المهمة
+function getTaskTypeBadge(type) {
+    const types = {
+        'component': { name: 'Component', class: 'primary' },
+        'epic': { name: 'Epic', class: 'info' },
+        'user_story': { name: 'User Story', class: 'success' },
+        'sub_task': { name: 'Sub Task', class: 'warning' },
+        'bug': { name: 'Bug', class: 'danger' }
+    };
+    
+    const taskType = types[type] || { name: type, class: 'secondary' };
+    return `<span class="badge badge-${taskType.class}">${taskType.name}</span>`;
+}
+
+// دالة لتعديل المهمة حسب النوع
+function editTaskByType(id, type) {
+    const typeMap = {
+        'component': 'Component',
+        'epic': 'Epic',
+        'user_story': 'Story',
+        'sub_task': 'SubTask',
+        'bug': 'Bug'
+    };
+    
+    const functionName = 'edit' + (typeMap[type] || 'Task');
+    if (typeof window[functionName] === 'function') {
+        window[functionName](id);
+    } else {
+        console.error('Function not found:', functionName);
+    }
+}
+
+// دالة لحذف المهمة حسب النوع
+function deleteTaskByType(id, type) {
+    const typeMap = {
+        'component': 'Component',
+        'epic': 'Epic',
+        'user_story': 'Story',
+        'sub_task': 'SubTask',
+        'bug': 'Bug'
+    };
+    
+    const functionName = 'delete' + (typeMap[type] || 'Task');
+    if (typeof window[functionName] === 'function') {
+        window[functionName](id);
+    } else {
+        console.error('Function not found:', functionName);
+    }
+}
+
+        contentType: false,
+        success: (response) => {
+            if (response.success) {
+                $('#componentModal').modal('hide');
+                showToast('success', response.message);
+                loadComponents();
+            }
+        },
+        error: (xhr) => {
+            if (xhr.status === 422) {
+                showFormErrors('#componentFormErrors', xhr.responseJSON.errors);
+            } else {
+                showToast('error', xhr.responseJSON?.message || 'حدث خطأ');
+            }
+        },
+        complete: () => {
+            $('#saveComponentBtn').prop('disabled', false).html('<i class="feather icon-save"></i> حفظ');
+        }
+    });
+}
+
+function editComponent(id) {
+    console.log('Editing component with ID:', id);
+    openComponentModal(id);
+}
+
+function deleteComponent(id) {
+    confirmDelete('Component', () => {
+        $.ajax({
+            url: route('tasks.destroy', {id: id}),
+            type: 'DELETE',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            success: (response) => {
+                if (response.success) {
+                    showToast('success', response.message);
+                    loadComponents();
+                }
+            },
+            error: () => showToast('error', 'حدث خطأ أثناء الحذف')
+        });
+    });
+}
+
+// ==================== Epic CRUD ====================
+
+function loadComponentsForEpic() {
+    $.get(route('tasks.get-components'), (response) => {
+        if (response.success) {
+            let options = '<option value="">اختر Component</option>';
+            response.tasks.forEach(c => options += `<option value="${c.id}">${c.title}</option>`);
+            $('#epic_parent_task_id').html(options).trigger('change');
+        }
+    });
+}
+
+function openEpicModal(epicId = null) {
+    console.log('Opening epic modal with ID:', epicId);
+
+    // Check if modal exists
+    if ($('#epicModal').length === 0) {
+        console.error('Epic modal not found');
+        return;
+    }
+
+    $('#epicFormErrors').hide();
+    $('#epicForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+
+    if (epicId) {
+        $('#epicModalTitle').text('تعديل Epic');
+        $('#saveEpicBtn').html('<i class="feather icon-save"></i> تحديث');
+        $.get(route('tasks.show', {id: epicId}), (response) => {
+            if (response.success) fillEpicForm(response.task);
+        });
+    } else {
+        $('#epicModalTitle').text('إضافة Epic جديد');
+        $('#saveEpicBtn').html('<i class="feather icon-save"></i> حفظ');
+        $('#epic_id').val('');
+    }
+
+    $('#epicModal').modal('show');
+}
+
+function fillEpicForm(task) {
+    $('#epic_id').val(task.id);
+    $('#epic_parent_task_id').val(task.parent_task_id).trigger('change');
+    $('#epic_sprint_id').val(task.sprint_id || '').trigger('change');
+    $('#epic_title').val(task.title);
+    $('#epic_description').val(task.description);
+    $('#epic_priority').val(task.priority);
+    $('#epic_budget').val(task.budget);
+
+}
+
+function saveEpic() {
+    const formData = new FormData($('#epicForm')[0]);
+    $('#saveEpicBtn').prop('disabled', true).html('<i class="feather icon-loader"></i> جاري الحفظ...');
+
+    $.ajax({
+        url: route('tasks.store'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: (response) => {
+            if (response.success) {
+                $('#epicModal').modal('hide');
+                showToast('success', response.message);
+                loadEpics();
+                loadComponents();
+            }
+        },
+        error: (xhr) => {
+            if (xhr.status === 422) {
+                showFormErrors('#epicFormErrors', xhr.responseJSON.errors);
+            } else {
+                showToast('error', xhr.responseJSON?.message || 'حدث خطأ');
+            }
+        },
+        complete: () => {
+            $('#saveEpicBtn').prop('disabled', false).html('<i class="feather icon-save"></i> حفظ');
+        }
+    });
+}
+
+function editEpic(id) {
+    console.log('Editing epic with ID:', id);
+    loadComponentsForEpic();
+    openEpicModal(id);
+}
+
+function deleteEpic(id) {
+    confirmDelete('Epic', () => {
+        $.ajax({
+            url: route('tasks.destroy', {id: id}),
+            type: 'DELETE',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            success: (response) => {
+                if (response.success) {
+                    showToast('success', response.message);
+                    loadEpics();
+                    loadComponents();
+                }
+            },
+            error: () => showToast('error', 'حدث خطأ أثناء الحذف')
+        });
+    });
+}
+
+// ==================== Story CRUD ====================
+
+function loadEpicsForStory() {
+    $.get(route('tasks.get-epics'), (response) => {
+        if (response.success) {
+            let options = '<option value="">اختر Epic</option>';
+            response.tasks.forEach(e => options += `<option value="${e.id}">${e.title}</option>`);
+            $('#story_parent_task_id').html(options).trigger('change');
+        }
+    });
+}
+
+function openStoryModal(storyId = null) {
+    console.log('Opening story modal with ID:', storyId);
+
+    // Check if modal exists
+    if ($('#storyModal').length === 0) {
+        console.error('Story modal not found');
+        return;
+    }
+
+    $('#storyFormErrors').hide();
+    $('#storyForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+
+    if (storyId) {
+        $('#storyModalTitle').text('تعديل User Story');
+        $('#saveStoryBtn').html('<i class="feather icon-save"></i> تحديث');
+        $.get(route('tasks.show', {id: storyId}), (response) => {
+            if (response.success) fillStoryForm(response.task);
+        });
+    } else {
+        $('#storyModalTitle').text('إضافة User Story جديدة');
+        $('#saveStoryBtn').html('<i class="feather icon-save"></i> حفظ');
+        $('#story_id').val('');
+    }
+
+    $('#storyModal').modal('show');
+}
+
+function fillStoryForm(task) {
+    $('#story_id').val(task.id);
+    $('#story_parent_task_id').val(task.parent_task_id).trigger('change');
+    $('#story_sprint_id').val(task.sprint_id || '').trigger('change');
+    $('#story_title').val(task.title);
+    $('#story_description').val(task.description);
+    $('#story_priority').val(task.priority);
+    $('#story_estimated_hours').val(task.estimated_hours);
+    $('#story_completion_percentage').val(task.completion_percentage);
+
+}
+
+function saveStory() {
+    const formData = new FormData($('#storyForm')[0]);
+    $('#saveStoryBtn').prop('disabled', true).html('<i class="feather icon-loader"></i> جاري الحفظ...');
+
+    $.ajax({
+        url: route('tasks.store'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: (response) => {
+            if (response.success) {
+                $('#storyModal').modal('hide');
+                showToast('success', response.message);
+                loadStories();
+                loadEpics();
+            }
+        },
+        error: (xhr) => {
+            if (xhr.status === 422) {
+                showFormErrors('#storyFormErrors', xhr.responseJSON.errors);
+            } else {
+                showToast('error', xhr.responseJSON?.message || 'حدث خطأ');
+            }
+        },
+        complete: () => {
+            $('#saveStoryBtn').prop('disabled', false).html('<i class="feather icon-save"></i> حفظ');
+        }
+    });
+}
+
+function editStory(id) {
+    console.log('Editing story with ID:', id);
+    loadEpicsForStory();
+    openStoryModal(id);
+}
+
+function deleteStory(id) {
+    confirmDelete('Story', () => {
+        $.ajax({
+            url: route('tasks.destroy', {id: id}),
+            type: 'DELETE',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            success: (response) => {
+                if (response.success) {
+                    showToast('success', response.message);
+                    loadStories();
+                    loadEpics();
+                }
+            },
+            error: () => showToast('error', 'حدث خطأ أثناء الحذف')
+        });
+    });
+}
+
+// ==================== SubTask & Bug CRUD (Similar Pattern) ====================
+
+function loadStoriesForSubTask() {
+    $.get(route('tasks.get-stories'), (response) => {
+        if (response.success) {
+            let options = '<option value="">اختر User Story</option>';
+            response.tasks.forEach(s => options += `<option value="${s.id}">${s.title}</option>`);
+            $('#subtask_parent_task_id').html(options).trigger('change');
+        }
+    });
+}
+
+function openSubTaskModal(id = null) {
+    console.log('Opening subtask modal with ID:', id);
+
+    // Check if modal exists
+    if ($('#subTaskModal').length === 0) {
+        console.error('SubTask modal not found');
+        return;
+    }
+
+    $('#subTaskFormErrors').hide();
+    $('#subTaskForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+    if (id) {
+        $('#subTaskModalTitle').text('تعديل Sub Task');
+        $('#saveSubTaskBtn').html('<i class="feather icon-save"></i> تحديث');
+        $.get(route('tasks.show', {id: id}), (r) => {
+            if (r.success) {
+                $('#subtask_id').val(r.task.id);
+                $('#subtask_parent_task_id').val(r.task.parent_task_id).trigger('change');
+                $('#subtask_sprint_id').val(r.task.sprint_id || '').trigger('change');
+                $('#subtask_title').val(r.task.title);
+                $('#subtask_description').val(r.task.description);
+                $('#subtask_priority').val(r.task.priority);
+                $('#subtask_estimated_hours').val(r.task.estimated_hours);
+                $('#subtask_completion_percentage').val(r.task.completion_percentage);
+            }
+        });
+    } else {
+        $('#subTaskModalTitle').text('إضافة Sub Task جديدة');
+        $('#saveSubTaskBtn').html('<i class="feather icon-save"></i> حفظ');
+        $('#subtask_id').val('');
+    }
+    $('#subTaskModal').modal('show');
+}
+
+function fillSubTaskForm(task) {
+    $('#subtask_id').val(task.id);
+    $('#subtask_parent_task_id').val(task.parent_task_id).trigger('change');
+    $('#subtask_sprint_id').val(task.sprint_id || '').trigger('change');
+    $('#subtask_title').val(task.title);
+    $('#subtask_description').val(task.description);
+    $('#subtask_priority').val(task.priority);
+    $('#subtask_estimated_hours').val(task.estimated_hours);
+    $('#subtask_completion_percentage').val(task.completion_percentage);
+
+}
+
+function saveSubTask() {
+    const formData = new FormData($('#subTaskForm')[0]);
+    $('#saveSubTaskBtn').prop('disabled', true).html('<i class="feather icon-loader"></i> جاري الحفظ...');
+    $.ajax({
+        url: route('tasks.store'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: (r) => {
+            if (r.success) {
+                $('#subTaskModal').modal('hide');
+                showToast('success', r.message);
+                loadSubTasks();
+                loadStories();
+            }
+        },
+        error: (xhr) => {
+            if (xhr.status === 422) showFormErrors('#subTaskFormErrors', xhr.responseJSON.errors);
+            else showToast('error', xhr.responseJSON?.message || 'حدث خطأ');
+        },
+        complete: () => $('#saveSubTaskBtn').prop('disabled', false).html('<i class="feather icon-save"></i> حفظ')
+    });
+}
+
+function editSubTask(id) {
+    console.log('Editing subtask with ID:', id);
+    loadStoriesForSubTask();
+    openSubTaskModal(id);
+}
+function deleteSubTask(id) {
+    confirmDelete('Sub Task', () => {
+        $.ajax({
+            url: route('tasks.destroy', {id: id}),
+            type: 'DELETE',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            success: (r) => { if (r.success) { showToast('success', r.message); loadSubTasks(); loadStories(); }},
+            error: () => showToast('error', 'حدث خطأ')
+        });
+    });
+}
+
+function loadEpicsForBug() {
+    $.get(route('tasks.get-epics'), (r) => {
+        if (r.success) {
+            let opts = '<option value="">اختر Epic</option>';
+            r.tasks.forEach(e => opts += `<option value="${e.id}">${e.title}</option>`);
+            $('#bug_parent_task_id').html(opts).trigger('change');
+        }
+    });
+}
+
+function openBugModal(id = null) {
+    console.log('Opening bug modal with ID:', id);
+
+    // Check if modal exists
+    if ($('#bugModal').length === 0) {
+        console.error('Bug modal not found');
+        return;
+    }
+
+    $('#bugFormErrors').hide();
+    $('#bugForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+    if (id) {
+        $('#bugModalTitle').text('تعديل Bug');
+        $('#saveBugBtn').html('<i class="feather icon-save"></i> تحديث');
+        $.get(route('tasks.show', {id: id}), (r) => {
+            if (r.success) {
+                $('#bug_id').val(r.task.id);
+                $('#bug_parent_task_id').val(r.task.parent_task_id).trigger('change');
+                $('#bug_sprint_id').val(r.task.sprint_id || '').trigger('change');
+                $('#bug_title').val(r.task.title);
+                $('#bug_description').val(r.task.description);
+                $('#bug_priority').val(r.task.priority);
+                $('#bug_estimated_hours').val(r.task.estimated_hours);
+                $('#bug_completion_percentage').val(r.task.completion_percentage);
+            }
+        });
+    } else {
+        $('#bugModalTitle').text('إضافة Bug جديد');
+        $('#saveBugBtn').html('<i class="feather icon-save"></i> حفظ');
+        $('#bug_id').val('');
+    }
+    $('#bugModal').modal('show');
+}
+
+function fillBugForm(task) {
+    $('#bug_id').val(task.id);
+    $('#bug_parent_task_id').val(task.parent_task_id).trigger('change');
+    $('#bug_sprint_id').val(task.sprint_id || '').trigger('change');
+    $('#bug_title').val(task.title);
+    $('#bug_description').val(task.description);
+    $('#bug_priority').val(task.priority);
+    $('#bug_estimated_hours').val(task.estimated_hours);
+    $('#bug_completion_percentage').val(task.completion_percentage);
+
+}
+
+function saveBug() {
+    const formData = new FormData($('#bugForm')[0]);
+    $('#saveBugBtn').prop('disabled', true).html('<i class="feather icon-loader"></i> جاري الحفظ...');
+    $.ajax({
+        url: route('tasks.store'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: (r) => {
+            if (r.success) {
+                $('#bugModal').modal('hide');
+                showToast('success', r.message);
+                loadBugs();
+                loadEpics();
+            }
+        },
+        error: (xhr) => {
+            if (xhr.status === 422) showFormErrors('#bugFormErrors', xhr.responseJSON.errors);
+            else showToast('error', xhr.responseJSON?.message || 'حدث خطأ');
+        },
+        complete: () => $('#saveBugBtn').prop('disabled', false).html('<i class="feather icon-save"></i> حفظ')
+    });
+}
+
+function editBug(id) {
+    console.log('Editing bug with ID:', id);
+    loadEpicsForBug();
+    openBugModal(id);
+}
+function deleteBug(id) {
+    confirmDelete('Bug', () => {
+        $.ajax({
+            url: route('tasks.destroy', {id: id}),
+            type: 'DELETE',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            success: (r) => { if (r.success) { showToast('success', r.message); loadBugs(); loadEpics(); }},
+            error: () => showToast('error', 'حدث خطأ')
+        });
+    });
+}
+
+// ==================== Utility Functions ====================
+
+function showFormErrors(container, errors) {
+    let html = '<ul class="mb-0">';
+    $.each(errors, (key, value) => html += `<li>${value[0]}</li>`);
+    html += '</ul>';
+    $(container).html(html).show();
+}
+
+function confirmDelete(type, callback) {
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: `سيتم حذف هذا ${type} وكل ما يتعلق به!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'نعم، احذف!',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) callback();
+    });
+}
+
+function showToast(type, message) {
+    const icons = { success: 'success', error: 'error', warning: 'warning', info: 'info' };
+    Swal.fire({
+        icon: icons[type] || 'info',
+        title: message,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: type === 'error' ? 4000 : 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+}
+
+// Add a new function to assign sprint to any task with hierarchical inheritance
+function assignSprintToTask(taskId, taskType) {
+    // Create a simple prompt for sprint selection
+    const sprintOptions = $('#componentFilterSprint').html() || '';
+    const sprintSelect = `
+        <div class="form-group">
+            <label>اختر Sprint:</label>
+            <select id="sprintSelect" class="form-control" style="width: 100%;">
+                <option value="">بدون Sprint - Backlog</option>
+                ${sprintOptions}
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="createNewSprintBtn">
+                <i class="feather icon-plus"></i> إنشاء Sprint جديد
+            </button>
+        </div>
+        <div class="form-group" id="newSprintForm" style="display: none; margin-top: 15px;">
+            <label>اسم Sprint الجديد:</label>
+            <input type="text" id="newSprintName" class="form-control" placeholder="أدخل اسم Sprint">
+            <label class="mt-2">الهدف:</label>
+            <textarea id="newSprintGoal" class="form-control" placeholder="أدخل هدف Sprint"></textarea>
+            <label class="mt-2">تاريخ البدء:</label>
+            <input type="date" id="newSprintStartDate" class="form-control">
+            <label class="mt-2">تاريخ الانتهاء:</label>
+            <input type="date" id="newSprintEndDate" class="form-control">
+        </div>
+        <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" id="applyToChildren" checked>
+            <label class="form-check-label" for="applyToChildren">
+                تطبيق على جميع العناصر الفرعية
+            </label>
+        </div>
+    `;
+
+    Swal.fire({
+        title: 'تعيين Sprint',
+        html: sprintSelect,
+        showCancelButton: true,
+        confirmButtonText: 'حفظ',
+        cancelButtonText: 'إلغاء',
+        didOpen: () => {
+            // Load task current sprint if exists
+            $.get('/tasks/' + taskId, (response) => {
+                if (response.success && response.task.sprint_id) {
+                    $('#sprintSelect').val(response.task.sprint_id);
+                }
+            });
+
+            // Toggle new sprint form
+            $('#createNewSprintBtn').on('click', function() {
+                $('#newSprintForm').toggle();
+                if ($('#newSprintForm').is(':visible')) {
+                    $(this).html('<i class="feather icon-x"></i> إلغاء إنشاء Sprint');
+                } else {
+                    $(this).html('<i class="feather icon-plus"></i> إنشاء Sprint جديد');
+                    // Clear form fields
+                    $('#newSprintName').val('');
+                    $('#newSprintGoal').val('');
+                    $('#newSprintStartDate').val('');
+                    $('#newSprintEndDate').val('');
+                }
+            });
+        },
+        preConfirm: () => {
+            // Check if creating new sprint
+            if ($('#newSprintForm').is(':visible')) {
+                const name = $('#newSprintName').val();
+                const goal = $('#newSprintGoal').val();
+                const startDate = $('#newSprintStartDate').val();
+                const endDate = $('#newSprintEndDate').val();
+
+                if (!name) {
+                    Swal.showValidationMessage('يرجى إدخال اسم Sprint');
+                    return false;
+                }
+
+                return {
+                    createNew: true,
+                    name: name,
+                    goal: goal,
+                    start_date: startDate,
+                    end_date: endDate,
+                    applyToChildren: $('#applyToChildren').is(':checked')
+                };
+            } else {
+                const sprintId = $('#sprintSelect').val();
+                const applyToChildren = $('#applyToChildren').is(':checked');
+                return {
+                    createNew: false,
+                    sprintId: sprintId,
+                    applyToChildren: applyToChildren
+                };
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (result.value.createNew) {
+                // Create new sprint and assign it
+                createAndAssignSprint(
+                    taskId,
+                    result.value.name,
+                    result.value.goal,
+                    result.value.start_date,
+                    result.value.end_date,
+                    result.value.applyToChildren
+                );
+            } else {
+                // Update the task with the selected sprint
+                const formData = new FormData();
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                if (result.value.sprintId) {
+                    formData.append('sprint_id', result.value.sprintId);
+                }
+
+                if (result.value.applyToChildren) {
+                    // Use route helper for updating children sprint - POST method
+                    $.ajax({
+                        url: route('tasks.update-children-sprint', { taskId: taskId }),
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: (response) => {
+                            if (response.success) {
+                                showToast('success', 'تم تحديث Sprint لجميع العناصر الفرعية');
+                                // Reload the current tab
+                                const activeTab = $('.tab-pane.active').attr('id');
+                                loadTabContent(activeTab);
+                            } else {
+                                showToast('error', response.message || 'حدث خطأ أثناء تحديث العناصر الفرعية');
+                                // Still reload the current tab
+                                const activeTab = $('.tab-pane.active').attr('id');
+                                loadTabContent(activeTab);
+                            }
+                        },
+                        error: (xhr) => {
+                            showToast('error', 'حدث خطأ أثناء تحديث العناصر الفرعية: ' + (xhr.responseJSON?.message || 'خطأ غير معروف'));
+                            // Still reload the current tab
+                            const activeTab = $('.tab-pane.active').attr('id');
+                            loadTabContent(activeTab);
+                        }
+                    });
+                } else {
+                    // Update only the current task - PUT method
+                    const putData = new FormData();
+                    putData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                    putData.append('_method', 'PUT');
+                    if (result.value.sprintId) {
+                        putData.append('sprint_id', result.value.sprintId);
+                    }
+
+                    $.ajax({
+                        url: '/tasks/' + taskId,
+                        type: 'POST',
+                        data: putData,
+                        processData: false,
+                        contentType: false,
+                        success: (response) => {
+                            if (response.success) {
+                                showToast('success', 'تم تحديث Sprint للمهمة');
+                                // Reload the current tab
+                                const activeTab = $('.tab-pane.active').attr('id');
+                                loadTabContent(activeTab);
+                            }
+                        },
+                        error: () => {
+                            showToast('error', 'حدث خطأ أثناء تحديث Sprint');
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+
+// Function to create a new sprint and assign it to a task
+function createAndAssignSprint(taskId, name, goal, startDate, endDate, applyToChildren) {
+    // Show loading message
+    Swal.fire({
+        title: 'جاري إنشاء Sprint...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Get the project ID from the task (we need to fetch the task first)
+    $.get('/tasks/' + taskId, (taskResponse) => {
+        if (taskResponse.success && taskResponse.task.project_id) {
+            // Create the new sprint
+            const sprintData = new FormData();
+            sprintData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+            sprintData.append('project_id', taskResponse.task.project_id);
+            sprintData.append('name', name);
+            if (goal) sprintData.append('goal', goal);
+            if (startDate) sprintData.append('start_date', startDate);
+            if (endDate) sprintData.append('end_date', endDate);
+            // Set default status to planned
+            sprintData.append('status', 'planned');
+
+            $.ajax({
+                url: route('sprints.store'),
+                type: 'POST',
+                data: sprintData,
+                processData: false,
+                contentType: false,
+                success: (response) => {
+                    if (response.success && response.sprint) {
+                        // Add the new sprint to all sprint dropdowns
+                        const newOption = new Option(response.sprint.name, response.sprint.id, true, true);
+
+                        $('#componentFilterSprint').append(newOption.cloneNode(true));
+                        $('#epicFilterSprint').append(newOption.cloneNode(true));
+                        $('#storyFilterSprint').append(newOption.cloneNode(true));
+                        $('#subtaskFilterSprint').append(newOption.cloneNode(true));
+                        $('#bugFilterSprint').append(newOption.cloneNode(true));
+
+                        // Now assign this sprint to the task
+                        const formData = new FormData();
+                        formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                        formData.append('sprint_id', response.sprint.id);
+
+                        if (applyToChildren) {
+                            // Use route helper for updating children sprint - POST method
+                            $.ajax({
+                                url: route('tasks.update-children-sprint', { taskId: taskId }),
+                                type: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                success: (response) => {
+                                    if (response.success) {
+                                        Swal.fire('نجاح', 'تم إنشاء Sprint وتعيينه لجميع العناصر الفرعية', 'success');
+                                        // Reload the current tab
+                                        const activeTab = $('.tab-pane.active').attr('id');
+                                        loadTabContent(activeTab);
+                                    } else {
+                                        Swal.fire('خطأ', response.message || 'حدث خطأ أثناء تحديث العناصر الفرعية', 'error');
+                                        // Still reload the current tab
+                                        const activeTab = $('.tab-pane.active').attr('id');
+                                        loadTabContent(activeTab);
+                                    }
+                                },
+                                error: (xhr) => {
+                                    Swal.fire('خطأ', 'حدث خطأ أثناء تحديث العناصر الفرعية: ' + (xhr.responseJSON?.message || 'خطأ غير معروف'), 'error');
+                                    // Still reload the current tab
+                                    const activeTab = $('.tab-pane.active').attr('id');
+                                    loadTabContent(activeTab);
+                                }
+                            });
+                        } else {
+                            // Update only the current task - PUT method
+                            const putData = new FormData();
+                            putData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                            putData.append('_method', 'PUT');
+                            putData.append('sprint_id', response.sprint.id);
+
+                            $.ajax({
+                                url: '/tasks/' + taskId,
+                                type: 'POST',
+                                data: putData,
+                                processData: false,
+                                contentType: false,
+                                success: (response) => {
+                                    if (response.success) {
+                                        Swal.fire('نجاح', 'تم إنشاء Sprint وتعيينه للمهمة', 'success');
+                                        // Reload the current tab
+                                        const activeTab = $('.tab-pane.active').attr('id');
+                                        loadTabContent(activeTab);
+                                    }
+                                },
+                                error: () => {
+                                    Swal.fire('خطأ', 'حدث خطأ أثناء تحديث Sprint', 'error');
+                                }
+                            });
+                        }
+                    } else {
+                        Swal.fire('خطأ', response.message || 'حدث خطأ أثناء إنشاء Sprint', 'error');
+                    }
+                },
+                error: (xhr) => {
+                    Swal.fire('خطأ', 'حدث خطأ أثناء إنشاء Sprint: ' + (xhr.responseJSON?.message || 'خطأ غير معروف'), 'error');
+                }
+            });
+        } else {
+            Swal.fire('خطأ', 'تعذر الحصول على معلومات المشروع للمهمة', 'error');
+        }
+    }).fail(() => {
+        Swal.fire('خطأ', 'تعذر الحصول على معلومات المهمة', 'error');
+    });
+}
+
+// Function to recursively update child tasks with the same sprint
+function updateChildTasksSprint(parentTaskId, sprintId) {
+    // Show loading message
+    Swal.fire({
+        title: 'جاري تحديث العناصر الفرعية...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Call the backend to update all child tasks using route helper - POST method
+    const formData = new FormData();
+    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+    if (sprintId) {
+        formData.append('sprint_id', sprintId);
+    }
+
+    $.ajax({
+        url: route('tasks.update-children-sprint', { taskId: parentTaskId }),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: (response) => {
+            if (response.success) {
+                Swal.fire('نجاح', 'تم تحديث Sprint لجميع العناصر الفرعية', 'success');
+                // Reload the current tab
+                const activeTab = $('.tab-pane.active').attr('id');
+                loadTabContent(activeTab);
+            } else {
+                Swal.fire('خطأ', response.message || 'حدث خطأ أثناء تحديث العناصر الفرعية', 'error');
+                // Still reload the current tab
+                const activeTab = $('.tab-pane.active').attr('id');
+                loadTabContent(activeTab);
+            }
+        },
+        error: (xhr) => {
+            Swal.fire('خطأ', 'حدث خطأ أثناء تحديث العناصر الفرعية: ' + (xhr.responseJSON?.message || 'خطأ غير معروف'), 'error');
+            // Still reload the current tab
+            const activeTab = $('.tab-pane.active').attr('id');
+            loadTabContent(activeTab);
+        }
+    });
+}
+
+
+
+// إضافة هذه الدوال إلى ملف product-backlog.js
+
+// دالة لتحميل Backlog مع Sprints القابلة للطي
+function loadBacklogWithSprints() {
+    showSkeletonLoader('#backlogContent');
+
+    // Get filter values
+    var backlogFilters = {
+        sprint_id: $('#backlogFilterSprint').val(),
+        user_id: $('#backlogFilterUser').val(),
+        priority: $('#backlogFilterPriority').val(),
+        status: $('#backlogFilterStatus').val()
+    };
+
+    $.ajax({
+        url: '/api/backlog/sprints-and-tasks',
+        method: 'GET',
+        data: backlogFilters,
+        cache: false,
+        success: (response) => {
+            if (response.success) {
+                renderBacklogAccordion(response.sprints, response.backlogTasks);
+            } else {
+                showError('#backlogContent', 'Backlog');
+            }
+        },
+        error: () => showError('#backlogContent', 'Backlog')
+    });
+}
+
+// دالة لعرض Accordion الخاص بـ Backlog
+function renderBacklogAccordion(sprints, backlogTasks) {
+    let html = '<div class="accordion" id="backlogAccordion">';
+
+    // قسم المهام غير المجدولة (Backlog)
+    html += `
+        <div class="card">
+            <div class="card-header bg-secondary" id="headingBacklog">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-right text-white collapsed" type="button"
+                            data-toggle="collapse" data-target="#collapseBacklog"
+                            aria-expanded="false" aria-controls="collapseBacklog">
+                        <i class="feather icon-inbox"></i>
+                        <strong>Backlog - مهام غير مجدولة</strong>
+                        <span class="badge badge-light float-left">${backlogTasks.length} مهمة</span>
+                        <i class="feather icon-chevron-down float-left mr-2"></i>
+                    </button>
+                </h2>
+            </div>
+            <div id="collapseBacklog" class="collapse" aria-labelledby="headingBacklog" data-parent="#backlogAccordion">
+                <div class="card-body">
+                    ${renderBacklogTasksList(backlogTasks)}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Sprints المجدولة
+    sprints.forEach((sprint, index) => {
+        const sprintId = `sprint${sprint.id}`;
+        const isExpanded = index === 0 ? 'show' : '';
+        const ariaExpanded = index === 0 ? 'true' : 'false';
+        const collapsed = index === 0 ? '' : 'collapsed';
+
+        const statusBadge = getSprintStatusBadge(sprint.status);
+        const dateRange = sprint.start_date && sprint.end_date
+            ? `${formatDate(sprint.start_date)} - ${formatDate(sprint.end_date)}`
+            : 'غير محدد';
+
+        html += `
+            <div class="card">
+                <div class="card-header ${getSprintHeaderClass(sprint.status)}" id="heading${sprintId}">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-right ${collapsed}" type="button"
+                                data-toggle="collapse" data-target="#collapse${sprintId}"
+                                aria-expanded="${ariaExpanded}" aria-controls="collapse${sprintId}">
+                            <i class="feather icon-calendar"></i>
+                            <strong>${sprint.name}</strong>
+                            ${statusBadge}
+                            <span class="badge badge-info float-left">${sprint.tasks_count || 0} مهمة</span>
+                            <i class="feather icon-chevron-down float-left mr-2"></i>
+                            <br>
+                            <small class="text-muted">${dateRange}</small>
+                            ${sprint.goal ? `<br><small class="text-muted"><i class="feather icon-target"></i> ${sprint.goal}</small>` : ''}
+                        </button>
+                    </h2>
+                </div>
+                <div id="collapse${sprintId}" class="collapse ${isExpanded}"
+                     aria-labelledby="heading${sprintId}" data-parent="#backlogAccordion">
+                    <div class="card-body">
+                        ${renderSprintTasksHierarchy(sprint.tasks)}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    $('#backlogContent').html(html);
+}
+
+// دالة لعرض المهام غير المجدولة
+function renderBacklogTasksList(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في Backlog حالياً
+        </div>`;
+    }
+
+    // تصنيف المهام حسب النوع
+    const groupedTasks = {
+        component: tasks.filter(t => t.type === 'component'),
+        epic: tasks.filter(t => t.type === 'epic'),
+        user_story: tasks.filter(t => t.type === 'user_story'),
+        sub_task: tasks.filter(t => t.type === 'sub_task'),
+        bug: tasks.filter(t => t.type === 'bug')
+    };
+
+    let html = '<div class="backlog-tasks">';
+
+    // Components
+    if (groupedTasks.component.length > 0) {
+        html += '<h5 class="mt-3"><i class="feather icon-package"></i> Components</h5>';
+        html += renderTaskCards(groupedTasks.component, 'component');
+    }
+
+    // Epics
+    if (groupedTasks.epic.length > 0) {
+        html += '<h5 class="mt-3"><i class="feather icon-layers"></i> Epics</h5>';
+        html += renderTaskCards(groupedTasks.epic, 'epic');
+    }
+
+    // User Stories
+    if (groupedTasks.user_story.length > 0) {
+        html += '<h5 class="mt-3"><i class="feather icon-file-text"></i> User Stories</h5>';
+        html += renderTaskCards(groupedTasks.user_story, 'user_story');
+    }
+
+    // Sub Tasks
+    if (groupedTasks.sub_task.length > 0) {
+        html += '<h5 class="mt-3"><i class="feather icon-list"></i> Sub Tasks</h5>';
+        html += renderTaskCards(groupedTasks.sub_task, 'sub_task');
+    }
+
+    // Bugs
+    if (groupedTasks.bug.length > 0) {
+        html += '<h5 class="mt-3"><i class="feather icon-alert-triangle"></i> Bugs</h5>';
+        html += renderTaskCards(groupedTasks.bug, 'bug');
+    }
+
+    html += '</div>';
+    return html;
+}
+
+// دالة لعرض المهام في Sprint بشكل هرمي
+function renderSprintTasksHierarchy(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في هذا Sprint
+        </div>`;
+    }
+
+    // تنظيم المهام بشكل هرمي
+    const components = tasks.filter(t => t.type === 'component');
+    const epics = tasks.filter(t => t.type === 'epic');
+    const stories = tasks.filter(t => t.type === 'user_story');
+    const subtasks = tasks.filter(t => t.type === 'sub_task');
+    const bugs = tasks.filter(t => t.type === 'bug');
+
+    let html = '<div class="sprint-tasks-hierarchy">';
+
+    // عرض Components مع Epics التابعة لها
+    components.forEach(component => {
+        html += `<div class="task-card component-card mb-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5>
+                        <i class="feather icon-package text-primary"></i>
+                        ${component.title}
+                        ${getPriorityBadge(component.priority)}
+                        ${getStatusBadge(component.status)}
+                    </h5>
+                    <p class="mb-0 text-muted">${component.description || ''}</p>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editComponent(${component.id})">
+                            <i class="feather icon-edit"></i> تعديل
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteComponent(${component.id})">
+                            <i class="feather icon-trash"></i> حذف
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+        `;
+
+        // Epics التابعة لهذا Component
+        const componentEpics = epics.filter(e => e.parent_task_id === component.id);
+        if (componentEpics.length > 0) {
+            componentEpics.forEach(epic => {
+                html += renderEpicWithChildren(epic, stories, subtasks, bugs);
+            });
+        } else {
+            html += '<p class="text-muted mb-0"><em>لا توجد Epics لهذا Component</em></p>';
+        }
+
+        html += `
+                </div>
+            </div>
+        </div>`;
+    });
+
+    // Epics بدون Component
+    const orphanEpics = epics.filter(e => !e.parent_task_id);
+    if (orphanEpics.length > 0) {
+        html += '<h5 class="mt-3">Epics بدون Component:</h5>';
+        orphanEpics.forEach(epic => {
+            html += renderEpicWithChildren(epic, stories, subtasks, bugs);
+        });
+    }
+
+    // Stories بدون Epic
+    const orphanStories = stories.filter(s => !s.parent_task_id);
+    if (orphanStories.length > 0) {
+        html += '<h5 class="mt-3">User Stories بدون Epic:</h5>';
+        orphanStories.forEach(story => {
+            html += renderStoryWithSubtasks(story, subtasks);
+        });
+    }
+
+    // Bugs بدون Epic
+    const orphanBugs = bugs.filter(b => !b.parent_task_id);
+    if (orphanBugs.length > 0) {
+        html += '<h5 class="mt-3">Bugs بدون Epic:</h5>';
+        html += renderTaskCards(orphanBugs, 'bug');
+    }
+
+    html += '</div>';
+    return html;
+}
+
+// دالة لعرض Epic مع العناصر التابعة له
+function renderEpicWithChildren(epic, allStories, allSubtasks, allBugs) {
+    const epicStories = allStories.filter(s => s.parent_task_id === epic.id);
+    const epicBugs = allBugs.filter(b => b.parent_task_id === epic.id);
+
+    let html = `
+        <div class="task-card epic-card mb-3 ml-3">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6>
+                        <i class="feather icon-layers"></i>
+                        ${epic.title}
+                        ${getPriorityBadge(epic.priority)}
+                        ${getStatusBadge(epic.status)}
+                    </h6>
+                    <p class="mb-0"><small>${epic.description || ''}</small></p>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-light" onclick="editEpic(${epic.id})">
+                            <i class="feather icon-edit"></i> تعديل
+                        </button>
+                        <button class="btn btn-sm btn-outline-light" onclick="deleteEpic(${epic.id})">
+                            <i class="feather icon-trash"></i> حذف
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+    `;
+
+    // User Stories
+    if (epicStories.length > 0) {
+        epicStories.forEach(story => {
+            html += renderStoryWithSubtasks(story, allSubtasks);
+        });
+    }
+
+    // Bugs
+    if (epicBugs.length > 0) {
+        html += '<div class="mt-2"><strong>Bugs:</strong></div>';
+        html += renderTaskCards(epicBugs, 'bug');
+    }
+
+    if (epicStories.length === 0 && epicBugs.length === 0) {
+        html += '<p class="text-muted mb-0"><em>لا توجد User Stories أو Bugs لهذا Epic</em></p>';
+    }
+
+    html += `
+                </div>
+            </div>
+        </div>
+    `;
+
+    return html;
+}
+
+// دالة لعرض Story مع Sub Tasks
+function renderStoryWithSubtasks(story, allSubtasks) {
+    const storySubtasks = allSubtasks.filter(st => st.parent_task_id === story.id);
+
+    let html = `
+        <div class="task-card story-card mb-2 ml-4">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <strong>
+                        <i class="feather icon-file-text"></i>
+                        ${story.title}
+                    </strong>
+                    ${getPriorityBadge(story.priority)}
+                    ${getStatusBadge(story.status)}
+                    <span class="badge badge-light float-left">${story.completion_percentage || 0}%</span>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-light" onclick="editStory(${story.id})">
+                            <i class="feather icon-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-light" onclick="deleteStory(${story.id})">
+                            <i class="feather icon-trash"></i>
+                        </button>
+                    </div>
+                </div>
+    `;
+
+    if (storySubtasks.length > 0) {
+        html += '<div class="card-body">';
+        storySubtasks.forEach(subtask => {
+            html += `
+                <div class="task-item mb-1 p-2 border-left border-info">
+                    <i class="feather icon-check-square"></i>
+                    ${subtask.title}
+                    ${getPriorityBadge(subtask.priority)}
+                    ${getStatusBadge(subtask.status)}
+                    <span class="badge badge-secondary">${subtask.completion_percentage || 0}%</span>
+                    <button class="btn btn-sm btn-link" onclick="editSubTask(${subtask.id})">
+                        <i class="feather icon-edit"></i>
+                    </button>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+
+    html += '</div></div>';
+    return html;
+}
+
+// دالة لعرض بطاقات المهام
+function renderTaskCards(tasks, type) {
+    let html = '<div class="row">';
+
+    tasks.forEach(task => {
+        html += `
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card task-card-item">
+                    <div class="card-body">
+                        <h6>${task.title}</h6>
+                        <p class="text-muted small">${task.description ? task.description.substring(0, 100) : ''}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            ${getPriorityBadge(task.priority)}
+                            ${getStatusBadge(task.status)}
+                        </div>
+                        ${task.completion_percentage !== undefined ?
+                            `<div class="progress mt-2" style="height: 5px;">
+                                <div class="progress-bar" style="width: ${task.completion_percentage}%"></div>
+                            </div>` : ''}
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-primary" onclick="window.assignSprintToTask(${task.id}, '${type}')">
+                                <i class="feather icon-calendar"></i> تعيين Sprint
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="edit${capitalizeFirst(type)}(${task.id})">
+                                <i class="feather icon-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+// دالة لعرض المهام غير المجدولة في شكل جدول
+function renderBacklogTasksTable(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في Backlog حالياً
+        </div>`;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th>
+            <th>النوع</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+            <th>المستخدمون</th>
+            <th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    tasks.forEach(task => {
+        const taskType = getTaskTypeBadge(task.type);
+        
+        html += `<tr>
+            <td>${task.title}</td>
+            <td>${taskType}</td>
+            <td>${getPriorityBadge(task.priority)}</td>
+            <td>${getStatusBadge(task.status)}</td>
+            <td>${getUsersBadges(task.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="window.assignSprintToTask(${task.id}, '${task.type}')" title="تعيين Sprint">
+                    <i class="feather icon-calendar"></i>
+                </button>
+                <button class="btn btn-sm btn-light" onclick="editTaskByType(${task.id}, '${task.type}')" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteTaskByType(${task.id}, '${task.type}')" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+}
+
+// دالة لعرض مهام Sprint في شكل جدول
+function renderSprintTasksTable(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في هذا Sprint
+        </div>`;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th>
+            <th>النوع</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+            <th>نسبة الإنجاز</th>
+            <th>المستخدمون</th>
+            <th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    tasks.forEach(task => {
+        const taskType = getTaskTypeBadge(task.type);
+        const completionPercentage = task.completion_percentage || 0;
+        
+        html += `<tr>
+            <td>${task.title}</td>
+            <td>${taskType}</td>
+            <td>${getPriorityBadge(task.priority)}</td>
+            <td>${getStatusBadge(task.status)}</td>
+            <td>${completionPercentage}%</td>
+            <td>${getUsersBadges(task.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-light" onclick="editTaskByType(${task.id}, '${task.type}')" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteTaskByType(${task.id}, '${task.type}')" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+}
+
+// دالة للحصول على شارة نوع المهمة
+function getTaskTypeBadge(type) {
+    const types = {
+        'component': { name: 'Component', class: 'primary' },
+        'epic': { name: 'Epic', class: 'info' },
+        'user_story': { name: 'User Story', class: 'success' },
+        'sub_task': { name: 'Sub Task', class: 'warning' },
+        'bug': { name: 'Bug', class: 'danger' }
+    };
+    
+    const taskType = types[type] || { name: type, class: 'secondary' };
+    return `<span class="badge badge-${taskType.class}">${taskType.name}</span>`;
+}
+
+// دالة لتعديل المهمة حسب النوع
+function editTaskByType(id, type) {
+    const typeMap = {
+        'component': 'Component',
+        'epic': 'Epic',
+        'user_story': 'Story',
+        'sub_task': 'SubTask',
+        'bug': 'Bug'
+    };
+    
+    const functionName = 'edit' + (typeMap[type] || 'Task');
+    if (typeof window[functionName] === 'function') {
+        window[functionName](id);
+    } else {
+        console.error('Function not found:', functionName);
+    }
+}
+
+// دالة لحذف المهمة حسب النوع
+function deleteTaskByType(id, type) {
+    const typeMap = {
+        'component': 'Component',
+        'epic': 'Epic',
+        'user_story': 'Story',
+        'sub_task': 'SubTask',
+        'bug': 'Bug'
+    };
+    
+    const functionName = 'delete' + (typeMap[type] || 'Task');
+    if (typeof window[functionName] === 'function') {
+        window[functionName](id);
+    } else {
+        console.error('Function not found:', functionName);
+    }
+}
+
+// دوال مساعدة
+function getSprintStatusBadge(status) {
+    const badges = {
+        planned: '<span class="badge badge-secondary">مخطط</span>',
+        active: '<span class="badge badge-success">نشط</span>',
+        completed: '<span class="badge badge-primary">مكتمل</span>',
+        cancelled: '<span class="badge badge-danger">ملغي</span>'
+    };
+    return badges[status] || '';
+}
+
+function getSprintHeaderClass(status) {
+    const classes = {
+        planned: 'bg-info text-white',
+        active: 'bg-success text-white',
+        completed: 'bg-primary text-white',
+        cancelled: 'bg-danger text-white'
+    };
+    return classes[status] || 'bg-secondary text-white';
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-SA');
+}
+
+function capitalizeFirst(str) {
+    const map = {
+        'component': 'Component',
+        'epic': 'Epic',
+        'user_story': 'Story',
+        'sub_task': 'SubTask',
+        'bug': 'Bug'
+    };
+    return map[str] || str;
+}
+
+// دالة لعرض المهام غير المجدولة في شكل جدول
+function renderBacklogTasksTable(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في Backlog حالياً
+        </div>`;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th>
+            <th>النوع</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+            <th>المستخدمون</th>
+            <th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    tasks.forEach(task => {
+        const taskType = getTaskTypeBadge(task.type);
+        
+        html += `<tr>
+            <td>${task.title}</td>
+            <td>${taskType}</td>
+            <td>${getPriorityBadge(task.priority)}</td>
+            <td>${getStatusBadge(task.status)}</td>
+            <td>${getUsersBadges(task.assigned_users)}</td>
+function saveComponent() {
+    const formData = new FormData($('#componentForm')[0]);
+    $('#saveComponentBtn').prop('disabled', true).html('<i class="feather icon-loader"></i> جاري الحفظ...');
+
+    $.ajax({
+        url: route('tasks.store'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: (response) => {
+            if (response.success) {
+                $('#componentModal').modal('hide');
+                showToast('success', response.message);
+                loadComponents();
+            }
+        },
+        error: (xhr) => {
+            if (xhr.status === 422) {
+                showFormErrors('#componentFormErrors', xhr.responseJSON.errors);
+            } else {
+                showToast('error', xhr.responseJSON?.message || 'حدث خطأ');
+            }
+        },
+        complete: () => {
+            $('#saveComponentBtn').prop('disabled', false).html('<i class="feather icon-save"></i> حفظ');
+        }
+    });
+}
+
+// دالة لعرض المهام غير المجدولة في شكل جدول
+function renderBacklogTasksTable(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في Backlog حالياً
+        </div>`;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th>
+            <th>النوع</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+            <th>المستخدمون</th>
+            <th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    tasks.forEach(task => {
+        const taskType = getTaskTypeBadge(task.type);
+        
+        html += `<tr>
+            <td>${task.title}</td>
+            <td>${taskType}</td>
+            <td>${getPriorityBadge(task.priority)}</td>
+            <td>${getStatusBadge(task.status)}</td>
+            <td>${getUsersBadges(task.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="window.assignSprintToTask(${task.id}, '${task.type}')" title="تعيين Sprint">
+                    <i class="feather icon-calendar"></i>
+                </button>
+                <button class="btn btn-sm btn-light" onclick="editTaskByType(${task.id}, '${task.type}')" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteTaskByType(${task.id}, '${task.type}')" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+}
+
+// دالة لعرض مهام Sprint في شكل جدول
+function renderSprintTasksTable(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return `<div class="alert alert-info">
+            <i class="feather icon-info"></i> لا توجد مهام في هذا Sprint
+        </div>`;
+    }
+
+    let html = `<div class="table-responsive"><table class="table table-striped table-bordered">
+        <thead><tr>
+            <th>العنوان</th>
+            <th>النوع</th>
+            <th>الأولوية</th>
+            <th>الحالة</th>
+            <th>نسبة الإنجاز</th>
+            <th>المستخدمون</th>
+            <th>الإجراءات</th>
+        </tr></thead><tbody>`;
+
+    tasks.forEach(task => {
+        const taskType = getTaskTypeBadge(task.type);
+        const completionPercentage = task.completion_percentage || 0;
+        
+        html += `<tr>
+            <td>${task.title}</td>
+            <td>${taskType}</td>
+            <td>${getPriorityBadge(task.priority)}</td>
+            <td>${getStatusBadge(task.status)}</td>
+            <td>${completionPercentage}%</td>
+            <td>${getUsersBadges(task.assigned_users)}</td>
+            <td>
+                <button class="btn btn-sm btn-light" onclick="editTaskByType(${task.id}, '${task.type}')" title="تعديل">
+                    <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteTaskByType(${task.id}, '${task.type}')" title="حذف">
+                    <i class="feather icon-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+}
+
+// دالة للحصول على شارة نوع المهمة
+function getTaskTypeBadge(type) {
+    const types = {
+        'component': { name: 'Component', class: 'primary' },
+        'epic': { name: 'Epic', class: 'info' },
+        'user_story': { name: 'User Story', class: 'success' },
+        'sub_task': { name: 'Sub Task', class: 'warning' },
+        'bug': { name: 'Bug', class: 'danger' }
+    };
+    
+    const taskType = types[type] || { name: type, class: 'secondary' };
+    return `<span class="badge badge-${taskType.class}">${taskType.name}</span>`;
+}
+
+// دالة لتعديل المهمة حسب النوع
+function editTaskByType(id, type) {
+    const typeMap = {
+        'component': 'Component',
+        'epic': 'Epic',
+        'user_story': 'Story',
+        'sub_task': 'SubTask',
+        'bug': 'Bug'
+    };
+    
+    const functionName = 'edit' + (typeMap[type] || 'Task');
+    if (typeof window[functionName] === 'function') {
+        window[functionName](id);
+    } else {
+        console.error('Function not found:', functionName);
+    }
+}
+
+// دالة لحذف المهمة حسب النوع
+function deleteTaskByType(id, type) {
+    const typeMap = {
+        'component': 'Component',
+        'epic': 'Epic',
+        'user_story': 'Story',
+        'sub_task': 'SubTask',
+        'bug': 'Bug'
+    };
+    
+    const functionName = 'delete' + (typeMap[type] || 'Task');
+    if (typeof window[functionName] === 'function') {
+        window[functionName](id);
+    } else {
+        console.error('Function not found:', functionName);
+    }
+}
+
+// تحديث دالة loadTabContent لدعم تبويبة Backlog الجديدة
+const originalLoadTabContent = loadTabContent;
+loadTabContent = function(tab) {
+    if (tab === 'backlog-overview') {
+        loadBacklogWithSprints();
+    } else {
+        originalLoadTabContent(tab);
+    }
+};

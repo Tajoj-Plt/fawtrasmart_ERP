@@ -1,0 +1,11 @@
+{
+    "name": "Installer",
+    "alias": "installer",
+    "description": "معالج تثبيت النظام: فحص المتطلبات، ضبط قاعدة البيانات، تشغيل الهجرات والبذور، وتجهيز الإعدادات الأساسية.",
+    "keywords": [],
+    "priority": 100,
+    "providers": [
+        "Modules\\Installer\\Providers\\InstallerServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,451 @@
+متحكّمات الموارد البشرية : 44
+الأفعال المسجَّلة        : 358
+بلا صلاحية نظام         : 0
+متحكّمات تعذّرت قراءتها  : 0
+
+
+── Attendance\AttendanceDaysController
+     index                        staff_attendance_view_all
+     filter                       staff_attendance_edit_days
+     create                       staff_attendance_edit_days
+     edit                         staff_attendance_edit_days
+     show                         staff_attendance_view_all
+     store                        staff_attendance_edit_days
+     update                       staff_attendance_edit_days
+     calculation                  staff_attendance_calculate_days | staff_attendance_edit_days
+     delete                       staff_attendance_edit_days
+     calculateAttendance          staff_attendance_calculate_days | staff_attendance_edit_days
+
+── Attendance\AttendanceRecordsController
+     index                        staff_attendance_view_all | staff_attendance_view_own
+     create                       staff_attendance_online
+     store                        staff_attendance_online
+     show                         staff_attendance_view_all | staff_attendance_view_own
+     edit                         staff_attendance_edit_days
+     update                       staff_attendance_edit_days
+     destroy                      staff_attendance_delete
+
+── Attendance\AttendanceSessionsRecordController
+     index                        staff_attendance_view_all
+     create                       staff_attendance_edit_days
+     store                        staff_attendance_edit_days
+     show                         staff_attendance_view_all
+     edit                         staff_attendance_edit_days
+     update                       staff_attendance_edit_days
+     destroy                      staff_attendance_edit_days
+
+── Attendance\AttendanceSheetsController
+     index                        staff_attendance_view_all | staff_attendance_view_other_books | staff_attendance_view_own_records
+     create                       staff_attendance_create_book
+     edit                         staff_attendance_edit_days
+     show                         staff_attendance_view_all | staff_attendance_view_other_books | staff_attendance_view_own_records
+     getAttendanceSheetsAjax      staff_attendance_view_all | staff_attendance_view_own_records
+     filterAttendanceDays         staff_attendance_view_all | staff_attendance_view_own_records
+     store                        staff_attendance_create_book
+     update                       staff_attendance_edit_days
+     delete                       staff_attendance_delete_books
+
+── Attendance\BarcodeAttendanceController
+     scanPage                     staff_attendance_online
+     processBarcode               staff_attendance_online
+     checkIn                      staff_attendance_online
+     checkOut                     staff_attendance_online
+     dashboardStats               staff_attendance_report_view | staff_attendance_online
+     generateBarcode              staff_attendance_online
+     generateAllBarcodes          staff_attendance_online
+     dailyReport                  staff_attendance_report_view | staff_attendance_online
+     searchEmployeeByBarcode      staff_attendance_online
+     printEmployeeBarcode         staff_attendance_online
+     exportAttendance             staff_attendance_online
+
+── Attendance\CustomShiftsController
+     index                        hr_shifts_view
+     filter                       hr_shifts_manage
+     create                       hr_shifts_manage
+     store                        hr_shifts_manage
+     show                         hr_shifts_view
+     edit                         hr_shifts_manage
+     update                       hr_shifts_manage
+     delete                       hr_shifts_manage
+
+── Attendance\LeavePermissionsController
+     getLeavePermissionsAjax      hr_leave_permissions_manage
+     index                        hr_leave_permissions_manage
+     create                       hr_leave_permissions_manage
+     store                        hr_leave_permissions_manage
+     show                         hr_leave_permissions_manage
+     filterLeaveRecords           hr_leave_permissions_manage
+     edit                         hr_leave_permissions_manage
+     update                       hr_leave_permissions_manage
+     destroy                      hr_leave_permissions_manage
+
+── Attendance\LeaveRequestsController
+     index                        staff_leave_requests_view_all | staff_leave_requests_view_own
+     store                        staff_leave_requests_add
+     create                       staff_leave_requests_add
+     edit                         staff_leave_requests_edit_delete_all | staff_leave_requests_edit_delete_own
+     show                         staff_leave_requests_view_all | staff_leave_requests_view_own
+     update                       staff_leave_requests_edit_delete_all | staff_leave_requests_edit_delete_own
+     destroy                      staff_leave_requests_edit_delete_all | staff_leave_requests_edit_delete_own
+     search                       staff_leave_requests_view_all | staff_leave_requests_view_own
+     getEmployeesList             staff_leave_requests_view_all | staff_leave_requests_view_own
+     getEmployeeLeaveBalance      staff_leave_requests_view_all | staff_leave_requests_view_own
+     approve                      staff_leave_requests_approve_reject
+     reject                       staff_leave_requests_approve_reject
+     cancelApproval               staff_leave_requests_approve_reject
+     undoRejection                staff_leave_requests_approve_reject
+     updateStatus                 staff_leave_requests_approve_reject
+     checkBalance                 staff_leave_requests_view_all | staff_leave_requests_view_own
+     getBalance                   staff_leave_requests_view_all | staff_leave_requests_view_own
+     addNote                      staff_leave_requests_view_all | staff_leave_requests_view_own
+     getNotes                     staff_leave_requests_view_all | staff_leave_requests_view_own
+     deleteNote                   staff_leave_requests_view_all | staff_leave_requests_view_own
+     returnFromRejection          staff_leave_requests_approve_reject
+     processAction                staff_leave_requests_approve_reject
+
+── Attendance\SettingsController
+     index                        staff_attendance_settings_manage
+
+── Attendance\Settings\AttendanceDeterminantsController
+     index                        hr_attendance_rules_manage
+     ajaxData                     hr_attendance_rules_manage
+     create                       hr_attendance_rules_manage
+     store                        hr_attendance_rules_manage
+     show                         hr_attendance_rules_manage
+     edit                         hr_attendance_rules_manage
+     manageEmployees              hr_attendance_rules_manage
+     employeesCount               hr_attendance_rules_manage
+     addEmployees                 hr_attendance_rules_manage
+     employeesList                hr_attendance_rules_manage
+     removeEmployee               hr_attendance_rules_manage
+     getStatistics                hr_attendance_rules_manage
+     previewRules                 hr_attendance_rules_manage
+     deleteCustomization          hr_attendance_rules_manage
+     applyDeterminant             hr_attendance_rules_manage
+     update                       hr_attendance_rules_manage
+     destroy                      hr_attendance_rules_manage
+     updateStatus                 hr_attendance_rules_manage
+
+── Attendance\Settings\AttendanceRuleController
+     index                        hr_attendance_rules_manage
+     search                       hr_attendance_rules_manage
+     create                       hr_attendance_rules_manage
+     store                        hr_attendance_rules_manage
+     show                         hr_attendance_rules_manage
+     edit                         hr_attendance_rules_manage
+     update                       hr_attendance_rules_manage
+     destroy                      hr_attendance_rules_manage
+     toggleStatus                 hr_attendance_rules_manage
+
+── Attendance\Settings\AttendanceV2SettingsController
+     index                        hr_attendance_rules_manage
+     updateGeneral                hr_attendance_rules_manage
+     storePhotoType               hr_attendance_rules_manage
+     togglePhotoType              hr_attendance_rules_manage
+     deletePhotoType              hr_attendance_rules_manage
+     storeEmployeeConfig          hr_attendance_rules_manage
+     deleteEmployeeConfig         hr_attendance_rules_manage
+
+── Attendance\Settings\BasicController
+     index                        staff_attendance_settings_manage
+     update                       staff_attendance_settings_manage
+
+── Attendance\Settings\EmployeeLeaveBalanceController
+     index                        hr_leave_balances_manage
+     show                         hr_leave_balances_manage
+     create                       hr_leave_balances_manage
+     store                        hr_leave_balances_manage
+     edit                         hr_leave_balances_manage
+     update                       hr_leave_balances_manage
+     destroy                      hr_leave_balances_manage
+     checkExisting                hr_leave_balances_manage
+     recalculateBalances          hr_leave_balances_manage
+
+── Attendance\Settings\HolidayController
+     index                        hr_holidays_manage
+     create                       hr_holidays_manage
+     search                       hr_holidays_manage
+     employeesCount               hr_holidays_manage
+     employeesList                hr_holidays_manage
+     removeEmployee               hr_holidays_manage
+     store                        hr_holidays_manage
+     show                         hr_holidays_manage
+     edit                         hr_holidays_manage
+     update                       hr_holidays_manage
+     delete                       hr_holidays_manage
+     holyday_employees            hr_holidays_manage
+     add_holyday_employees        hr_holidays_manage
+
+── Attendance\Settings\LeavePoliciesController
+     index                        hr_leave_policies_manage
+     search                       hr_leave_policies_manage
+     employeesCount               hr_leave_policies_manage
+     getStatistics                hr_leave_policies_manage
+     employeesList                hr_leave_policies_manage
+     removeEmployee               hr_leave_policies_manage
+     create                       hr_leave_policies_manage
+     store                        hr_leave_policies_manage
+     show                         hr_leave_policies_manage
+     edit                         hr_leave_policies_manage
+     update                       hr_leave_policies_manage
+     delete                       hr_leave_policies_manage
+     updateStatus                 hr_leave_policies_manage
+     leave_policy_employees       hr_leave_policies_manage
+     add_leave_policy_employees   hr_leave_policies_manage
+
+── Attendance\Settings\LeaveTypesController
+     index                        hr_leave_types_manage
+     create                       hr_leave_types_manage
+     store                        hr_leave_types_manage
+     show                         hr_leave_types_manage
+     edit                         hr_leave_types_manage
+     update                       hr_leave_types_manage
+     delete                       hr_leave_types_manage
+
+── Attendance\Settings\MachinesController
+     index                        hr_attendance_devices_view
+     search                       hr_attendance_devices_view
+     create                       hr_attendance_devices_manage
+     store                        hr_attendance_devices_manage
+     edit                         hr_attendance_devices_manage
+     update                       hr_attendance_devices_manage
+     show                         hr_attendance_devices_view
+     destroy                      hr_attendance_devices_manage
+     toggleStatus                 hr_attendance_devices_manage
+     testConnection               hr_attendance_devices_manage
+     pullData                     staff_attendance_pull_from_device | hr_attendance_devices_manage
+     connect                      staff_attendance_pull_from_device | hr_attendance_devices_manage
+
+── Attendance\Settings\PrintableTemplatesController
+     index                        hr_printable_templates_manage
+     create                       hr_printable_templates_manage
+
+── CommissionsReportController
+     index                        hr_commissions_view
+     show                         hr_commissions_view
+
+── DashboardController
+     index                        hr_dashboard_view
+     getEmployeeMonthlyPerformance hr_dashboard_view
+     getEmployeesMonthlyMatrix    hr_dashboard_view
+
+── EmployeeController
+     search                       employees_view_profile
+     index                        employees_view_profile
+     report                       employees_view_profile
+     create                       employees_add
+     edit                         employees_edit_delete
+     show                         employees_view_profile
+     updateStatus                 employees_edit_delete
+     toggleSystemAccess           hr_system_management
+     store                        employees_add
+     update                       employees_edit_delete
+     updatePassword               hr_system_management
+     delete                       employees_edit_delete
+     login_to                     hr_system_management
+     export_view                  employees_view_profile
+     export                       employees_view_profile
+     send_email                   hr_system_management
+     downloadAttachmentsZip       employees_view_profile
+     downloadAttachment           employees_view_profile
+     deleteAttachment             employees_edit_delete
+     Settings                     hr_dashboard_view
+     statistics_sitting           hr_dashboard_view
+     employee_management          hr_system_management
+     manage_shifts                hr_system_management
+     add_shift                    hr_system_management
+     add_new_role                 hr_system_management
+     dashboardhr                  hr_dashboard_view
+
+── EmployeePerformanceController
+     index                        hr_performance_view
+     export                       hr_performance_view
+
+── HRController
+     index                        hr_dashboard_view
+     store                        hr_dashboard_view
+     show                         hr_dashboard_view
+     update                       hr_dashboard_view
+     destroy                      hr_dashboard_view
+
+── HRReportsController
+     index                        hr_reports_view
+     attendanceByDepartment       hr_reports_view
+     salariesByDepartment         hr_reports_view
+     paymentsReport               hr_reports_view
+
+── OrganizationalStructure\DepartmentController
+     index                        hr_departments_view | hr_departments_manage
+     create                       hr_departments_manage
+     show                         hr_departments_view | hr_departments_manage
+     edit                         hr_departments_manage
+     store                        hr_departments_manage
+     update                       hr_departments_manage
+     delete                       hr_departments_manage
+     updateStatus                 hr_departments_manage
+     export_view                  hr_departments_view | hr_departments_manage
+     export                       hr_departments_view | hr_departments_manage
+
+── OrganizationalStructure\JobTitleController
+     index                        hr_job_titles_view | hr_job_titles_manage
+     create                       hr_job_titles_manage
+     show                         hr_job_titles_view | hr_job_titles_manage
+     edit                         hr_job_titles_manage
+     store                        hr_job_titles_manage
+     update                       hr_job_titles_manage
+     delete                       hr_job_titles_manage
+     updateStatus                 hr_job_titles_manage
+
+── OrganizationalStructure\ManagingFunctionalLevelsController
+     index                        hr_functional_levels_manage
+     create                       hr_functional_levels_manage
+     show                         hr_functional_levels_manage
+     edit                         hr_functional_levels_manage
+     store                        hr_functional_levels_manage
+     update                       hr_functional_levels_manage
+     delete                       hr_functional_levels_manage
+     updateStatus                 hr_functional_levels_manage
+
+── OrganizationalStructure\ManagingJobTypesController
+     index                        hr_job_types_manage
+     create                       hr_job_types_manage
+     show                         hr_job_types_manage
+     edit                         hr_job_types_manage
+     store                        hr_job_types_manage
+     update                       hr_job_types_manage
+     delete                       hr_job_types_manage
+     updateStatus                 hr_job_types_manage
+
+── Salaries\AdvanceApprovalController
+     index                        advance_requests_approve | salaries_loans_manage
+     create                       advance_requests_approve
+     store                        advance_requests_approve
+     show                         advance_requests_approve | salaries_loans_manage
+     approve                      advance_requests_approve
+     reject                       advance_requests_approve
+     settle                       advance_requests_approve
+
+── Salaries\AdvanceRequestController
+     index                        advance_requests_create | salaries_loans_manage
+     create                       advance_requests_create
+     store                        advance_requests_create
+     show                         advance_requests_create | salaries_loans_manage
+     cancel                       advance_requests_create
+
+── Salaries\AncestorController
+     store                        salaries_loans_manage
+     show                         salaries_loans_manage
+     edit                         salaries_loans_manage
+     pay                          salaries_loans_manage
+     storePayments                salaries_loans_manage
+     update                       salaries_loans_manage
+     destroy                      salaries_loans_manage
+
+── Salaries\ContractsController
+     index                        salaries_contracts_view_all | salaries_contracts_view_own
+     create                       salaries_contracts_create
+     store                        salaries_contracts_create
+     show                         salaries_contracts_view_all | salaries_contracts_view_own
+     edit                         salaries_contracts_edit_delete_all | salaries_contracts_edit_delete_own
+     update                       salaries_contracts_edit_delete_all | salaries_contracts_edit_delete_own
+     destroy                      salaries_contracts_edit_delete_all | salaries_contracts_edit_delete_own
+     printContract                salaries_contracts_view_all | salaries_contracts_view_own
+     printContract1               salaries_contracts_view_all | salaries_contracts_view_own
+
+── Salaries\DeductionController
+     index                        deductions_view
+     history                      deductions_history_view | deductions_view
+     show                         deductions_view
+     create                       deductions_create
+     store                        deductions_create
+     edit                         deductions_edit
+     update                       deductions_edit
+     cancel                       deductions_edit
+     destroy                      deductions_delete
+
+── Salaries\EmployeeTreasuryApiController
+     getEmployeeTreasury          salaries_payroll_view
+
+── Salaries\PayrollProcessController
+     index                        salaries_payroll_view | salaries_payroll_view_own
+     create                       salaries_payroll_create
+     store                        salaries_payroll_create
+     show                         salaries_payroll_view | salaries_payroll_view_own
+     edit                         salaries_payroll_edit
+     update                       salaries_payroll_edit
+     destroy                      salaries_payroll_delete | salaries_payroll_delete_all
+     approveAll                   salaries_payroll_approve
+     approve                      salaries_payroll_approve
+     deactivate                   salaries_payroll_approve
+     activate                     salaries_payroll_approve
+     exportSlips                  salaries_payroll_view | salaries_payroll_view_own
+
+── Salaries\PayrollRunController
+     index                        salaries_payroll_view | salaries_payroll_view_own
+     show                         salaries_payroll_view | salaries_payroll_view_own
+     disburse                     salaries_payroll_payment
+     cancel                       salaries_payroll_approve
+     print                        salaries_payroll_view | salaries_payroll_view_own
+
+── Salaries\RelatedModelsController
+     index                        hr_salary_items_view
+     create                       hr_salary_items_manage
+     show                         hr_salary_items_view
+     edit                         hr_salary_items_manage
+
+── Salaries\SalaryItemsController
+     index                        hr_salary_items_view
+     create                       hr_salary_items_manage
+     store                        hr_salary_items_manage
+     show                         hr_salary_items_view
+     edit                         hr_salary_items_manage
+     update                       hr_salary_items_manage
+     destroy                      hr_salary_items_manage
+     toggleStatus                 hr_salary_items_manage
+
+── Salaries\SalarySittingController
+     index                        salaries_payroll_settings_manage
+     general                      salaries_payroll_settings_manage
+     updateGeneral                salaries_payroll_settings_manage
+     notifications                salaries_payroll_settings_manage | salaries_contracts_notifications
+     updateNotifications          salaries_payroll_settings_manage | salaries_contracts_notifications
+     commissions                  salaries_payroll_settings_manage
+     updateCommissions            salaries_payroll_settings_manage
+
+── Salaries\SalarySlipController
+     index                        hr_payslips_view | salaries_payroll_view | salaries_payroll_view_own
+     create                       salaries_payroll_create
+     store                        salaries_payroll_create
+     show                         hr_payslips_view | salaries_payroll_view | salaries_payroll_view_own
+     approve                      salaries_payroll_approve
+     stop                         salaries_payroll_approve
+     edit                         salaries_payroll_edit
+     update                       salaries_payroll_edit
+     destroy                      salaries_payroll_delete | salaries_payroll_delete_all
+     getEmployeePayrollData       salaries_payroll_view | salaries_payroll_view_own
+
+── Salaries\SalaryTemplatesController
+     index                        hr_salary_items_view
+     create                       hr_salary_templates_manage
+     store                        hr_salary_templates_manage
+     show                         hr_salary_items_view
+     edit                         hr_salary_templates_manage
+     update                       hr_salary_templates_manage
+     destroy                      hr_salary_templates_manage
+     toggleStatus                 hr_salary_templates_manage
+
+── ShiftManagementController
+     index                        hr_shifts_view
+     search                       hr_shifts_view
+     create                       hr_shifts_manage
+     store                        hr_shifts_manage
+     edit                         hr_shifts_manage
+     update                       hr_shifts_manage
+     export                       hr_shifts_view
+     delete                       hr_shifts_manage
+     show                         hr_shifts_view
+
+── \Modules\HR\Http\Controllers\Salaries\DeductionController
+     approve                      deductions_approve
+     reject                       deductions_reject
+     settle                       deductions_settle

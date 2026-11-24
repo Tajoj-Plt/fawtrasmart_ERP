@@ -1,0 +1,419 @@
+
+        /* أنماط مخصصة لتبويب نقاط الأرصدة */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #adb5bd;
+        }
+
+        .empty-state h5 {
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0;
+        }
+
+        .card-header h5 {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .badge {
+            font-size: 0.75em;
+        }
+
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+        }
+
+        /* Actions card styling */
+        .actions-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .actions-grid .btn,
+        .actions-grid .dropdown {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            height: 100%;
+            text-align: center;
+            min-height: 80px; /* Fixed height for all buttons */
+            margin: 0;
+        }
+
+        .actions-grid .btn i,
+        .actions-grid .dropdown .btn i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .actions-grid .btn span,
+        .actions-grid .dropdown .btn span {
+            font-size: 0.85rem;
+        }
+
+        /* Ensure dropdown buttons take full height */
+        .actions-grid .dropdown .btn {
+            width: 100%;
+            height: 100%;
+            min-height: 80px;
+            padding: 0.75rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Remove default dropdown button styling that might interfere */
+        .actions-grid .dropdown .btn.dropdown-toggle::after {
+            margin-right: 0;
+            margin-top: 0.25rem;
+        }
+
+        /* Ensure dropdown menu doesn't affect grid sizing */
+        .actions-grid .dropdown-menu {
+            min-width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .actions-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 0.5rem;
+            }
+
+            .actions-grid .btn,
+            .actions-grid .dropdown {
+                min-height: 70px; /* Adjusted height for mobile */
+            }
+
+            .actions-grid .btn i,
+            .actions-grid .dropdown .btn i {
+                font-size: 1rem;
+                margin-bottom: 0.15rem;
+            }
+
+            .actions-grid .btn span,
+            .actions-grid .dropdown .btn span {
+                font-size: 0.75rem;
+            }
+
+            /* Ensure dropdown buttons take full height on mobile */
+            .actions-grid .dropdown .btn {
+                min-height: 70px;
+                padding: 0.5rem 0.25rem;
+            }
+
+            .actions-grid .dropdown .btn.dropdown-toggle::after {
+                margin-top: 0.15rem;
+            }
+        }
+
+        /* تخصيص الأزرار */
+        .custom-btn {
+            min-width: 120px;
+            margin: 5px;
+            justify-content: center;
+        }
+
+        .custom-dropdown {
+            min-width: 200px;
+        }
+
+        .product-wrapper {
+            contain: content;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            overflow: visible;
+            padding: 20px 0;
+        }
+
+        .main-content {
+            transition: none !important;
+            transform: none !important;
+        }
+
+        .main-content {
+            padding: 20px;
+            width: 100%;
+        }
+
+        .custom-dropdown .dropdown-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .custom-dropdown .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #0056b3;
+        }
+
+        .custom-btn i {
+            margin-right: 5px;
+        }
+
+        /* تحسينات الاستجابة للشاشات الصغيرة */
+        @media (max-width: 1200px) {
+            .main-content {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .product-header .row {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .product-header .col-lg-8,
+            .product-header .col-lg-4 {
+                width: 100%;
+                flex: none;
+            }
+
+            .product-header .d-flex.flex-column.align-items-end {
+                align-items: flex-start !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-header .col-md-9 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .product-header h3 {
+                font-size: 1.5rem;
+            }
+
+            .d-flex.align-items-center.gap-2.flex-wrap {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+
+            .vr {
+                display: none;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+                justify-content: center;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .form-label {
+                font-size: 0.9rem;
+            }
+
+            .form-control {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* تحسينات إضافية للشاشات الصغيرة جداً */
+        @media (max-width: 400px) {
+            .nav-tabs .nav-link {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.5rem;
+            }
+
+            .btn {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.75rem;
+            }
+        }
+
+        /* تحسينات للشاشات اللمسية */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .nav-link, .dropdown-item {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+
+            .custom-btn {
+                min-width: auto;
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Status badges styling */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .status-badge.bg-success {
+            background-color: #28a745 !important;
+            color: white;
+        }
+
+        .status-badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #212529;
+        }
+
+        .status-badge.bg-danger {
+            background-color: #dc3545 !important;
+            color: white;
+        }
+
+        .status-badge.bg-info {
+            background-color: #17a2b8 !important;
+            color: white;
+        }
+
+        .status-badge.bg-secondary {
+            background-color: #6c757d !important;
+            color: white;
+        }
+
+        /* Table stats styling */
+        .table-stats {
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table-stats th {
+            background: #e9ecef;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            padding: 15px 10px;
+        }
+
+        .table-stats td {
+            text-align: center;
+            border: none;
+            padding: 20px 10px;
+        }
+
+        .stats-value {
+            font-size: 1.2rem !important;
+            font-weight: bold;
+        }
+
+        .stats-label {
+            font-size: 0.8rem;
+            display: block;
+        }
+
+        /* Store info styling */
+        .store-info {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-left: 3px solid #007bff;
+        }
+
+        /* Loading indicator styles */
+        .tab-loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .tab-loading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        #status-loading {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px 0;
+        }
+
+        #status-loading .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-width: 0.15em;
+        }
+
+        #status-loading p {
+            font-size: 0.9rem;
+            margin: 5px 0 0;
+            color: #6c757d;
+        }
+
+        /* تحسين عرض الشارات */
+        .badge-responsive {
+            font-size: 11px;
+            padding: 5px 8px;
+        }
+
+        @media (max-width: 768px) {
+            .badge-responsive {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+        }
+
+        /* تحسين عرض تفاصيل المنتج */
+        .product-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .product-image-container {
+            flex: 0 0 auto;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        @media (max-width: 768px) {
+            .product-details {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .product-image-container {
+                align-self: center;
+            }
+        }

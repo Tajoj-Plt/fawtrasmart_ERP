@@ -1,0 +1,13 @@
+{
+    "cairo": {
+        "normal": "cairo_normal_a5cea5fc45f6bf5f483d9f082575cfe3",
+        "bold": "cairo_bold_23a9b2dc30935e892c606fbbafd14072",
+        "800": "cairo_800_8aad9479b2962017426195f271033cb3"
+    },
+    "tajawal": {
+        "normal": "tajawal_normal_c91c73f9f61c3351c5303523a2df7053",
+        "500": "tajawal_500_0581a732caba48f7421c4d500e19d395",
+        "bold": "tajawal_bold_efbff90ce1c530133306e47027557cfe",
+        "800": "tajawal_800_bd4743ae13fb3fa44146e90881c01563"
+    }
+}

@@ -1,0 +1,112 @@
+            3 => 'تحويل بنكي',
+            4 => 'بطاقة ائتمان',
+        ];
+
+        return $methods[$method] ?? 'غير محدد';
+    }
+
+    /**
+     * تقرير مدفوعات المشتريات
+     */
+    public function paymentPurchases(Request $request)
+    {
+        // 1. تحديد الموردين الصالحين (من جدول الحسابات)
+        $validSupplierIds = $this->getAccountLinkedSupplierIds($request->supplier_id);
+
+        $suppliers = Supplier::whereIn('id', $validSupplierIds)->orderBy('trade_name')->get();
+        // لإعادة ملء القائمة المنسدلة بجميع الموردين، قد نحتاج استعلام منفصل، ولكن هنا سنعرض الموردين "النشطين محاسبياً"
+        // أو يمكن جلب كل الموردين للقائمة، واستخدام validSupplierIds للفلترة فقط
+        $allSuppliers = Supplier::orderBy('trade_name')->get(); 
+        
+        $branches = Branch::orderBy('name')->get();
+
+        $fromDate = $request->get('from_date') ? Carbon::parse($request->from_date)->startOfDay() : Carbon::now()->startOfMonth();
+        $toDate = $request->get('to_date') ? Carbon::parse($request->to_date)->endOfDay() : Carbon::now()->endOfDay();
+
+        // 2. بناء الاستعلام
+        $query = PurchaseInvoice::with(['supplier', 'branch', 'payments_process', 'creator'])
+            ->whereIn('supplier_id', $validSupplierIds) // الفلترة الأساسية بناءً على الحسابات
+            ->whereBetween('date', [$fromDate, $toDate]);
+
+        // الفلاتر الإضافية
+        if ($request->branch_id) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        // الترتيب
+        $orderBy = $request->input('order_by', 'desc');
+        $query->orderBy('date', $orderBy);
+
+        $invoices = $query->get();
+
+        // 3. التجميع والحسابات
+        $groupedInvoices = $invoices->groupBy('supplier_id');
+
+        // حساب الإجماليات العامة
+        $totalGrandTotal = 0;
+        $totalPaid = 0;
+        $totalRemaining = 0;
+
+        foreach ($invoices as $inv) {
+            $invPaid = $inv->payments_process->sum('amount');
+            $invRemaining = $inv->grand_total - $invPaid;
+
+            $totalGrandTotal += $inv->grand_total;
+            $totalPaid += $invPaid;
+            $totalRemaining += $invRemaining;
+        }
+
+        // 4. إعداد بيانات التشارت
+        // سنعرض أعلى 10 موردين من حيث المتبقي (أو المدفوع)
+        $supplierStats = $groupedInvoices->map(function ($supplierInvoices) {
+            $gt = $supplierInvoices->sum('grand_total');
+            $pd = $supplierInvoices->sum(function($i) { return $i->payments_process->sum('amount'); });
+            return [
+                'name' => $supplierInvoices->first()->supplier->trade_name ?? 'غير معروف',
+                'paid' => $pd,
+                'remaining' => $gt - $pd
+            ];
+        })->sortByDesc('remaining')->take(10);
+
+        $chartData = [
+            'labels' => $supplierStats->pluck('name')->values()->toArray(),
+            'paid' => $supplierStats->pluck('paid')->values()->toArray(),
+            'remaining' => $supplierStats->pluck('remaining')->values()->toArray()
+        ];
+        
+        $totals = [
+            'totalGrandTotal' => $totalGrandTotal,
+            'totalPaid' => $totalPaid,
+            'totalRemaining' => $totalRemaining
+        ];
+
+        // تمرير المتغير المتوقع للـ View
+        $suppliers = $allSuppliers; 
+
+        return view('purchases::purchases.report.purchaseReport.paymentPurchases', compact(
+            'suppliers',
+            'branches',
+            'fromDate',
+            'toDate',
+            'totals',
+            'groupedInvoices',
+            'totalGrandTotal',
+            'totalPaid',
+            'totalRemaining',
+            'chartData'
+        ));
+    }
+    /**
+     * الحصول على معرفات الموردين المرتبطة بحسابات
+     */
+    private function getAccountLinkedSupplierIds($supplierId = null)
+    {
+        $query = Account::whereNotNull('supplier_id');
+        
+        if ($supplierId) {
+            $query->where('supplier_id', $supplierId);
+        }
+        
+        return $query->pluck('supplier_id')->unique()->toArray();
+    }
+}

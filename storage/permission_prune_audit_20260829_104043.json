@@ -1,0 +1,374 @@
+[
+    {
+        "id": 947,
+        "name": "installments_add"
+    },
+    {
+        "id": 950,
+        "name": "installments_collect"
+    },
+    {
+        "id": 949,
+        "name": "installments_delete"
+    },
+    {
+        "id": 948,
+        "name": "installments_edit"
+    },
+    {
+        "id": 193,
+        "name": "inv_manage_allow_sale_below_min_price"
+    },
+    {
+        "id": 191,
+        "name": "inv_manage_inventory_edit_quantity"
+    },
+    {
+        "id": 194,
+        "name": "inv_manage_inventory_monitor"
+    },
+    {
+        "id": 176,
+        "name": "inv_manage_inventory_permission_add"
+    },
+    {
+        "id": 178,
+        "name": "inv_manage_inventory_permission_edit"
+    },
+    {
+        "id": 177,
+        "name": "inv_manage_inventory_permission_view"
+    },
+    {
+        "id": 179,
+        "name": "inv_manage_inventory_price_edit"
+    },
+    {
+        "id": 192,
+        "name": "inv_manage_inventory_transfer"
+    },
+    {
+        "id": 180,
+        "name": "inv_manage_inventory_view_price"
+    },
+    {
+        "id": 922,
+        "name": "inv_manage_purchase_invoice_add"
+    },
+    {
+        "id": 924,
+        "name": "inv_manage_purchase_invoice_edit_delete_all"
+    },
+    {
+        "id": 923,
+        "name": "inv_manage_purchase_invoice_edit_delete_own"
+    },
+    {
+        "id": 925,
+        "name": "inv_manage_purchase_invoices_view_all"
+    },
+    {
+        "id": 921,
+        "name": "inv_manage_purchase_invoices_view_own"
+    },
+    {
+        "id": 926,
+        "name": "inv_manage_suppliers_add"
+    },
+    {
+        "id": 928,
+        "name": "inv_manage_suppliers_edit_delete_all"
+    },
+    {
+        "id": 929,
+        "name": "inv_manage_suppliers_edit_delete_own"
+    },
+    {
+        "id": 927,
+        "name": "inv_manage_suppliers_view_all"
+    },
+    {
+        "id": 930,
+        "name": "inv_manage_suppliers_view_created"
+    },
+    {
+        "id": 934,
+        "name": "purchase_cycle_order_to_invoice"
+    },
+    {
+        "id": 935,
+        "name": "purchase_cycle_orders_approve_reject"
+    },
+    {
+        "id": 931,
+        "name": "purchase_cycle_orders_manage"
+    },
+    {
+        "id": 937,
+        "name": "purchase_cycle_orders_manage_orders"
+    },
+    {
+        "id": 936,
+        "name": "purchase_cycle_quotes_approve_reject"
+    },
+    {
+        "id": 932,
+        "name": "purchase_cycle_quotes_manage"
+    },
+    {
+        "id": 933,
+        "name": "purchase_cycle_quotes_to_orders"
+    },
+    {
+        "id": 877,
+        "name": "sales_add_invoices"
+    },
+    {
+        "id": 878,
+        "name": "sales_add_own_invoices"
+    },
+    {
+        "id": 890,
+        "name": "sales_add_payments_all"
+    },
+    {
+        "id": 919,
+        "name": "sales_add_payments_assigned_client"
+    },
+    {
+        "id": 891,
+        "name": "sales_add_payments_own"
+    },
+    {
+        "id": 955,
+        "name": "sales_add_periodic_invoices_all"
+    },
+    {
+        "id": 956,
+        "name": "sales_add_periodic_invoices_own"
+    },
+    {
+        "id": 896,
+        "name": "sales_add_quote_all"
+    },
+    {
+        "id": 897,
+        "name": "sales_add_quote_own"
+    },
+    {
+        "id": 912,
+        "name": "sales_add_return_invoice"
+    },
+    {
+        "id": 904,
+        "name": "sales_add_sales_order_all"
+    },
+    {
+        "id": 905,
+        "name": "sales_add_sales_order_own"
+    },
+    {
+        "id": 884,
+        "name": "sales_change_seller"
+    },
+    {
+        "id": 954,
+        "name": "sales_create_invoice_from_any_location"
+    },
+    {
+        "id": 883,
+        "name": "sales_create_tax_report"
+    },
+    {
+        "id": 953,
+        "name": "sales_credit_note_from_any_location"
+    },
+    {
+        "id": 965,
+        "name": "sales_daily_closing_entry"
+    },
+    {
+        "id": 908,
+        "name": "sales_edit_delete_all_credit_notices"
+    },
+    {
+        "id": 879,
+        "name": "sales_edit_delete_all_invoices"
+    },
+    {
+        "id": 894,
+        "name": "sales_edit_delete_all_payments"
+    },
+    {
+        "id": 957,
+        "name": "sales_edit_delete_all_periodic_invoices"
+    },
+    {
+        "id": 900,
+        "name": "sales_edit_delete_all_quotes"
+    },
+    {
+        "id": 915,
+        "name": "sales_edit_delete_all_return_invoices"
+    },
+    {
+        "id": 906,
+        "name": "sales_edit_delete_all_sales_orders"
+    },
+    {
+        "id": 918,
+        "name": "sales_edit_delete_assigned_client_invoices"
+    },
+    {
+        "id": 909,
+        "name": "sales_edit_delete_own_credit_notices"
+    },
+    {
+        "id": 880,
+        "name": "sales_edit_delete_own_invoices"
+    },
+    {
+        "id": 895,
+        "name": "sales_edit_delete_own_payments"
+    },
+    {
+        "id": 958,
+        "name": "sales_edit_delete_own_periodic_invoices"
+    },
+    {
+        "id": 901,
+        "name": "sales_edit_delete_own_quotes"
+    },
+    {
+        "id": 916,
+        "name": "sales_edit_delete_own_return_invoices"
+    },
+    {
+        "id": 907,
+        "name": "sales_edit_delete_own_sales_orders"
+    },
+    {
+        "id": 889,
+        "name": "sales_edit_invoice_date"
+    },
+    {
+        "id": 892,
+        "name": "sales_edit_payment_options"
+    },
+    {
+        "id": 885,
+        "name": "sales_invoice_all_products"
+    },
+    {
+        "id": 952,
+        "name": "sales_return_invoice_from_any_location"
+    },
+    {
+        "id": 964,
+        "name": "sales_test_print_template"
+    },
+    {
+        "id": 910,
+        "name": "sales_view_all_credit_notices"
+    },
+    {
+        "id": 893,
+        "name": "sales_view_all_payments"
+    },
+    {
+        "id": 959,
+        "name": "sales_view_all_periodic_invoices"
+    },
+    {
+        "id": 898,
+        "name": "sales_view_all_quotes"
+    },
+    {
+        "id": 913,
+        "name": "sales_view_all_return_invoices"
+    },
+    {
+        "id": 902,
+        "name": "sales_view_all_sales_orders"
+    },
+    {
+        "id": 886,
+        "name": "sales_view_invoice_profit"
+    },
+    {
+        "id": 961,
+        "name": "sales_view_kpi_dashboard"
+    },
+    {
+        "id": 911,
+        "name": "sales_view_own_credit_notices"
+    },
+    {
+        "id": 960,
+        "name": "sales_view_own_periodic_invoices"
+    },
+    {
+        "id": 899,
+        "name": "sales_view_own_quotes"
+    },
+    {
+        "id": 914,
+        "name": "sales_view_own_return_invoices"
+    },
+    {
+        "id": 903,
+        "name": "sales_view_own_sales_orders"
+    },
+    {
+        "id": 920,
+        "name": "sales_view_payments_assigned_client"
+    },
+    {
+        "id": 963,
+        "name": "sales_view_periodic_invoices"
+    },
+    {
+        "id": 962,
+        "name": "sales_view_returned_invoices"
+    },
+    {
+        "id": 99,
+        "name": "storehouse_add"
+    },
+    {
+        "id": 101,
+        "name": "storehouse_delete"
+    },
+    {
+        "id": 100,
+        "name": "storehouse_edit"
+    },
+    {
+        "id": 102,
+        "name": "storehouse_report_view"
+    },
+    {
+        "id": 98,
+        "name": "storehouse_view"
+    },
+    {
+        "id": 939,
+        "name": "supply_orders_add"
+    },
+    {
+        "id": 940,
+        "name": "supply_orders_edit_delete_all"
+    },
+    {
+        "id": 941,
+        "name": "supply_orders_edit_delete_own"
+    },
+    {
+        "id": 944,
+        "name": "supply_orders_manage_settings"
+    },
+    {
+        "id": 942,
+        "name": "supply_orders_update_status"
+    }
+]

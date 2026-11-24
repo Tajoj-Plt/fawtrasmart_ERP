@@ -1,0 +1,1775 @@
+/*
+    ═══════════════════════════════════════════════════════════════════
+                        شاشةُ البيع — لوحةُ أداة
+    ═══════════════════════════════════════════════════════════════════
+
+    ═══════════ ما كانت ═══════════
+
+    قالبَ لوحةِ تحكّمٍ من طرازٍ مضى: تدرّجاتٌ قُطريّةٌ على كل سطحٍ ملوّن،
+    وحدودٌ بسمك ٢، وظلٌّ تحت كل بطاقة، وكلُّ عنصرٍ يقفز عند مرور الفأرة —
+    البطاقاتُ ترتفع ٣ بكسل، والأزرارُ تكبر عُشراً، وصفوفُ السلّة تنزلق
+    جانباً.
+
+    وأخضران متقاربان لا متطابقان في الشاشة نفسِها: أخضرُ ماتيريال على
+    أزرار البحث، وأخضرُ بوتستراب على الأسعار. فرقٌ تراه العينُ ولا يفسّره
+    شيء.
+
+    ═══════════ والاتّجاه ═══════════
+
+    هذه ليست صفحةَ عرض. الكاشيرُ ينظر إليها ثماني ساعاتٍ متّصلة، ويبحث
+    فيها عن صنفٍ والزبونُ واقفٌ ينتظر. فالمرجعُ لوحةُ أداةٍ مهنيّة — شاشةُ
+    تسجيلِ ركّابٍ أو طرفيّةُ تداول — لا تطبيقُ ويب.
+
+    وثلاثةُ مبادئ:
+
+      **البنيةُ بالخطوط لا بالظلال.** الفواصلُ الشعريّةُ ودرجاتُ الأرضيّة
+      تفصل المناطق. الظلُّ يُحفظ لما يطفو فعلاً — القوائمُ المنسدلةُ
+      والنوافذ. وسطحٌ يظلّل بلا سببٍ يوهم بعمقٍ ليس هناك.
+
+      **لونٌ واحدٌ مشبَعٌ في الشاشة كلِّها**، هو لونُ المعاملة: يحمله السعرُ
+      وزرُّ الدفع ولا شيءَ سواهما. فحين يظهر يعني شيئاً. والكحليُّ بنيةٌ لا
+      لون: شريطٌ علويٌّ ورأسُ سلّة، يتراجع فتتقدّم البضاعة.
+
+      **ولا شيءَ يتحرّك من مكانه.** الحركةُ في لوحةٍ تُلمس مئةَ مرّةٍ في
+      الساعة عائقٌ لا زينة: زرٌّ يكبر تحت الإصبع يُخطئه الإصبع، وصفٌّ ينزلق
+      تحت الفأرة يُفلت. فالانتقالاتُ على اللون وحده، ومئةٌ وعشرون جزءاً من
+      الألف — تُحسّ ولا تُنتظَر.
+
+    ═══════════ والأرقام ═══════════
+
+    الشاشةُ كلُّها أرقامٌ تتبدّل: أسعارٌ وكمّياتٌ ومجاميع. وفي الخطوط
+    المتناسبة يختلف عرضُ الرقم عن الرقم، فينزاح السطرُ كلَّما تغيّر رقم.
+
+    فكلُّ مبلغٍ بأرقامٍ جدوليّة. هذا وحدَه أوضحُ ما يفرّق أداةً مهنيّةً عن
+    قالبٍ جاهز.
+*/
+
+/* ═══════════════════════════════════════════════════════════════════
+   ١ · الرموز
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* الحبر */
+    --t-ink:        #101422;
+    --t-ink-2:      #4A5266;
+    --t-ink-3:      #858C9E;
+
+    /* الأسطح */
+    --t-ground:     #F2F4F7;
+    --t-surface:    #FFFFFF;
+    --t-sunken:     #E8EBF0;
+
+    /* الخطوط الشعريّة */
+    --t-line:       #DFE3EA;
+    --t-line-2:     #EDF0F4;
+
+    /* البنية */
+    --t-navy:       #242C47;
+    --t-navy-2:     #1A2038;
+    --t-navy-tint:  #ECEEF4;
+
+    /* المعاملة — اللونُ المشبَعُ الوحيد */
+    --t-go:         #0E7C4A;
+    --t-go-2:       #0A6239;
+    --t-go-tint:    #E4F1EA;
+
+    /* الدلالة — مكتومةٌ عمداً */
+    --t-hold:       #9A6410;
+    --t-hold-tint:  #F8F1E2;
+    --t-stop:       #B23A2E;
+    --t-stop-tint:  #F9EBE9;
+
+    /* الظلُّ لما يطفو وحده */
+    --t-float:      0 8px 28px rgba(16, 20, 34, .14);
+
+    --t-r:          5px;
+    --t-r-lg:       8px;
+
+    --t-quick:      120ms cubic-bezier(.4, 0, .2, 1);
+
+    /* اختصارُ الانتقال الكامل — للقواعد التي ورثته باسمٍ واحد */
+    --t-quick-all:  color 120ms, background-color 120ms, border-color 120ms;
+}
+
+/*
+    الأرقامُ الجدوليّة على كل ما يحمل مالاً أو كمّية.
+
+    القائمةُ صريحةٌ لا شاملة: `font-variant-numeric` على `body` يطبعها على
+    النصّ العربي كذلك، وهو لا يستفيد منها.
+*/
+.product-price, .item-price, .item-total, .qty-display,
+.summary-row, .summary-row span, .amount-total, .amount-due,
+.discount-input, .stock-badge, .return-qty, .stat-value,
+#totalItems, #subtotalAmount, #taxAmount, #finalTotal,
+#totalPaidAmount, #remainingAmount, #changeAmount, #modalTotalAmount,
+#returnSubtotalAmount, #returnTaxAmount, #returnFinalTotal, #returnTotalItems {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٢ · اللوح
+   ═══════════════════════════════════════════════════════════════════ */
+
+/*
+    `html body` لا `body`.
+
+    قالبُ Vuexy يكتب `html body { background-color: #F8F8F8 }` في
+    `components.css` — نوعيّةٌ (٠،٠،٢) تغلب `body` وحدَها (٠،٠،١). فأرضيّةُ
+    الشاشة كانت تبقى رماديّةَ القالب مهما كُتب هنا.
+
+    والمطابقةُ في النوعيّة لا التجاوز: `!important` يُغلق البابَ على من
+    يريد تخصيصاً بعدُ.
+*/
+html body {
+    background: var(--t-ground);
+    color: var(--t-ink);
+    font-family: 'Cairo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-content {
+    margin-right: 0 !important;
+    height: 100vh;
+    padding: 0;
+    background: var(--t-ground);
+}
+
+/*
+    لا فجوةَ بين اللوحين ولا حشوَ حولهما.
+
+    الفجوةُ تُظهرهما بطاقتين تطفوان على سطح. وهما ليسا كذلك: هما منطقتا
+    أداةٍ واحدة، يفصلهما خطٌّ لا فراغ.
+*/
+.content-wrapper {
+    display: flex;
+    height: 100%;
+    gap: 0;
+}
+
+.left-card {
+    flex: 1;
+    min-width: 0;
+}
+
+/*
+    عرضٌ ثابتٌ للسلّة لا نسبة.
+
+    السلّةُ محتواها ثابتُ الشكل — اسمٌ وكمّيةٌ ومجموع. وتوسيعُها على شاشةٍ
+    عريضةٍ يمدّ سطورَها بلا فائدة، ويأخذ من شبكة المنتجات صفّاً كاملاً.
+*/
+.right-card {
+    flex: 0 0 344px;
+    min-width: 344px;
+    border-inline-start: 1px solid var(--t-line);
+}
+
+.card {
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    overflow: hidden;
+    background: var(--t-surface);
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٣ · الشريط العلويّ
+   ═══════════════════════════════════════════════════════════════════ */
+
+/*
+    النوعيّةُ تُطابَق: `bootstrap-extended` يكتب `.header-navbar.navbar-shadow`
+    — صنفان (٠،٢،٠) يغلبان صنفاً واحداً. والوسمُ يحمل الصنفين معاً.
+*/
+.header-navbar,
+.header-navbar.navbar-shadow {
+    background: var(--t-navy) !important;
+    border-radius: 0;
+    padding: 0 12px;
+    min-height: 46px;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-wrapper, .navbar-container { width: 100%; padding: 0; }
+
+.navbar-collapse {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.navbar-nav {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.nav-item { margin: 0; }
+
+/*
+    أدواتُ الشريط: بلا خلفيّةٍ حتى تُقصد.
+
+    كانت كلٌّ منها في مربّعٍ فاتحٍ دائم، فيبدو الشريطُ صفَّ أزرارٍ متساوية
+    الإلحاح. والخلفيّةُ عند المرور وحده تجعل الشريطَ يهدأ ويبقى مقروءاً.
+*/
+.nav-item .nav-link {
+    color: rgba(255, 255, 255, .72) !important;
+    padding: 7px 10px;
+    border-radius: var(--t-r);
+    background: transparent;
+    font-size: 13px;
+    line-height: 1;
+    transition: background-color var(--t-quick), color var(--t-quick);
+}
+
+.nav-item .nav-link:hover {
+    background: rgba(255, 255, 255, .12);
+    color: #fff !important;
+}
+
+.user-nav { text-align: right; color: rgba(255, 255, 255, .9); }
+.user-name { font-size: 13px; font-weight: 600; line-height: 1.25; }
+.user-status span { font-size: 11px; color: rgba(255, 255, 255, .6); }
+
+/*
+    اختصارُ المفتاح: علامةٌ تُقرأ عند البحث عنها لا تُعلن عن نفسها.
+*/
+.keyboard-shortcut {
+    position: absolute;
+    top: 2px;
+    inset-inline-end: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, .38);
+    letter-spacing: .04em;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٤ · شريطُ البحث والتبديل
+   ═══════════════════════════════════════════════════════════════════ */
+
+.search-section {
+    background: var(--t-surface);
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--t-line);
+}
+
+.search-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+/*
+    أزرارُ التبديل الثلاثة مجموعةٌ واحدة — لأنها اختيارٌ واحدٌ من ثلاثة،
+    لا ثلاثةُ أفعالٍ مستقلّة. والمجموعةُ تقول ذلك بشكلها قبل أن يُجرَّب.
+*/
+.search-buttons {
+    display: flex;
+    gap: 0;
+    flex-shrink: 0;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    overflow: hidden;
+    background: var(--t-surface);
+}
+
+.btn-search {
+    background: transparent;
+    border: none;
+    border-inline-end: 1px solid var(--t-line);
+    color: var(--t-ink-2);
+    padding: 0 13px;
+    border-radius: 0;
+    font-weight: 600;
+    font-size: 12.5px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: background-color var(--t-quick), color var(--t-quick);
+}
+
+.search-buttons .btn-search:last-child { border-inline-end: none; }
+
+.btn-search:hover { background: var(--t-navy-tint); color: var(--t-ink); }
+
+.btn-search.active {
+    background: var(--t-navy);
+    color: #fff;
+    box-shadow: none;
+}
+
+.btn-search i { font-size: 12px; opacity: .85; }
+
+.search-input {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--t-ink);
+    background: var(--t-surface);
+    transition: border-color var(--t-quick), box-shadow var(--t-quick);
+}
+
+.search-input::placeholder { color: var(--t-ink-3); }
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--t-go);
+    box-shadow: 0 0 0 3px var(--t-go-tint);
+}
+
+.content-body {
+    flex: 1;
+    padding: 10px 12px 12px;
+    overflow: auto;
+    background: var(--t-ground);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٥ · التصنيفاتُ والمنتجات
+   ═══════════════════════════════════════════════════════════════════ */
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.category-card {
+    background: var(--t-surface);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    padding: 9px 7px;
+    text-align: center;
+    cursor: pointer;
+    min-height: 78px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--t-ink);
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.category-card:hover { border-color: var(--t-ink-3); background: var(--t-navy-tint); }
+
+.category-card.active {
+    background: var(--t-navy);
+    border-color: var(--t-navy);
+    color: #fff;
+}
+
+.category-image {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--t-line);
+}
+
+.category-card.active .category-image { border-color: rgba(255, 255, 255, .35); }
+
+/*
+    بديلُ الصورة حين لا صورةَ للتصنيف.
+
+    كان تدرّجاً بنفسجيّاً مكتوباً في القالب — `#667eea → #764ba2`، وهو لونٌ
+    غريبٌ عن لوحة الشاشة كلِّها، ويظهر دائرةً صارخةً بين تصنيفاتٍ هادئة.
+
+    والبديلُ لا يجب أن يكون أوضحَ من الأصل: سطحٌ خافتٌ وأيقونةٌ رمادية.
+*/
+.category-image__fallback {
+    background: var(--t-sunken);
+    color: var(--t-ink-3);
+    font-size: 13px;
+}
+
+.category-card.active .category-image__fallback {
+    background: rgba(255, 255, 255, .14);
+    color: rgba(255, 255, 255, .8);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(134px, 1fr));
+    gap: 6px;
+}
+
+/*
+    بطاقةُ المنتج: أكثرُ ما يتكرّر في الشاشة، فأهدؤها.
+
+    كلُّ زينةٍ فيها تُضرب في عددها. فلا ظلَّ ولا شريطَ زينةٍ ولا رفع —
+    حدٌّ يشتدّ وأرضيّةٌ تميل إلى لون المعاملة، تقول «هذا يُضاف».
+*/
+.product-card {
+    background: var(--t-surface);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    padding: 7px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color var(--t-quick), border-color var(--t-quick);
+}
+
+.product-card:hover { border-color: var(--t-go); background: var(--t-go-tint); }
+.product-card:active { background: var(--t-go-tint); border-color: var(--t-go-2); }
+
+.product-image {
+    width: 100%;
+    height: 74px;
+    object-fit: cover;
+    border-radius: 3px;
+    margin-bottom: 6px;
+    background: var(--t-sunken);
+}
+
+.product-name {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--t-ink);
+    margin-bottom: 4px;
+    height: 2.7em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/*
+    السعرُ يحمل لونَ المعاملة — وهو اللونُ نفسُه الذي على زرّ الدفع.
+    فيقرأ العينُ سلسلةً واحدة: هذا سعرُه، وهناك يُدفع.
+*/
+.product-price {
+    color: var(--t-go-2);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -.01em;
+}
+
+.product-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.product-card.no-image {
+    padding: 10px 9px;
+    min-height: 82px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-card.no-image .product-name {
+    font-size: 13px;
+    height: auto;
+    -webkit-line-clamp: 3;
+    margin-bottom: 7px;
+}
+
+.product-card.no-image .product-info { margin-top: 0; }
+
+.info-btn {
+    background: transparent;
+    border: 1px solid var(--t-line);
+    color: var(--t-ink-3);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.info-btn:hover { background: var(--t-navy); border-color: var(--t-navy); color: #fff; }
+
+/*
+    وسمُ الرصيد: لا يُلوَّن إلّا حين يستحقّ.
+
+    الرصيدُ الوافر خبرٌ لا يُحتاج، فيُقال رمادياً. والقليلُ والنافدُ قرارٌ:
+    الأوّلُ يُنبَّه والثاني يمنع.
+*/
+.stock-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--t-sunken);
+    color: var(--t-ink-2);
+    white-space: nowrap;
+}
+
+.stock-badge.low-stock { background: var(--t-hold-tint); color: var(--t-hold); }
+.stock-badge.out-of-stock { background: var(--t-stop-tint); color: var(--t-stop); }
+
+.product-card.out-of-stock { opacity: .55; }
+.product-card.out-of-stock:hover { border-color: var(--t-line); background: var(--t-surface); }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٦ · السلّة
+   ═══════════════════════════════════════════════════════════════════ */
+
+.order-header {
+    background: var(--t-navy);
+    color: #fff;
+    padding: 9px 11px;
+}
+
+.order-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.order-tab {
+    background: rgba(255, 255, 255, .1);
+    border: none;
+    color: rgba(255, 255, 255, .78);
+    padding: 5px 11px;
+    border-radius: var(--t-r);
+    white-space: nowrap;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    min-width: 34px;
+    transition: background-color var(--t-quick), color var(--t-quick);
+}
+
+.order-tab:hover:not(.active) { background: rgba(255, 255, 255, .2); color: #fff; }
+.order-tab.active { background: #fff; color: var(--t-navy); }
+
+.client-selector {
+    background: rgba(255, 255, 255, .1);
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: var(--t-r);
+    padding: 7px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    font-size: 12.5px;
+    transition: background-color var(--t-quick), border-color var(--t-quick);
+}
+
+.client-selector:hover { background: rgba(255, 255, 255, .18); }
+
+.order-content {
+    flex: 1;
+    background: var(--t-surface);
+    overflow-y: auto;
+    padding: 0;
+}
+
+/*
+    ═══════════ صفُّ السلّة = سطرُ إيصال ═══════════
+
+    كان كلُّ صنفٍ بطاقةً مستقلّةً بحدٍّ وحوافَّ وظلٍّ وفجوةٍ عمّا تحتها،
+    وتنزلق جانباً عند المرور.
+
+    وهذا يخطئ ما تمثّله: السلّةُ قائمةٌ متّصلةٌ تُجمع في مجموع، لا مجموعةُ
+    بطاقاتٍ منفصلة. فصارت سطوراً متلاصقةً يفصلها خطٌّ شعريّ — كالإيصال
+    الذي ستصير إليه.
+
+    وتُرى أصنافٌ أكثرُ قبل التمرير: هذا وحدَه يكفي مبرّراً.
+*/
+.order-item {
+    background: var(--t-surface);
+    border: none;
+    border-bottom: 1px solid var(--t-line-2);
+    border-radius: 0;
+    padding: 8px 11px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    transition: background-color var(--t-quick);
+}
+
+.order-item:hover { background: var(--t-navy-tint); }
+
+.item-details { flex: 1; min-width: 0; }
+
+.item-name {
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--t-ink);
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-price { color: var(--t-ink-3); font-size: 11px; }
+
+.item-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/*
+    ضابطُ الكمّية: مجموعةٌ واحدةٌ محدَّدة، لا زرّان ملوّنان.
+
+    كانا أخضرين مصمتين — لونُ الفعل مصروفاً على زيادةِ رقم. فيزاحمان زرَّ
+    الدفع على معنى اللون. واللونُ الآن عند المرور وحده.
+*/
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    overflow: hidden;
+    background: var(--t-surface);
+}
+
+.qty-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--t-ink-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: background-color var(--t-quick), color var(--t-quick);
+}
+
+.qty-btn:hover { background: var(--t-go); color: #fff; }
+
+.qty-display {
+    min-width: 28px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--t-ink);
+    border-inline: 1px solid var(--t-line);
+}
+
+.item-total {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--t-ink);
+    min-width: 60px;
+    text-align: left;
+}
+
+/*
+    الحذفُ لا رجعةَ فيه، فلا يُعرض بلونٍ يجذب الإصبع. يبقى باهتاً حتى
+    يُقصَد، ثم يحمرّ.
+*/
+.delete-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--t-ink-3);
+    border-radius: var(--t-r);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.delete-btn:hover {
+    background: var(--t-stop-tint);
+    border-color: var(--t-stop);
+    color: var(--t-stop);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٧ · الملخّصُ والفعل
+   ═══════════════════════════════════════════════════════════════════ */
+
+.order-summary {
+    background: var(--t-surface);
+    padding: 9px 11px 11px;
+    border-top: 1px solid var(--t-line);
+}
+
+/*
+    السطورُ الفرعيّةُ رماديّةٌ صغيرة، والإجماليُّ وحدَه يكبر ويسودّ.
+
+    كانت كلُّها بخطوطٍ فاصلةٍ ووزنٍ متقارب، والإجماليُّ أخضرَ فوق خطٍّ
+    أخضر. فثلاثةُ خطوطٍ خضراءَ في لوحةٍ واحدة.
+
+    والإجماليُّ **ليس أخضر**: الأخضرُ في هذه الشاشة لونُ الفعل — ما يُنقر
+    وما يُضاف. والإجماليُّ نتيجةٌ تُقرأ وتُقال للزبون.
+*/
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+    border: none;
+    font-size: 12px;
+    color: var(--t-ink-2);
+}
+
+.summary-row span:last-child { color: var(--t-ink); font-weight: 600; }
+
+.summary-row.total {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--t-ink);
+    border-top: 1px solid var(--t-line);
+    padding-top: 8px;
+    margin-top: 7px;
+    letter-spacing: -.02em;
+}
+
+.summary-row.total span:last-child { font-weight: 800; color: var(--t-ink); }
+
+.discount-section, .tax-section {
+    background: var(--t-ground);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    padding: 7px 8px;
+    margin: 7px 0;
+    font-size: 12px;
+}
+
+.discount-controls, .tax-controls {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.discount-type-select, .discount-input, .tax-controls select {
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    background: var(--t-surface);
+    color: var(--t-ink);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 5px 8px;
+    height: 30px;
+}
+
+.discount-type-select { flex: none; width: 74px; }
+.discount-input { flex: 1; text-align: center; }
+
+.discount-type-select:focus, .discount-input:focus, .tax-controls select:focus {
+    outline: none;
+    border-color: var(--t-go);
+    box-shadow: 0 0 0 3px var(--t-go-tint);
+}
+
+/*
+    ═══════════ هرمُ الأفعال ═══════════
+
+    ثلاثةُ أزرارٍ متساويةِ العرض والصوت: أصفرُ للتعليق، وأحمرُ للاسترداد،
+    وأخضرُ للدفع — ثلاثتُها ممتلئةٌ بتدرّجٍ صارخ. فتصيح معاً فلا يُسمع
+    أيُّها.
+
+    و**الدفعُ هو الفعل**: يُضغط في كل فاتورة. والتعليقُ والاستردادُ نادران
+    — وأحدُهما لا رجعةَ فيه.
+
+    فصار واحدٌ ممتلئاً وأعرضَ، والآخران محدَّدين: يُقرآن حين يُبحث عنهما،
+    ولا يزاحمان.
+*/
+.action-buttons {
+    display: flex;
+    gap: 6px;
+    margin-top: 9px;
+}
+
+.action-btn {
+    flex: 1;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: var(--t-r);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 12.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.btn-hold {
+    background: var(--t-surface);
+    border-color: var(--t-line);
+    color: var(--t-hold);
+}
+
+.btn-hold:hover { background: var(--t-hold-tint); border-color: var(--t-hold); }
+
+.btn-return {
+    background: var(--t-surface);
+    border-color: var(--t-line);
+    color: var(--t-stop);
+}
+
+.btn-return:hover { background: var(--t-stop-tint); border-color: var(--t-stop); }
+
+/* الفعلُ الذي تقوم عليه الشاشة — وحدَه ممتلئ، وأعرضُ بالنصف */
+.btn-pay {
+    background: var(--t-go);
+    border-color: var(--t-go);
+    color: #fff;
+    flex: 1.6;
+    font-size: 13.5px;
+}
+
+.btn-pay:hover { background: var(--t-go-2); border-color: var(--t-go-2); }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٨ · الحالاتُ والتفاصيل
+   ═══════════════════════════════════════════════════════════════════ */
+
+.empty-state {
+    text-align: center;
+    padding: 34px 16px;
+    color: var(--t-ink-3);
+}
+
+.empty-state i { font-size: 26px; margin-bottom: 8px; opacity: .3; }
+.empty-state p { font-size: 13px; margin-bottom: 3px; color: var(--t-ink-2); }
+.empty-state small { font-size: 11.5px; }
+
+/*
+    شريطُ التمرير: رفيعٌ وبلا لون.
+
+    الشريطُ العريضُ الملوّن يأخذ من عرض السلّة ويجذب العينَ إلى حافّتها.
+*/
+.order-content::-webkit-scrollbar,
+.content-body::-webkit-scrollbar { width: 7px; height: 7px; }
+
+.order-content::-webkit-scrollbar-track,
+.content-body::-webkit-scrollbar-track { background: transparent; }
+
+.order-content::-webkit-scrollbar-thumb,
+.content-body::-webkit-scrollbar-thumb {
+    background: var(--t-line);
+    border-radius: 4px;
+}
+
+.order-content::-webkit-scrollbar-thumb:hover,
+.content-body::-webkit-scrollbar-thumb:hover { background: var(--t-ink-3); }
+
+/*
+    القوائمُ المنسدلةُ تطفو فعلاً — فلها ظلٌّ وحدَها.
+*/
+.dropdown-menu, .client-dropdown {
+    border: 1px solid var(--t-line);
+    box-shadow: var(--t-float);
+    border-radius: var(--t-r-lg);
+    padding: 5px;
+}
+
+.dropdown-item {
+    border-radius: var(--t-r);
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--t-ink);
+    transition: background-color var(--t-quick);
+}
+
+.dropdown-item:hover { background: var(--t-navy-tint); }
+
+/*
+    الرسومُ المتحرّكة عند الظهور: عشرُ بكسلاتٍ ومئةٌ وستّون جزءاً من الألف.
+
+    كانت انزلاقاتٍ طويلةً تُعاد على السلّة كلِّها مع كل تغييرِ كمّية. وهي
+    الآن على ما يظهر جديداً وحده، وبمقدارٍ يُلمَح ولا يُنتظَر.
+*/
+@keyframes posIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.fade-in, .slide-in { animation: posIn 160ms ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+    .fade-in, .slide-in { animation: none; }
+    * { transition-duration: 1ms !important; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ٩ · الشاشاتُ الضيّقة
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1100px) {
+    .right-card { flex: 0 0 300px; min-width: 300px; }
+    .products-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+}
+
+/*
+    دون ٩٠٠: اللوحان فوق بعضهما، والسلّةُ أسفلَ بارتفاعٍ محدود — فتبقى
+    شبكةُ المنتجات هي المساحة.
+*/
+@media (max-width: 900px) {
+    .content-wrapper { flex-direction: column; }
+
+    .left-card { flex: 1 1 auto; min-height: 0; }
+
+    .right-card {
+        flex: 0 0 auto;
+        min-width: 0;
+        max-height: 46vh;
+        border-inline-start: none;
+        border-top: 1px solid var(--t-line);
+    }
+
+    .search-row { flex-wrap: wrap; }
+    .search-input { min-width: 100%; order: -1; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ١٠ · النوافذ
+   ═══════════════════════════════════════════════════════════════════
+
+   ═══════ ما كانت ═══════
+
+   مصمَّمةً في سمة `style` على كل عنصر: حشوٌ ٣٠، وحدٌّ بلونٍ ثانوي، وثلاثُ
+   بطاقاتِ ملخّصٍ بألوانٍ باهتةٍ مكتوبةٍ بأرقامها — وهي ألوانُ تنبيهاتِ
+   بوتستراب لا ألوانَ هذه الشاشة.
+
+   وأسوأُ من ذلك: `var(--primary-color)` و`var(--border-radius)` بقيت في
+   السمات بعد أن استُبدل نظامُ الرموز، فصارت **بلا قيمة** — يسقط الإعلانُ
+   ويُرسم رأسُ النافذة بلا لون.
+
+   ═══════ والمبدأ ═══════
+
+   النافذةُ تطفو فوق الشاشة فلها ظلٌّ — وهو الموضعُ الوحيد الذي يستحقّه.
+   وما عدا ذلك تتبع الشاشةَ نفسَها: الكحليُّ بنية، والأخضرُ فعل، والخطوطُ
+   شعريّة.
+
+   ═══════ وهرمُ الأرقام ═══════
+
+   ثلاثةُ أرقامٍ في الملخّص كانت متساويةَ الإلحاح — ثلاثُ بطاقاتٍ ملوّنة.
+   والمهمُّ منها **المتبقّي** وحده: هو ما يمنع التأكيد. فيُلوَّن حين يكون
+   ويهدأ حين يصفر، ويُلوَّن «الباقي للعميل» حين يوجد فقط.
+*/
+
+.pos-modal {
+    border: none;
+    border-radius: var(--t-r-lg);
+    box-shadow: var(--t-float);
+    overflow: hidden;
+}
+
+.pos-modal .modal-header {
+    background: var(--t-navy);
+    color: #fff;
+    border: none;
+    padding: 12px 16px;
+    align-items: center;
+}
+
+.pos-modal .modal-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.pos-modal .modal-header .close,
+.pos-modal .modal-header .btn-close {
+    color: rgba(255, 255, 255, .75);
+    opacity: 1;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    padding: 0 6px;
+    text-shadow: none;
+    transition: color var(--t-quick);
+}
+
+.pos-modal .modal-header .close:hover { color: #fff; }
+
+.pos-modal .modal-body { padding: 16px; }
+
+.pos-modal .modal-footer {
+    border-top: 1px solid var(--t-line);
+    padding: 11px 16px;
+    gap: 7px;
+    background: var(--t-ground);
+}
+
+/* ─── المستحقّ: الرقمُ هو السؤال ─── */
+
+.pay-due {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 11px 13px;
+    background: var(--t-ground);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    margin-bottom: 14px;
+}
+
+.pay-due__label {
+    font-size: 12px;
+    color: var(--t-ink-2);
+    font-weight: 600;
+}
+
+.pay-due__value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--t-ink);
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.pay-state {
+    margin-inline-start: auto;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+}
+
+.pay-state--short { background: var(--t-stop-tint); color: var(--t-stop); }
+.pay-state--done  { background: var(--t-go-tint);   color: var(--t-go-2); }
+
+/* ─── الدفعُ السريع ─── */
+
+.pay-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--t-ink-2);
+    margin-bottom: 7px;
+}
+
+.pay-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 14px;
+}
+
+.quick-pay-btn {
+    background: var(--t-surface);
+    border: 1px solid var(--t-line);
+    color: var(--t-ink);
+    border-radius: var(--t-r);
+    padding: 9px 15px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.quick-pay-btn:hover { border-color: var(--t-go); background: var(--t-go-tint); }
+
+/*
+    الافتراضيُّ محدَّدٌ بلون الفعل ووسمٌ يسمّيه — لا ممتلئ.
+
+    الامتلاءُ هنا يزاحم «تأكيد الدفع» في الذيل، وهو الفعلُ الأخير. فيكفي
+    الحدُّ ليُعرف من بعيد.
+*/
+.quick-pay-btn--default {
+    border-color: var(--t-go);
+    color: var(--t-go-2);
+    background: var(--t-go-tint);
+}
+
+.quick-pay-btn__tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--t-go);
+    color: #fff;
+}
+
+/* ─── أدواتُ الطرق المتعدّدة ─── */
+
+.pay-tools { display: flex; gap: 6px; }
+
+.pay-tool {
+    background: var(--t-surface);
+    border: 1px solid var(--t-line);
+    color: var(--t-ink-2);
+    border-radius: var(--t-r);
+    padding: 6px 11px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.pay-tool:hover { background: var(--t-navy-tint); color: var(--t-ink); }
+
+.pay-tool--go { border-color: var(--t-go); color: var(--t-go-2); }
+.pay-tool--go:hover { background: var(--t-go-tint); border-color: var(--t-go); }
+
+/* ─── صفُّ طريقة الدفع ─── */
+
+.payment-method-row {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    margin-bottom: 6px;
+    padding: 7px;
+    background: var(--t-ground);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+}
+
+.payment-method-row .payment-method-select { flex: 1; }
+.payment-method-row .input-group { flex: 1; }
+
+.payment-method-row .form-control,
+.payment-method-row .input-group-text {
+    border: 1px solid var(--t-line);
+    background: var(--t-surface);
+    color: var(--t-ink);
+    font-family: inherit;
+    font-size: 13px;
+    height: 36px;
+    border-radius: var(--t-r);
+}
+
+.payment-method-row .input-group-text {
+    background: var(--t-sunken);
+    color: var(--t-ink-2);
+    font-size: 12px;
+}
+
+.payment-method-row .payment-amount-input {
+    text-align: end;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.payment-method-row .form-control:focus {
+    outline: none;
+    border-color: var(--t-go);
+    box-shadow: 0 0 0 3px var(--t-go-tint);
+}
+
+.remove-payment-method {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--t-ink-3);
+    border-radius: var(--t-r);
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.remove-payment-method:hover {
+    background: var(--t-stop-tint);
+    border-color: var(--t-stop);
+    color: var(--t-stop);
+}
+
+/* ─── ملخّصُ الدفع ─── */
+
+.pay-sums {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    margin-top: 14px;
+    background: var(--t-line);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    overflow: hidden;
+}
+
+.pay-sum {
+    background: var(--t-surface);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pay-sum__label { font-size: 11px; color: var(--t-ink-2); font-weight: 600; }
+
+.pay-sum__value {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--t-ink);
+    letter-spacing: -.015em;
+    font-variant-numeric: tabular-nums;
+}
+
+/*
+    المتبقّي والباقي: يُلوَّنان حين يكونان غيرَ صفر.
+
+    الصنفُ يُضاف من `updatePaymentSummary`، فاللونُ يتبع الحالةَ لا مكانَ
+    البطاقة.
+*/
+.pay-sum--remaining.is-on { background: var(--t-stop-tint); }
+.pay-sum--remaining.is-on .pay-sum__value,
+.pay-sum--remaining.is-on .pay-sum__label { color: var(--t-stop); }
+
+.pay-sum--change.is-on { background: var(--t-go-tint); }
+.pay-sum--change.is-on .pay-sum__value,
+.pay-sum--change.is-on .pay-sum__label { color: var(--t-go-2); }
+
+/* ─── أزرارُ الذيل ─── */
+
+.pos-modal .modal-footer .btn {
+    border-radius: var(--t-r);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 18px;
+    border: 1px solid transparent;
+    transition: background-color var(--t-quick), border-color var(--t-quick);
+}
+
+.pos-modal .modal-footer .btn-secondary {
+    background: var(--t-surface);
+    border-color: var(--t-line);
+    color: var(--t-ink-2);
+}
+
+.pos-modal .modal-footer .btn-secondary:hover { background: var(--t-navy-tint); color: var(--t-ink); }
+
+.pos-modal .modal-footer .btn-success,
+.pos-modal .modal-footer .btn-danger {
+    background: var(--t-go);
+    border-color: var(--t-go);
+    color: #fff;
+}
+
+.pos-modal .modal-footer .btn-success:hover,
+.pos-modal .modal-footer .btn-danger:hover {
+    background: var(--t-go-2);
+    border-color: var(--t-go-2);
+}
+
+/* والاستردادُ فعلٌ لا رجعةَ فيه: لونُه لونُه */
+#returnModal .modal-footer .btn-danger {
+    background: var(--t-stop);
+    border-color: var(--t-stop);
+}
+
+#returnModal .modal-footer .btn-danger:hover { background: #962F26; border-color: #962F26; }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ١١ · نافذةُ المرتجع
+   ═══════════════════════════════════════════════════════════════════
+
+   كانت أصنافَ بوتستراب: `alert alert-info` أزرقُ يشرح ما هو ظاهر،
+   و`table-light` رماديّ، و`h4 text-danger` للإجمالي، وعرضٌ مكتوبٌ في
+   السطر (`style="width: 70px"`).
+
+   والمرتجعُ فعلٌ **لا رجعةَ فيه**: بضاعةٌ تعود إلى الرفّ، وقيدٌ يُكتب،
+   ونقدٌ قد يخرج من الدرج. فالنافذةُ تُقرأ قبل التأكيد لا تُمرّ عليها
+   العين — ولذلك يخفت غيرُ المختار ويكبر الإجمالي.
+*/
+
+.ret-popup {
+    border-radius: var(--t-r-lg) !important;
+    padding: 0 !important;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+.ret-popup .swal2-html-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: start !important;
+    color: var(--t-ink);
+}
+
+.ret-popup .swal2-title { display: none !important; }
+
+.ret-modal { text-align: start; }
+
+/* ─── الترويسة ─── */
+
+.ret-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    background: var(--t-navy);
+    color: #fff;
+}
+
+.ret-head__title { font-size: 12px; color: rgba(255, 255, 255, .68); font-weight: 600; }
+
+.ret-head__code {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    font-variant-numeric: tabular-nums;
+}
+
+.ret-head__cap { text-align: end; }
+
+.ret-head__cap-label {
+    display: block;
+    font-size: 11px;
+    color: rgba(255, 255, 255, .62);
+    font-weight: 600;
+}
+
+.ret-head__cap-value {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ─── الجدول ─── */
+
+.ret-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.ret-table thead th {
+    background: var(--t-ground);
+    color: var(--t-ink-2);
+    font-size: 11.5px;
+    font-weight: 700;
+    text-align: start;
+    padding: 8px 11px;
+    border-bottom: 1px solid var(--t-line);
+    white-space: nowrap;
+}
+
+.ret-table tbody td {
+    padding: 8px 11px;
+    border-bottom: 1px solid var(--t-line-2);
+    vertical-align: middle;
+}
+
+.ret-table tbody tr:last-child td { border-bottom: none; }
+
+/*
+    الصفُّ غيرُ المختار يخفت.
+
+    فاتورةٌ بعشرة أصنافٍ يُرجَع منها اثنان: بلا تمييزٍ تُقرأ العشرةُ كلُّها
+    قبل التأكيد. والخفوتُ يجعل المختارَ يظهر وحده.
+*/
+.ret-table tbody tr { opacity: .45; transition: opacity var(--t-quick), background-color var(--t-quick); }
+.ret-table tbody tr.is-picked { opacity: 1; background: var(--t-go-tint); }
+
+.ret-pick { width: 34px; }
+
+.ret-pick input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--t-go);
+    cursor: pointer;
+}
+
+.ret-name { font-weight: 600; color: var(--t-ink); }
+
+.ret-meta {
+    font-size: 11px;
+    color: var(--t-ink-3);
+    margin-top: 1px;
+    font-variant-numeric: tabular-nums;
+}
+
+.ret-sold {
+    width: 62px;
+    color: var(--t-ink-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.ret-table .return-qty {
+    width: 76px;
+    height: 32px;
+    padding: 0 9px;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    background: var(--t-surface);
+    color: var(--t-ink);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.ret-table .return-qty:focus {
+    outline: none;
+    border-color: var(--t-go);
+    box-shadow: 0 0 0 3px var(--t-go-tint);
+}
+
+.ret-line-total {
+    width: 96px;
+    font-weight: 700;
+    color: var(--t-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ─── الإجمالي ─── */
+
+.ret-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 11px 16px;
+    border-top: 1px solid var(--t-line);
+    background: var(--t-ground);
+}
+
+.ret-foot__label { font-size: 12.5px; font-weight: 700; color: var(--t-ink-2); }
+
+/*
+    الإجماليُّ يهدأ وهو صفر ويحمرّ حين يكون.
+
+    وصفرٌ أحمرُ يصيح بلا خبر — والمرتجعُ يُصبغ بالأحمر لأنه فعلٌ لا رجعةَ
+    فيه، لا لأنّ خانةً فارغة.
+*/
+.ret-foot__value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--t-ink-3);
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--t-quick);
+}
+
+.ret-foot__value.is-on { color: var(--t-stop); }
+
+/* ─── السبب ─── */
+
+.ret-reason { padding: 12px 16px 14px; }
+
+.ret-reason label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--t-ink-2);
+    margin-bottom: 5px;
+}
+
+.ret-reason textarea {
+    width: 100%;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    background: var(--t-surface);
+    color: var(--t-ink);
+    font-family: inherit;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    resize: vertical;
+}
+
+.ret-reason textarea:focus {
+    outline: none;
+    border-color: var(--t-go);
+    box-shadow: 0 0 0 3px var(--t-go-tint);
+}
+
+.ret-reason textarea::placeholder { color: var(--t-ink-3); }
+
+/* ─── أزرارُ الذيل ─── */
+
+.ret-popup .swal2-actions {
+    margin: 0 !important;
+    padding: 0 16px 14px !important;
+    gap: 7px;
+    justify-content: flex-start;
+}
+
+.ret-popup .swal2-confirm,
+.ret-popup .swal2-cancel {
+    border-radius: var(--t-r);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 18px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color var(--t-quick), border-color var(--t-quick);
+}
+
+/* الاستردادُ لا رجعةَ فيه — فلونُه لونُه */
+.ret-popup .swal2-confirm {
+    background: var(--t-stop);
+    color: #fff;
+}
+
+.ret-popup .swal2-confirm:hover { background: #962F26; }
+
+.ret-popup .swal2-cancel {
+    background: var(--t-surface);
+    border-color: var(--t-line);
+    color: var(--t-ink-2);
+}
+
+.ret-popup .swal2-cancel:hover { background: var(--t-navy-tint); color: var(--t-ink); }
+
+/* وسمُ فاتورة المرتجع في القائمة */
+.invoice-type-badge--return { background: var(--t-stop-tint); color: var(--t-stop); }
+.invoices-table tbody tr.is-return-doc td:first-child { box-shadow: inset 3px 0 0 var(--t-ink-3); }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ١٢ · نافذةُ تفاصيل الفاتورة
+   ═══════════════════════════════════════════════════════════════════
+
+   كانت `invoice-details-pro`: تدرّجٌ بنفسجيّ وأصنافُ بوتستراب وأيقوناتُ
+   FontAwesome — لوحةٌ لا صلةَ لها بالشاشة التي فُتحت منها.
+
+   وثلاثةُ أزرارٍ متساوية الوزن: «طباعة» و«مرتجع» و«إغلاق». والمرتجعُ فعلٌ
+   لا رجعةَ فيه، والإغلاقُ لا أثرَ له — فلا يصحّ أن يتساويا.
+*/
+
+.inv-popup {
+    border-radius: var(--t-r-lg) !important;
+    padding: 0 !important;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+.inv-popup .swal2-html-container { margin: 0 !important; padding: 0 !important; text-align: start !important; }
+.inv-popup .swal2-title { display: none !important; }
+
+.inv-modal { text-align: start; color: var(--t-ink); }
+
+/* ─── الترويسة ─── */
+
+.inv-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    padding: 13px 16px;
+    background: var(--t-navy);
+    color: #fff;
+}
+
+/* المرتجعُ يُعرف من ترويسته قبل قراءة سطر */
+.inv-head--return { background: var(--t-stop); }
+
+.inv-head__kind { font-size: 12px; color: rgba(255, 255, 255, .68); font-weight: 600; }
+
+.inv-head__code {
+    font-size: 17px; font-weight: 800; letter-spacing: -.01em;
+    font-variant-numeric: tabular-nums;
+}
+
+.inv-head__cap { text-align: end; }
+.inv-head__cap-label { display: block; font-size: 11px; color: rgba(255, 255, 255, .62); font-weight: 600; }
+
+.inv-head__cap-value {
+    display: block; font-size: 15px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ─── البطاقات ─── */
+
+.inv-facts {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--t-line-2);
+    border-bottom: 1px solid var(--t-line);
+}
+
+.inv-fact { background: var(--t-surface); padding: 9px 14px; }
+.inv-fact__label { display: block; font-size: 11px; color: var(--t-ink-3); font-weight: 600; }
+.inv-fact__value { display: block; font-size: 13px; font-weight: 600; margin-top: 2px; }
+
+.inv-pill {
+    display: inline-block;
+    padding: 1px 8px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 700;
+    background: var(--t-navy-tint); color: var(--t-ink-2);
+}
+
+.inv-pill--ok { background: var(--t-go-tint); color: var(--t-go-2); }
+.inv-pill--warn { background: #FBF2E8; color: #8A5A2B; }
+.inv-pill--stop, .inv-pill--return { background: var(--t-stop-tint); color: var(--t-stop); }
+
+.inv-dim { color: var(--t-ink-3); font-size: 11.5px; font-weight: 600; }
+
+/* ─── الجدول ─── */
+
+.inv-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+
+.inv-table th {
+    background: var(--t-ground); color: var(--t-ink-2);
+    font-size: 11.5px; font-weight: 700; text-align: start;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--t-line);
+}
+
+.inv-table td { padding: 8px 12px; border-bottom: 1px solid var(--t-line-2); }
+.inv-table tbody tr:last-child td { border-bottom: none; }
+
+.inv-name { font-weight: 600; }
+.inv-c { text-align: center; font-variant-numeric: tabular-nums; }
+.inv-e { text-align: end; font-variant-numeric: tabular-nums; }
+.inv-strong { font-weight: 700; }
+
+/* ─── الإجماليات ─── */
+
+.inv-sums { padding: 10px 16px; border-top: 1px solid var(--t-line); background: var(--t-ground); }
+
+.inv-sums .inv-sum {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 3px 0;
+    font-size: 12.5px;
+}
+
+.inv-sum span { color: var(--t-ink-2); }
+.inv-sum b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.inv-sum--minus b { color: var(--t-stop); }
+
+.inv-sum--grand {
+    margin-top: 5px; padding-top: 8px;
+    border-top: 1px solid var(--t-line);
+}
+
+.inv-sum--grand span { color: var(--t-ink); font-weight: 700; font-size: 13px; }
+.inv-sum--grand b { font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+
+/* ─── الأزرار ─── */
+
+.inv-acts { display: flex; gap: 7px; padding: 12px 16px; }
+
+.inv-btn {
+    padding: 9px 18px;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    background: var(--t-surface); color: var(--t-ink-2);
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    transition: background-color var(--t-quick), border-color var(--t-quick);
+}
+
+.inv-btn:hover:not(:disabled) { background: var(--t-navy-tint); color: var(--t-ink); }
+
+.inv-btn--go { background: var(--t-navy); border-color: var(--t-navy); color: #fff; }
+.inv-btn--go:hover { background: #0F1726; color: #fff; }
+
+/* المرتجعُ فعلٌ لا رجعةَ فيه — فلونُه يُنذر */
+.inv-btn--warn { background: var(--t-stop); border-color: var(--t-stop); color: #fff; }
+.inv-btn--warn:hover { background: #962F26; color: #fff; }
+
+/*
+    المعطَّلُ يُعرض ولا يُخفى.
+
+    إخفاءُ زرٍّ يجعل المستخدم يبحث عمّا لا يجده ويظنّ العطلَ في النظام.
+    وعرضُه معطَّلاً مع سببه يقول: رأيتُك، ولا يجوز، وهذا السبب.
+*/
+.inv-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.inv-note {
+    margin: 0; padding: 0 16px 14px;
+    font-size: 11.5px; color: var(--t-ink-3); font-weight: 600;
+}
+
+
+/* ─── خيارُ صرف المرتجع ───
+
+   المرتجعُ فعلان لا واحد: بضاعةٌ تعود، ومالٌ يُسوّى. والثاني كان يقع
+   تلقائياً بلا أن يراه الكاشير — فصار خياراً ظاهراً قبل التأكيد.
+
+   وهما بطاقتان لا قائمةٌ منسدلة: الفرقُ بينهما مالٌ يخرج من الدرج، فيُقرأ
+   لا يُنقر عليه.
+*/
+
+.ret-pay {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    padding: 0 16px 14px;
+}
+
+.ret-pay__opt { margin: 0; cursor: pointer; }
+.ret-pay__opt input { position: absolute; opacity: 0; pointer-events: none; }
+
+.ret-pay__box {
+    display: block;
+    padding: 9px 12px;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    background: var(--t-surface);
+    transition: border-color var(--t-quick), background-color var(--t-quick);
+}
+
+.ret-pay__title { display: block; font-size: 12.5px; font-weight: 700; color: var(--t-ink); }
+.ret-pay__hint { display: block; font-size: 11px; color: var(--t-ink-3); margin-top: 2px; line-height: 1.45; }
+
+.ret-pay__opt:hover .ret-pay__box { background: var(--t-navy-tint); }
+
+/* المختارُ يُعلَّم بالإطار — والصرفُ النقديّ بلونه لأنه مالٌ يخرج */
+.ret-pay__opt input:checked + .ret-pay__box {
+    border-color: var(--t-navy);
+    box-shadow: 0 0 0 2px var(--t-navy-tint);
+}
+
+.ret-pay__opt input[value="cash"]:checked + .ret-pay__box {
+    border-color: var(--t-stop);
+    box-shadow: 0 0 0 2px var(--t-stop-tint);
+}
+
+.ret-pay__opt input[value="cash"]:checked + .ret-pay__box .ret-pay__title { color: var(--t-stop); }
+
+.ret-pay__opt input:focus-visible + .ret-pay__box { outline: 2px solid var(--t-navy); outline-offset: 2px; }
+
+.ret-nopay {
+    margin: 0; padding: 0 16px 14px;
+    font-size: 11.5px; color: var(--t-ink-3); font-weight: 600;
+}

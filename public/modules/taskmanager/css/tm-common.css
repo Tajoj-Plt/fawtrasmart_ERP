@@ -1,0 +1,363 @@
+/*
+ * TaskManager shared design system: hero header, stat pills, toolbar,
+ * filter chips, cards. Used across all TaskManager module pages
+ * (board, dashboard, projects, workspaces, sprints, settings, reports)
+ * so every page shares one consistent, interactive, responsive look.
+ */
+
+/* ---------- Hero ---------- */
+.tm-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 18px;
+    padding: 2.5rem 2rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.28);
+    color: white;
+    text-align: center;
+    animation: tmFadeUp 0.5s ease both;
+}
+
+.tm-hero-content { max-width: 800px; margin: 0 auto; }
+
+.tm-hero-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    color: white;
+}
+
+.tm-hero-highlight {
+    background: linear-gradient(120deg, #ffe082, #ffd54f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.tm-hero-subtitle {
+    font-size: 1.05rem;
+    opacity: 0.92;
+    margin-bottom: 0;
+}
+
+.tm-hero-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.tm-hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.4rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.tm-hero-btn-solid {
+    background: #fff;
+    color: #667eea;
+    border-color: transparent;
+}
+
+.tm-hero-btn-solid:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.18); color: #5a4fc7; }
+
+.tm-hero-btn-ghost {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+.tm-hero-btn-ghost:hover { background: rgba(255, 255, 255, 0.24); color: #fff; transform: translateY(-2px); }
+
+.tm-stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+    margin-top: 1.75rem;
+}
+
+.tm-stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 14px;
+    padding: 0.7rem 1.1rem;
+    min-width: 150px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.tm-stat-pill:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.2); }
+.tm-stat-pill i { font-size: 1.3rem; opacity: 0.9; }
+.tm-stat-pill > div { display: flex; flex-direction: column; text-align: right; }
+.tm-stat-value { font-size: 1.25rem; font-weight: 800; line-height: 1.1; color: #fff; }
+.tm-stat-label { font-size: 0.75rem; opacity: 0.85; }
+
+/* ---------- Toolbar: search + filter chips ---------- */
+.tm-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #fff;
+    border: 1px solid #edf0f5;
+    border-radius: 14px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+}
+
+.tm-toolbar.tm-toolbar-sticky { position: sticky; top: 8px; z-index: 20; }
+
+.tm-search { position: relative; flex: 1 1 240px; max-width: 340px; }
+
+.tm-search i {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    color: #a5adba;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+.tm-search input {
+    width: 100%;
+    border: 1px solid #e1e6ee;
+    border-radius: 10px;
+    padding: 0.55rem 2.4rem 0.55rem 0.9rem;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tm-search input:focus {
+    outline: none;
+    border-color: #7367f0;
+    box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.14);
+}
+
+.tm-filter-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.tm-chip {
+    border: 1px solid #e1e6ee;
+    background: #f8f9fc;
+    color: #5e6c84;
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tm-chip:hover { background: #eef0fb; color: #667eea; }
+
+.tm-chip.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+}
+
+.tm-chip:focus-visible { outline: 2px solid #7367f0; outline-offset: 2px; }
+
+/* ---------- Section titles ---------- */
+.tm-section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 3px solid #eef0fb;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.tm-section-title i { color: #667eea; }
+
+/* ---------- Empty state ---------- */
+.tm-empty-state {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: #a5adba;
+    background: #fff;
+    border: 1px dashed #dfe1e6;
+    border-radius: 14px;
+    margin-bottom: 2rem;
+}
+
+.tm-empty-state i { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+
+/* ---------- Generic entrance animation ---------- */
+@keyframes tmFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tm-fade-up {
+    opacity: 0;
+    animation: tmFadeUp 0.45s ease forwards;
+}
+
+.tm-fade-up:nth-child(1) { animation-delay: 0.03s; }
+.tm-fade-up:nth-child(2) { animation-delay: 0.08s; }
+.tm-fade-up:nth-child(3) { animation-delay: 0.13s; }
+.tm-fade-up:nth-child(4) { animation-delay: 0.18s; }
+.tm-fade-up:nth-child(5) { animation-delay: 0.23s; }
+.tm-fade-up:nth-child(6) { animation-delay: 0.28s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .tm-hero, .tm-fade-up { animation: none; opacity: 1; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .tm-hero { padding: 1.75rem 1.25rem; border-radius: 14px; }
+    .tm-hero-title { font-size: 1.6rem; }
+    .tm-hero-subtitle { font-size: 0.92rem; }
+    .tm-stat-pill { min-width: 130px; flex: 1 1 130px; }
+    .tm-toolbar { position: static; flex-direction: column; align-items: stretch; }
+    .tm-search { flex: none; max-width: none; }
+    .tm-filter-chips { justify-content: center; }
+}
+
+@media (max-width: 420px) {
+    .tm-stat-row { gap: 0.6rem; }
+    .tm-stat-pill { min-width: 100%; }
+}
+
+/* ---------- Kanban column accents (board + sprint board) ---------- */
+.kanban-column-card {
+    border: 1px solid #eef0f5;
+    border-top: none;
+    border-radius: 12px;
+    box-shadow: 0 3px 14px rgba(23, 43, 77, 0.06);
+    transition: box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kanban-column-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 4px;
+}
+
+.kanban-accent-secondary::before { background: linear-gradient(90deg, #90a4ae, #607d8b); }
+.kanban-accent-primary::before { background: linear-gradient(90deg, #7367f0, #5b4fd6); }
+.kanban-accent-success::before { background: linear-gradient(90deg, #4CAF50, #2E7D32); }
+.kanban-accent-danger::before { background: linear-gradient(90deg, #ea5455, #c62828); }
+
+.kanban-column-card .card-header {
+    background: #fbfbfd;
+    border-bottom: 1px solid #f0f1f6;
+}
+
+.kanban-column-card .card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.kanban-column-card .card-title i { font-size: 0.95rem; opacity: 0.75; }
+
+/* ---------- Reusable content panel (dashboard, reports-style cards) ---------- */
+.tm-panel {
+    background: #fff;
+    border: 1px solid #eef0f5;
+    border-radius: 14px;
+    box-shadow: 0 3px 14px rgba(23, 43, 77, 0.06);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.tm-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f0f1f6;
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.tm-panel-header i { color: #667eea; }
+.tm-panel-body { padding: 1.25rem; }
+
+/* Stat tiles (dashboard summary cards) */
+.tm-stat-tile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fff;
+    border: 1px solid #eef0f5;
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 3px 14px rgba(23, 43, 77, 0.06);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    height: 100%;
+}
+
+.tm-stat-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(23, 43, 77, 0.12);
+}
+
+.tm-stat-tile-icon {
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #fff;
+}
+
+.tm-stat-tile-icon.bg-success-grad { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+.tm-stat-tile-icon.bg-primary-grad { background: linear-gradient(135deg, #2196F3, #1565C0); }
+.tm-stat-tile-icon.bg-warning-grad { background: linear-gradient(135deg, #ff9f43, #e08e2b); }
+.tm-stat-tile-icon.bg-danger-grad { background: linear-gradient(135deg, #ea5455, #c62828); }
+.tm-stat-tile-icon.bg-purple-grad { background: linear-gradient(135deg, #7367f0, #5b4fd6); }
+
+.tm-stat-tile-value { font-size: 1.6rem; font-weight: 800; color: #2c3e50; line-height: 1.15; }
+.tm-stat-tile-label { font-size: 0.82rem; color: #7f8c8d; }
+
+/* Lightly polished tables inside .tm-panel */
+.tm-table thead th {
+    border-top: none;
+    color: #7f8c8d;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 700;
+}
+
+.tm-table tbody tr { transition: background 0.15s ease; }
+.tm-table tbody tr:hover { background: #f8f9fc; }
+.tm-table td { white-space: nowrap; vertical-align: middle; }
+
+/* Rows holding .tm-panel siblings shouldn't force-stretch a short panel to
+   match a much taller one (e.g. a small summary card next to a long table) */
+#task-dashboard .row { align-items: flex-start; }

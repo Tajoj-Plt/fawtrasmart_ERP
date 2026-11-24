@@ -1,0 +1,186 @@
+/**
+ * Sprint Manager CSS
+ * Styles for sprint functionality in the Task Manager module
+ */
+
+/* Sprint Card Styles */
+.sprint-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #eee;
+}
+
+.sprint-card.active {
+    border-left-color: #28a745;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.sprint-card.completed {
+    border-left-color: #007bff;
+    opacity: 0.8;
+}
+
+.sprint-card.planned {
+    border-left-color: #6c757d;
+}
+
+.sprint-card.canceled {
+    border-left-color: #dc3545;
+    opacity: 0.6;
+}
+
+/* Sprint Status Badges */
+.badge-sprint-active {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.badge-sprint-completed {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.badge-sprint-planned {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+.badge-sprint-canceled {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* Sprint Progress Bar */
+.sprint-progress {
+    height: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.sprint-progress .progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Sprint Task Highlight */
+.task-card.in-sprint {
+    border: 2px solid #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.task-card.in-sprint .card-header {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Sprint Modal Styles */
+.sprint-modal .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.sprint-modal .form-group label {
+    font-weight: 600;
+}
+
+/* Sprint Dashboard Stats */
+.sprint-stats .stat-card {
+    text-align: center;
+    padding: 20px;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.sprint-stats .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.sprint-stats .stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Sprint Task Board */
+.sprint-task-board .task-column {
+    min-height: 500px;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.sprint-task-board .task-column-header {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .sprint-card .card-body {
+        padding: 1rem;
+    }
+    
+    .sprint-stats .stat-card {
+        padding: 15px;
+    }
+    
+    .sprint-stats .stat-number {
+        font-size: 1.5rem;
+    }
+}
+
+/* Sprint Date Range */
+.sprint-date-range {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.sprint-date-range .start-date {
+    font-weight: 600;
+}
+
+.sprint-date-range .end-date {
+    font-weight: 600;
+}
+
+.sprint-date-range .date-separator {
+    margin: 0 5px;
+}
+
+/* Sprint Goal */
+.sprint-goal {
+    font-style: italic;
+    color: #495057;
+    border-left: 3px solid #007bff;
+    padding-left: 10px;
+    margin: 10px 0;
+}
+
+/* Sprint Action Buttons */
+.sprint-actions .btn {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+/* Sprint Empty State */
+.sprint-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.sprint-empty-state i {
+    font-size: 3rem;
+    color: #ced4da;
+    margin-bottom: 1rem;
+}
+
+.sprint-empty-state h3 {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.sprint-empty-state p {
+    color: #adb5bd;
+    margin-bottom: 1rem;
+}

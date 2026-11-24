@@ -1,0 +1,956 @@
+/* ================================================================
+   إدارة علاقات العملاء — على تصميم شاشات خط السير (rb)
+   ================================================================
+
+   الغلاف `.rm-page-wrapper` يحمل `id="route-builder"` فتعمل عليه أصناف
+   `Itinerary/components/route-builder-styles` كما هي (rb-head, rb-btn, rb-stat,
+   rb-card, rb-picker…). هذه الورقة تضيف ما يخصّ الشاشة فقط وتُلبس العناصر
+   القديمة (`rm-*`) — التي يولّدها الجافاسكربت أو يقرؤها — نفس اللغة.
+   لا معرّف ولا صنفاً يقرؤه الجافاسكربت تغيّر. */
+
+.rm-rb,
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) {
+    --rb-primary: var(--app-primary, #2563eb);
+    --rb-primary-soft: color-mix(in srgb, var(--rb-primary) 12%, #fff);
+    --rb-primary-line: color-mix(in srgb, var(--rb-primary) 30%, #fff);
+    --rb-border: #e5e9f2;
+    --rb-line: #eef2f7;
+    --rb-soft: #f8fafc;
+    --rb-bg: #f3f6fb;
+    --rb-text: #1e293b;
+    --rb-muted: #64748b;
+    --rb-radius: 14px;
+
+    /* الرموز الأصلية تُعاد معايرتها فتتبعها كل القواعد القديمة */
+    --p1: var(--rb-primary);
+    --p1-h: color-mix(in srgb, var(--rb-primary) 85%, #000);
+    --p1-soft: var(--rb-primary-soft);
+    --p1-line: var(--rb-primary-line);
+    --border: var(--rb-border);
+    --border-l: var(--rb-line);
+    --txt-1: var(--rb-text);
+    --txt-4: var(--rb-muted);
+    --r-sm: 10px;
+    --r-md: 12px;
+    --r-lg: 14px;
+    --sh-xs: 0 1px 2px rgba(15, 23, 42, .04);
+    --sh-sm: 0 1px 2px rgba(15, 23, 42, .05);
+    --sh-md: 0 8px 20px rgba(15, 23, 42, .07);
+}
+
+/* ================================================================
+   الغلاف والرأس
+   ================================================================ */
+#route-builder.crm {
+    padding: 14px 16px 16px;
+    border-radius: 0;
+    gap: 14px;
+    background: var(--rb-bg);
+}
+
+#route-builder.crm .rb-head { margin-bottom: 0; flex-shrink: 0; }
+#route-builder.crm .rb-head p { display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; }
+#route-builder.crm .rb-head__actions { align-items: center; }
+
+#route-builder.crm .crm-nav {
+    display: inline-flex;
+    gap: .35rem;
+    padding-inline-end: .55rem;
+    margin-inline-end: .1rem;
+    border-inline-end: 1px solid var(--rb-border);
+}
+
+#route-builder.crm .rb-btn--icon { width: 42px; padding-inline: 0; }
+
+#route-builder.crm .crm-count {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 .4rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .25);
+    display: inline-grid;
+    place-items: center;
+    font-size: .75rem;
+}
+
+/* الجافاسكربت يُظهر هذين الزرّين بـ inline-block — نُبقيهما flex */
+#route-builder.crm #bulkAddToItineraryBtn[style*="inline-block"],
+#route-builder.crm #clearSelectionBtn[style*="inline-block"] { display: inline-flex !important; }
+
+/* ── الإحصاءات ── */
+#route-builder.crm .crm-stats { flex-shrink: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#route-builder.crm .crm-stats .rb-stat { padding: .8rem 1rem; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+#route-builder.crm .crm-stats .rb-stat strong { font-size: 1.35rem; }
+#route-builder.crm .crm-stats .rb-stat__icon { width: 46px; height: 46px; }
+#route-builder.crm .rb-stat--amber .rb-stat__icon { background: #fef3c7; color: #b45309; }
+
+/* ================================================================
+   المساحة الرئيسية: الشجرة (مع التصفية) + التفاصيل
+   ================================================================ */
+.rm-rb .rm-content-area { padding: 0; gap: 14px; }
+
+.rm-rb .rm-sidebar {
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: var(--rb-radius);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+/* ── شريط التصفية فوق المحتوى — rb-form ── */
+.rm-rb .crm-filters.rm-filters-panel {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: .6rem 1rem;
+    padding: .75rem 1rem;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: var(--rb-radius);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    overflow: visible;
+}
+
+/* العنوان سطرٌ كاملٌ فوق الحقول (زرّ الطيّ في طرفه)، لا عمودٌ بجانبها */
+#route-builder.crm .crm-filters .rb-picker__title {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    min-height: 0;
+}
+
+#route-builder.crm .crm-filters__name { display: inline-flex; align-items: center; gap: .5rem; }
+.rm-rb .crm-filters .rm-filters-panel-body { flex: 1 1 100%; min-width: 0; padding: 0; }
+.rm-rb .crm-filters .rm-filters-panel-foot { flex: 1 1 100%; margin: 0; }
+
+.rm-rb .crm-filters .select2-container--default .select2-selection--single { border-radius: 10px !important; }
+
+#route-builder.crm .crm-filters__toggle {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--rb-soft);
+    border: 1px solid var(--rb-border);
+    display: grid;
+    place-items: center;
+}
+
+#route-builder.crm .crm-filters__toggle i { color: var(--rb-muted); font-size: .75rem; margin: 0; }
+
+.rm-rb .crm-filters .rm-filters-grid-compact {
+    display: grid;
+    /* كلُّ الحقول بعرضٍ واحد — البحث لم يعد أعرض من البقيّة */
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: .6rem .75rem;
+    align-items: end;
+}
+.rm-rb .crm-filters .rm-branch-cascade--inline,
+.rm-rb .crm-filters .rm-branch-cascade-levels { display: contents; }
+
+.rm-rb .crm-filters .rm-fg-item { display: flex; flex-direction: column; gap: .3rem; min-width: 0; margin: 0; }
+
+.rm-rb .crm-filters .rm-fg-label,
+.rm-rb .crm-filters .rm-fg-label--level {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--rb-muted);
+    margin: 0;
+    padding: 0;
+}
+
+.rm-rb .crm-filters .select2-container--default .select2-selection--single {
+    height: 42px;
+    border: 1px solid var(--rb-border);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.rm-rb .crm-filters .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 40px; font-size: .9rem; color: var(--rb-text); }
+.rm-rb .crm-filters .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px; }
+
+.rm-rb .crm-filters .select2-container--default.select2-container--open .select2-selection--single,
+.rm-rb .crm-filters .select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: var(--rb-primary);
+    box-shadow: 0 0 0 3px var(--rb-primary-soft);
+}
+
+.select2-dropdown.rm-filter-select2-dropdown {
+    border-radius: 10px !important;
+    border-color: #e5e9f2 !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .10);
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .rm-rb .crm-filters.rm-filters-panel { border-width: 0 0 1px; border-radius: 0; box-shadow: none; padding: .55rem .75rem; }
+    #route-builder.crm .crm-filters .rb-picker__title { border-left: 0; padding: 0; min-height: 34px; flex: 1 1 100%; justify-content: space-between; }
+    .rm-rb .crm-filters .rm-filters-grid-compact { grid-template-columns: minmax(0, 1fr); }
+}
+
+.rm-rb .crm-filters .rm-filters-panel-foot {
+    padding: .45rem .6rem;
+    border-radius: 10px;
+    background: var(--rb-primary-soft);
+    border: 1px solid var(--rb-primary-line);
+}
+
+.rm-rb .rm-filter-chip { border-radius: 999px; }
+.rm-rb .rm-clear-all-btn { border-radius: 8px; }
+
+/* ── رأس الشجرة ── */
+.rm-rb .rm-sidebar-header {
+    padding: .7rem 1rem;
+    background: var(--rb-soft);
+    border-bottom: 1px solid var(--rb-line);
+}
+
+.rm-rb .rm-sidebar-title-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--rb-primary-soft);
+    color: var(--rb-primary);
+    font-size: .9rem;
+}
+
+.rm-rb .rm-sidebar-title h6 { font-size: .98rem; font-weight: 800; color: var(--rb-text); margin: 0; }
+.rm-rb .rm-sidebar-title small { display: block; font-size: .75rem; color: var(--rb-muted); font-weight: 600; }
+
+.rm-rb .rm-sidebar-count {
+    height: 26px;
+    background: var(--rb-primary-soft);
+    color: var(--rb-primary);
+    border: 1px solid var(--rb-primary-line);
+    font-size: .8rem;
+}
+
+.rm-rb .rm-sidebar-close { border-radius: 10px; }
+.rm-rb .rm-sidebar-scroll { padding: 10px 0; }
+
+/* ── عُقد الشجرة ── */
+.rm-rb .rm-group-header {
+    padding: 9px 11px;
+    gap: 10px;
+    border: 1px solid var(--rb-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.rm-rb .rm-group-header:hover { background: #fafcff; border-color: var(--rb-primary-line); box-shadow: none; }
+
+.rm-rb .rm-group-header[aria-expanded="true"] {
+    background: var(--rb-primary-soft);
+    border-color: var(--rb-primary-line);
+    box-shadow: none;
+}
+
+.rm-rb .rm-group-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--rb-soft);
+    border: 1px solid var(--rb-line);
+    font-size: .85rem;
+}
+
+.rm-rb .rm-group-header[aria-expanded="true"] .rm-group-icon { background: #fff; border-color: var(--rb-primary-line); }
+.rm-rb .rm-group-name { font-size: .92rem; color: var(--rb-text); }
+.rm-rb .rm-group-name .badge { border-radius: 999px; font-size: .68rem; font-weight: 700; padding: .1rem .5rem; }
+
+.rm-rb .rm-group-count {
+    height: 24px;
+    background: #f1f5f9;
+    border-color: transparent;
+    color: var(--rb-muted);
+    font-size: .75rem;
+}
+
+.rm-rb .rm-group-header[aria-expanded="true"] .rm-group-count { background: var(--rb-primary); border-color: var(--rb-primary); color: #fff; }
+
+.rm-rb .rm-group-content,
+.rm-rb .rm-branch-children { border-right-color: var(--rb-line); }
+
+.rm-rb .rm-sub-accordion .rm-accordion-item::before,
+.rm-rb .rm-direct-clients .rm-client-item::before { background: var(--rb-line); }
+
+.rm-rb .rm-group-select-all {
+    padding: 7px 11px;
+    border-radius: 10px;
+    background: var(--rb-soft);
+    border: 1px dashed var(--rb-border);
+    margin: 4px 0 8px;
+}
+
+.rm-rb .rm-group-select-all.all-selected { background: var(--rb-primary-soft); border-style: solid; border-color: var(--rb-primary-line); }
+
+/* ── بطاقة العميل — rb-client ── */
+.rm-rb .rm-client-item {
+    padding: 9px 11px;
+    margin: 6px 0;
+    border: 1px solid var(--rb-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.rm-rb .rm-client-item:hover { border-color: var(--rb-primary-line); background: #fafcff; box-shadow: none; }
+
+.rm-rb .rm-client-item.selected {
+    background: var(--rb-primary-soft);
+    border-color: var(--rb-primary);
+    box-shadow: 0 0 0 1px var(--rb-primary);
+}
+
+.rm-rb .rm-client-row-top { gap: 10px; align-items: flex-start; }
+.rm-rb .rm-client-avatar { width: 38px; height: 38px; border-radius: 50%; font-size: 16px; box-shadow: none; }
+.rm-rb .rm-client-check { margin-top: 8px; }
+.rm-rb .rm-client-check .rm-client-check-face { border-width: 1.5px; border-radius: 6px; }
+.rm-rb .rm-client-name { font-size: .9rem; padding-top: 0; min-height: 38px; display: flex; align-items: center; color: var(--rb-text); }
+.rm-rb .rm-client-row-bottom { margin-top: 5px; padding-right: 32px; }
+.rm-rb .rm-client-status-badge { padding: .1rem .55rem; font-size: .72rem; border-radius: 999px; }
+.rm-rb .rm-client-meta { font-size: .75rem; color: var(--rb-muted); }
+.rm-rb .rm-empty-group { border-radius: 10px; }
+
+/* ================================================================
+   لوحة التفاصيل
+   ================================================================ */
+.rm-rb .rm-details-panel {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.rm-rb .rm-loading-overlay { border-radius: var(--rb-radius); background: rgba(243, 246, 251, .85); }
+
+/* الحالة الترحيبية */
+.rm-rb .rm-welcome-state {
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: var(--rb-radius);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    padding: 2.5rem 1.5rem;
+}
+
+.rm-rb .rm-sidebar .rm-welcome-state { border: 0; box-shadow: none; }
+.rm-rb .rm-welcome-illustration { width: 84px; height: 84px; margin-bottom: 1rem; border: 0; background: var(--rb-primary-soft); }
+.rm-rb .rm-welcome-illustration i { font-size: 34px; color: var(--rb-primary); opacity: 1; }
+.rm-rb .rm-welcome-state h5 { font-size: 1.25rem; font-weight: 800; color: var(--rb-text); margin-bottom: .35rem; }
+.rm-rb .rm-welcome-state p { color: var(--rb-muted); font-size: .9rem; max-width: 460px; }
+
+.rm-rb .crm-tips {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    width: min(760px, 100%);
+    text-align: right;
+}
+
+.rm-rb .crm-tips li {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .8rem .9rem;
+    border: 1px solid var(--rb-border);
+    border-radius: 12px;
+    background: var(--rb-soft);
+}
+
+.rm-rb .crm-tips__icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.rm-rb .crm-tips__icon--blue { background: #dbeafe; color: #1d4ed8; }
+.rm-rb .crm-tips__icon--green { background: #dcfce7; color: #15803d; }
+.rm-rb .crm-tips__icon--navy { background: #e0e7ff; color: #1e3a8a; }
+.rm-rb .crm-tips strong { display: block; font-size: .88rem; color: var(--rb-text); }
+.rm-rb .crm-tips small { display: block; font-size: .76rem; color: var(--rb-muted); line-height: 1.6; }
+
+.rm-rb .rm-client-details { padding: 0 0 14px; }
+
+/* بطاقة البروفايل — rb-head */
+.rm-rb .rm-profile-card {
+    margin-bottom: 14px;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: var(--rb-radius);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+.rm-rb .rm-profile-header {
+    background: #fff;
+    color: var(--rb-text);
+    padding: 1rem 1.25rem;
+    gap: .9rem;
+    align-items: center;
+}
+
+.rm-rb .rm-profile-header::before,
+.rm-rb .rm-profile-header::after { display: none; }
+
+.rm-rb .rm-profile-avatar-lg {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    font-size: 24px;
+    border: 3px solid var(--rb-primary-soft);
+    box-shadow: none;
+}
+
+.rm-rb .rm-profile-avatar-lg:hover { transform: none; filter: brightness(1.06); }
+.rm-rb .rm-profile-name-row { margin-bottom: .35rem; gap: .5rem; }
+.rm-rb .rm-profile-name { font-size: 1.3rem; font-weight: 800; color: var(--rb-text); }
+
+.rm-rb .rm-status-badge {
+    background: color-mix(in srgb, currentColor 12%, #fff) !important;
+    border-color: color-mix(in srgb, currentColor 30%, #fff) !important;
+    font-size: .75rem;
+    padding: .12rem .6rem;
+}
+
+.rm-rb .rm-profile-meta { color: var(--rb-muted); opacity: 1; font-size: .85rem; gap: .35rem; }
+
+.rm-rb .rm-profile-meta-item {
+    padding: .15rem .6rem;
+    border-radius: 999px;
+    background: var(--rb-soft);
+    border: 1px solid var(--rb-line);
+}
+
+.rm-rb .rm-profile-meta-item i { color: var(--rb-primary); opacity: 1; }
+
+.rm-rb .rm-profile-code {
+    background: var(--rb-primary-soft);
+    border: 1px solid var(--rb-primary-line);
+    color: var(--rb-primary);
+    border-radius: 999px;
+    padding: .1rem .6rem;
+    font-size: .8rem;
+}
+
+.rm-rb .rm-profile-links { align-self: center; gap: .5rem; }
+
+.rm-rb .rm-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--rb-border);
+    background: #fff;
+    color: var(--rb-text);
+    font-size: .95rem;
+}
+
+.rm-rb .rm-icon-btn:hover { transform: none; background: var(--rb-primary); border-color: var(--rb-primary); color: #fff; }
+
+/* الإجراءات السريعة — rb-btn--light */
+.rm-rb .rm-quick-actions {
+    padding: .7rem 1.25rem;
+    gap: .5rem;
+    background: var(--rb-soft);
+    border-top: 1px solid var(--rb-line);
+    border-bottom: 0;
+}
+
+.rm-rb .rm-qa-btn {
+    border-radius: 10px;
+    padding: .5rem 1rem;
+    font-size: .88rem;
+    transition: filter .15s, background-color .15s, border-color .15s, color .15s;
+}
+
+.rm-rb .rm-qa-btn.rm-qa-primary { background: #fff; border-color: var(--rb-border); color: var(--rb-text) !important; box-shadow: none; }
+.rm-rb .rm-qa-btn.rm-qa-primary i { color: var(--rb-primary); }
+.rm-rb .rm-qa-btn.rm-qa-primary:hover { background: var(--rb-primary); border-color: var(--rb-primary); color: #fff !important; transform: none; }
+.rm-rb .rm-qa-btn.rm-qa-primary:hover i { color: #fff; }
+.rm-rb .rm-qa-btn.rm-qa-secondary { background: #fff; border-color: var(--rb-border); }
+.rm-rb .rm-qa-btn.rm-qa-secondary:hover { background: var(--rb-primary-soft); border-color: var(--rb-primary-line); }
+.rm-rb .rm-qa-more-menu { border-radius: 12px; border-color: var(--rb-border); }
+.rm-rb .rm-qa-more-menu li a { border-radius: 8px; }
+
+/* إحصاءات العميل — rb-stat */
+.rm-rb .rm-stats-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+    padding: .85rem 1.25rem 1.1rem;
+    background: #fff;
+    border-top: 1px solid var(--rb-line);
+}
+
+.rm-rb .rm-stat-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "label icon" "value icon";
+    align-items: center;
+    column-gap: .6rem;
+    padding: .8rem 1rem;
+    text-align: right;
+    border: 1px solid var(--rb-border);
+    border-radius: var(--rb-radius);
+    background: #fff;
+}
+
+.rm-rb .rm-stat-item:last-child { border-left: 1px solid var(--rb-border); }
+.rm-rb .rm-stat-item:hover { background: #fafcff; }
+.rm-rb .rm-stat-item:hover .rm-stat-icon { transform: none; }
+.rm-rb .rm-stat-icon { grid-area: icon; width: 46px; height: 46px; margin: 0; border-radius: 50%; font-size: 1.05rem; }
+.rm-rb .rm-stat-icon-balance { background: #dcfce7; color: #15803d; }
+.rm-rb .rm-stat-icon-invoice { background: #dbeafe; color: #1d4ed8; }
+.rm-rb .rm-stat-icon-payment { background: #fef3c7; color: #b45309; }
+.rm-rb .rm-stat-icon-visit { background: #e0e7ff; color: #1e3a8a; }
+.rm-rb .rm-stat-label { grid-area: label; font-size: .8rem; font-weight: 600; color: var(--rb-muted); }
+
+.rm-rb .rm-stat-value {
+    grid-area: value;
+    font-size: 1.35rem;
+    margin: 0;
+    text-align: right;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* التبويبات — rb-tab */
+.rm-rb .rm-tabs-card { margin-bottom: 0; }
+
+.rm-rb .rm-nav-tabs {
+    gap: .45rem;
+    padding: .6rem;
+    margin-bottom: 14px;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: var(--rb-radius);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+.rm-rb .rm-nav-tab {
+    padding: .55rem 1rem;
+    border: 1px solid var(--rb-border);
+    border-radius: 10px;
+    background: var(--rb-soft);
+    color: var(--rb-text);
+    font-size: .88rem;
+}
+
+.rm-rb .rm-nav-tab:hover { background: #fff; border-color: var(--rb-primary); color: var(--rb-primary); }
+.rm-rb .rm-nav-tab.active { background: var(--rb-primary); border-color: var(--rb-primary); color: #fff; box-shadow: none; }
+.rm-rb .tab-badge { min-width: 22px; height: 22px; background: #eef2f7; color: var(--rb-muted); }
+.rm-rb .rm-nav-tab.active .tab-badge { background: rgba(255, 255, 255, .25); color: #fff; }
+
+.rm-rb .rm-tab-content {
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: var(--rb-radius);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+/* نظرة عامة */
+.rm-rb .rm-overview-grid { gap: .75rem; }
+.rm-rb .rm-overview-card { padding: .9rem 1rem; gap: .75rem; align-items: center; border: 1px solid var(--rb-border); border-radius: var(--rb-radius); }
+.rm-rb .rm-overview-card-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--rb-primary-soft); font-size: 1rem; }
+.rm-rb .rm-overview-card-title { font-size: .8rem; font-weight: 600; color: var(--rb-muted); }
+.rm-rb .rm-overview-card-value { font-size: 1.2rem; }
+.rm-rb .rm-overview-card-value--sm { font-size: .88rem; }
+
+/* الجداول — rb-table */
+.rm-rb .rm-table-wrap { border: 1px solid var(--rb-border); border-radius: 12px; box-shadow: none; }
+
+.rm-rb .rm-table thead th {
+    background: var(--rb-soft);
+    color: var(--rb-muted);
+    font-size: .85rem;
+    font-weight: 700;
+    padding: .7rem .75rem;
+    border-bottom: 1px solid var(--rb-border);
+}
+
+.rm-rb .rm-table tbody td { padding: .65rem .75rem; border-bottom: 1px solid var(--rb-line); font-size: .88rem; }
+.rm-rb .rm-table tbody tr:hover td { background: #fafcff; }
+
+.rm-rb .rm-empty-state,
+.rm-rb .empty-state {
+    padding: 2.25rem 1.25rem;
+    border-radius: 12px;
+    background: var(--rb-soft);
+    border: 1px dashed var(--rb-border);
+    color: var(--rb-muted);
+}
+
+.rm-rb .rm-timeline-content,
+.rm-rb .rm-note-card,
+.rm-rb .note-card-item,
+.rm-rb .rm-exchange-card { border-color: var(--rb-border); border-radius: 12px; }
+
+.rm-rb .rm-gallery-item { border-radius: 12px; }
+
+/* ── الجوال ── */
+.rm-rb .rm-mobile-back-btn { background: #fff; border-bottom-color: var(--rb-line); }
+.rm-rb .rm-mobile-bb-btn { border-radius: 10px; }
+
+@media (max-width: 1199.98px) {
+    #route-builder.crm .crm-head-text { display: none; }
+    .rm-rb .crm-tips { grid-template-columns: minmax(0, 1fr); width: min(420px, 100%); }
+}
+
+@media (max-width: 992px) {
+    #route-builder.crm .crm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .rm-rb .rm-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+    #route-builder.crm { padding: 0; gap: 0; }
+
+    #route-builder.crm .rb-head {
+        padding: .55rem .75rem;
+        background: #fff;
+        border-bottom: 1px solid var(--rb-border);
+        flex-wrap: nowrap;
+        gap: .5rem;
+    }
+
+    #route-builder.crm .rb-head__icon { width: 36px; height: 36px; font-size: 1rem; }
+    #route-builder.crm .rb-head h1 { font-size: 1.05rem; white-space: nowrap; }
+    #route-builder.crm .rb-head p,
+    #route-builder.crm .crm-nav { display: none; }
+    #route-builder.crm .rb-head__actions { width: auto; flex-wrap: nowrap; }
+    #route-builder.crm .rb-head__actions .rb-btn { flex: none; padding: .45rem .7rem; }
+    #route-builder.crm .crm-stats { display: none; }
+
+    .rm-rb .rm-sidebar,
+    .rm-rb .rm-details-panel { border: 0; border-radius: 0; box-shadow: none; }
+
+    .rm-rb .rm-details-panel { background: var(--rb-bg); }
+    .rm-rb .rm-client-details { padding: 12px; }
+    .rm-rb .rm-profile-header { padding: 14px; flex-wrap: wrap; }
+    .rm-rb .rm-profile-avatar-lg { width: 50px; height: 50px; font-size: 20px; }
+    .rm-rb .rm-profile-name { font-size: 1.1rem; }
+    .rm-rb .rm-profile-links { width: auto; margin-top: 0; }
+    .rm-rb .rm-quick-actions { padding: 10px 14px; }
+    .rm-rb .rm-stats-row { padding: 10px 14px 14px; gap: 8px; }
+    .rm-rb .rm-stat-item { padding: 10px 12px; }
+    .rm-rb .rm-stat-icon { width: 38px; height: 38px; font-size: .9rem; }
+    .rm-rb .rm-stat-value { font-size: 1.1rem; }
+    .rm-rb .rm-tab-content { padding: 10px; }
+    .rm-rb .rm-nav-tab { padding: .5rem .8rem; }
+    .rm-rb .rm-welcome-state { margin: 12px; }
+}
+
+/* ================================================================
+   النوافذ المنبثقة (مولَّدة بالجافاسكربت داخل حاوياتها)
+   الأنماط المضمَّنة في `style=` تُتجاوز بـ!important هنا فقط.
+   ================================================================ */
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-content {
+    border-radius: 16px !important;
+    border: 1px solid var(--rb-border) !important;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, .18) !important;
+    overflow: hidden;
+    font-family: var(--app-font-family, 'Cairo'), 'Cairo', system-ui, sans-serif;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-header {
+    padding: 14px 20px !important;
+    border-bottom: 1px solid var(--rb-line) !important;
+    border-radius: 0 !important;
+    align-items: center;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-title {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-body label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rb-muted);
+    margin-bottom: 4px;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-body .form-control,
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-body .select2-container--default .select2-selection--single,
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-body .select2-container--default .select2-selection--multiple {
+    border: 1px solid var(--rb-border);
+    border-radius: 10px;
+    min-height: 42px;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-body .form-control:focus {
+    border-color: var(--rb-primary);
+    box-shadow: 0 0 0 3px var(--rb-primary-soft);
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-footer {
+    padding: 12px 20px;
+    gap: 8px;
+    background: var(--rb-soft);
+    border-top: 1px solid var(--rb-line) !important;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-footer .btn {
+    border-radius: 10px;
+    font-weight: 700;
+    padding: .55rem 1.1rem;
+    box-shadow: none;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-footer .btn-secondary {
+    background: #fff !important;
+    border: 1px solid var(--rb-border) !important;
+    color: var(--rb-text) !important;
+}
+
+:is(#itineraryModalContainer, #quickAddModalContainer, #notificationModalContainer, #bulkAddModalContainer, #appointmentModalContainer) .modal-footer .btn-primary {
+    background: var(--rb-primary) !important;
+    border-color: var(--rb-primary) !important;
+}
+
+/* ================================================================
+   نسخة الجوال — relestion_mang_client_mobile (#route-builder.crm-m)
+   ================================================================ */
+#route-builder.crm-m {
+    padding: 0 0 90px;
+    border-radius: 0;
+    background: var(--rb-bg);
+    min-height: calc(100vh - 4.5rem);
+}
+
+#route-builder.crm-m .rb-head {
+    position: sticky;
+    top: 4.85rem;
+    z-index: 100;
+    margin: 0;
+    padding: .6rem .75rem;
+    flex-wrap: nowrap;
+    gap: .5rem;
+    background: #fff;
+    border-bottom: 1px solid var(--rb-border);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+#route-builder.crm-m .rb-head__title { gap: .55rem; min-width: 0; }
+#route-builder.crm-m .rb-head__title > div { min-width: 0; }
+#route-builder.crm-m .rb-head__icon { width: 38px; height: 38px; font-size: 1rem; flex: none; }
+#route-builder.crm-m .rb-head h1 { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#route-builder.crm-m .rb-head p { font-size: .75rem; margin: 0; white-space: nowrap; }
+#route-builder.crm-m .rb-head__actions { width: auto; flex: none; flex-wrap: nowrap; gap: .35rem; }
+#route-builder.crm-m .rb-head__actions .rb-btn { flex: none; }
+#route-builder.crm-m .rb-btn--icon { width: 38px; height: 38px; padding: 0; }
+
+#route-builder.crm-m #bulkAddToItineraryBtn[style*="inline-block"],
+#route-builder.crm-m #clearSelectionBtn[style*="inline-block"] { display: inline-flex !important; }
+
+#route-builder.crm-m .crm-m-bulk { position: relative; overflow: visible; }
+
+#route-builder.crm-m .crm-m-badge {
+    position: absolute;
+    top: -6px;
+    inset-inline-end: -6px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 .3rem;
+    border-radius: 999px;
+    border: 2px solid #fff;
+    background: var(--rb-danger);
+    color: #fff;
+    font-size: .68rem;
+    display: grid;
+    place-items: center;
+}
+
+/* الإحصاءات: بطاقتان في كل صف */
+#route-builder.crm-m .crm-m-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; padding: .75rem .75rem 0; }
+#route-builder.crm-m .crm-m-stats .rb-stat { padding: .6rem .75rem; gap: .5rem; }
+#route-builder.crm-m .crm-m-stats .rb-stat__label { font-size: .75rem; }
+#route-builder.crm-m .crm-m-stats .rb-stat strong { font-size: 1.1rem; }
+#route-builder.crm-m .crm-m-stats .rb-stat__icon { width: 36px; height: 36px; font-size: .9rem; }
+#route-builder.crm-m .rb-stat--amber .rb-stat__icon { background: #fef3c7; color: #b45309; }
+
+/* التصفية */
+#route-builder.crm-m .rm-m-filters-area {
+    display: none;
+    flex-direction: column;
+    gap: .65rem;
+    margin: .75rem .75rem 0;
+    padding: .85rem;
+    border: 1px solid var(--rb-border);
+}
+
+#route-builder.crm-m .rm-m-filters-area.show { display: flex; }
+#route-builder.crm-m .rm-m-filters-area .rb-picker__title { padding-bottom: .5rem; }
+#route-builder.crm-m .crm-m-cascade .rm-branch-cascade--inline,
+#route-builder.crm-m .crm-m-cascade .rm-branch-cascade-levels { display: flex; flex-direction: column; gap: .6rem; }
+#route-builder.crm-m .crm-m-cascade .rm-fg-item { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }
+#route-builder.crm-m .crm-m-cascade .rm-fg-label { font-size: .78rem; font-weight: 600; color: var(--rb-muted); margin: 0; padding: 0; }
+
+#route-builder.crm-m .rm-m-filters-area .select2-container--default .select2-selection--single {
+    height: 42px;
+    border: 1px solid var(--rb-border);
+    border-radius: 10px !important;
+    background: #fff;
+}
+
+#route-builder.crm-m .rm-m-filters-area .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 40px; font-size: .9rem; color: var(--rb-text); }
+#route-builder.crm-m .rm-m-filters-area .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px; }
+
+/* الشجرة */
+#route-builder.crm-m .crm-m-section { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1rem .1rem; }
+#route-builder.crm-m .crm-m-section__title { display: inline-flex; align-items: center; gap: .45rem; font-size: .95rem; font-weight: 800; }
+#route-builder.crm-m .crm-m-section__title i { color: var(--rb-primary); }
+#route-builder.crm-m .rm-m-list-container { padding: .5rem .75rem; gap: .5rem; }
+
+/* شاشة التفاصيل */
+#route-builder.crm-m .rm-m-details-view { background: var(--rb-bg); box-shadow: none; }
+
+#route-builder.crm-m .rm-m-details-header {
+    height: 60px;
+    padding: 0 .75rem;
+    gap: .5rem;
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--rb-border);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+#route-builder.crm-m .rm-m-details-title { font-size: 1rem; color: var(--rb-text); }
+#route-builder.crm-m .crm-m-dnav { display: flex; gap: .35rem; flex: none; }
+#route-builder.crm-m .rb-btn.disabled { opacity: .5; pointer-events: none; }
+#route-builder.crm-m .rm-m-details-content { padding: .75rem; background: var(--rb-bg); }
+#route-builder.crm-m .rm-m-loader-overlay { background: rgba(243, 246, 251, .85); }
+#route-builder.crm-m .rm-m-spinner { background: conic-gradient(var(--rb-primary) 0deg, transparent 280deg); }
+#route-builder.crm-m .rm-welcome-state { margin-top: .25rem; padding: 2rem 1rem; }
+
+#route-builder.crm-m .rm-client-details { padding: 0 0 .75rem; }
+#route-builder.crm-m .rm-profile-header { padding: .9rem; flex-wrap: wrap; }
+#route-builder.crm-m .rm-profile-avatar-lg { width: 50px; height: 50px; font-size: 20px; }
+#route-builder.crm-m .rm-profile-name { font-size: 1.1rem; }
+#route-builder.crm-m .rm-profile-links { width: auto; margin-top: 0; }
+#route-builder.crm-m .rm-quick-actions { padding: .6rem .9rem; }
+#route-builder.crm-m .rm-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; padding: .75rem .9rem .9rem; }
+#route-builder.crm-m .rm-stat-item { padding: .6rem .75rem; }
+#route-builder.crm-m .rm-stat-icon { width: 38px; height: 38px; font-size: .9rem; }
+#route-builder.crm-m .rm-stat-value { font-size: 1.1rem; }
+#route-builder.crm-m .rm-tab-content { padding: .75rem; }
+#route-builder.crm-m .rm-nav-tab { padding: .5rem .8rem; }
+
+/* ================================================================
+   كثافة مضغوطة — سطح المكتب فقط (طلب المستخدم 2026-09-15: «قلّص الأحجام
+   والمساحات الفارغة»). نفس العناصر والترتيب؛ تتغيّر الحشوات والأحجام فقط.
+   `--crm-top` = أسفل شريط الرأس الثابت، يقيسه سكربت الصفحة.
+   ================================================================ */
+@media (min-width: 769px) {
+    #route-builder.crm { height: calc(100vh - var(--crm-top, 4.6rem)); padding: 8px 12px 10px; gap: 8px; }
+
+    /* الرأس */
+    #route-builder.crm .rb-head { gap: .6rem; }
+    #route-builder.crm .rb-head__title { gap: .55rem; }
+    #route-builder.crm .rb-head__icon { width: 34px; height: 34px; border-radius: 10px; font-size: 1rem; }
+    #route-builder.crm .rb-head h1 { font-size: 1.08rem; }
+    #route-builder.crm .rb-head p { margin-top: 0; font-size: .76rem; }
+    #route-builder.crm .rb-head__actions { gap: .35rem; }
+    #route-builder.crm .rb-head .rb-btn { padding: .38rem .8rem; font-size: .82rem; }
+    #route-builder.crm .rb-btn--icon { width: 34px; height: 32px; }
+    #route-builder.crm .crm-nav { gap: .25rem; padding-inline-end: .4rem; }
+
+    /* الإحصاءات */
+    #route-builder.crm .crm-stats { gap: 8px; }
+    #route-builder.crm .crm-stats .rb-stat { padding: .45rem .8rem; border-radius: 12px; }
+    #route-builder.crm .crm-stats .rb-stat__label { font-size: .74rem; }
+    #route-builder.crm .crm-stats .rb-stat strong { font-size: 1.1rem; line-height: 1.25; }
+    #route-builder.crm .crm-stats .rb-stat__hint { font-size: .68rem; }
+    #route-builder.crm .crm-stats .rb-stat__icon { width: 34px; height: 34px; font-size: .9rem; }
+
+    /* التصفية */
+    #route-builder.crm .crm-filters.rm-filters-panel { padding: .45rem .75rem; gap: .4rem .75rem; border-radius: 12px; }
+    #route-builder.crm .crm-filters .rb-picker__title { font-size: .9rem; }
+    #route-builder.crm .crm-filters__toggle { width: 26px; height: 26px; }
+    #route-builder.crm .crm-filters .rm-filters-grid-compact { gap: .4rem .6rem; }
+    #route-builder.crm .crm-filters .rm-fg-item { gap: .15rem; }
+    #route-builder.crm .crm-filters .rm-fg-label,
+    #route-builder.crm .crm-filters .rm-fg-label--level { font-size: .72rem; }
+    #route-builder.crm .crm-filters .select2-container--default .select2-selection--single { height: 34px; border-radius: 8px !important; }
+    #route-builder.crm .crm-filters .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 32px; font-size: .84rem; }
+    #route-builder.crm .crm-filters .select2-container--default .select2-selection--single .select2-selection__arrow { height: 32px; }
+    #route-builder.crm .crm-filters .rm-filters-panel-foot { padding: .25rem .5rem; font-size: .82rem; }
+    #route-builder.crm .rm-clear-all-btn { padding: .2rem .6rem; font-size: .8rem; }
+    #route-builder.crm .rm-filter-chip { padding-block: .1rem; font-size: .78rem; }
+
+    /* الشجرة */
+    #route-builder.crm .rm-content-area { gap: 8px; }
+    #route-builder.crm .rm-sidebar { border-radius: 12px; }
+    #route-builder.crm .rm-sidebar-header { padding: .45rem .75rem; }
+    #route-builder.crm .rm-sidebar-title { gap: .5rem; }
+    #route-builder.crm .rm-sidebar-title-icon { width: 28px; height: 28px; border-radius: 8px; font-size: .8rem; }
+    #route-builder.crm .rm-sidebar-title h6 { font-size: .88rem; }
+    #route-builder.crm .rm-sidebar-title small { font-size: .7rem; }
+    #route-builder.crm .rm-sidebar-count { height: 22px; font-size: .74rem; }
+    #route-builder.crm .rm-sidebar-scroll { padding: 6px 0; }
+    #route-builder.crm .rm-group-header { padding: 6px 9px; gap: 8px; border-radius: 10px; }
+    #route-builder.crm .rm-group-icon { width: 28px; height: 28px; font-size: .75rem; }
+    #route-builder.crm .rm-group-name { font-size: .85rem; }
+    #route-builder.crm .rm-group-count { height: 20px; font-size: .7rem; }
+    #route-builder.crm .rm-group-select-all { padding: 5px 9px; margin: 3px 0 5px; }
+    #route-builder.crm .rm-client-item { padding: 6px 9px; margin: 4px 0; border-radius: 10px; }
+    #route-builder.crm .rm-client-row-top { gap: 8px; }
+    #route-builder.crm .rm-client-avatar { width: 30px; height: 30px; font-size: 13px; }
+    #route-builder.crm .rm-client-check { margin-top: 4px; }
+    #route-builder.crm .rm-client-name { min-height: 30px; font-size: .84rem; }
+    #route-builder.crm .rm-client-row-bottom { margin-top: 2px; }
+
+    /* الحالة الترحيبية */
+    #route-builder.crm .rm-welcome-state { padding: 1.25rem 1rem; border-radius: 12px; }
+    #route-builder.crm .rm-welcome-illustration { width: 56px; height: 56px; margin-bottom: .6rem; }
+    #route-builder.crm .rm-welcome-illustration i { font-size: 24px; }
+    #route-builder.crm .rm-welcome-state h5 { font-size: 1.05rem; }
+    #route-builder.crm .rm-welcome-state p { font-size: .82rem; margin-bottom: 0; }
+    #route-builder.crm .crm-tips { margin-top: .9rem; gap: .5rem; }
+    #route-builder.crm .crm-tips li { padding: .5rem .65rem; gap: .5rem; border-radius: 10px; }
+    #route-builder.crm .crm-tips__icon { width: 30px; height: 30px; font-size: .8rem; }
+    #route-builder.crm .crm-tips strong { font-size: .8rem; }
+    #route-builder.crm .crm-tips small { font-size: .7rem; line-height: 1.5; }
+
+    /* ملف العميل */
+    #route-builder.crm .rm-client-details { padding-bottom: 8px; }
+    #route-builder.crm .rm-profile-card { margin-bottom: 8px; border-radius: 12px; }
+    #route-builder.crm .rm-profile-header { padding: .6rem .9rem; gap: .65rem; }
+    #route-builder.crm .rm-profile-avatar-lg { width: 44px; height: 44px; font-size: 18px; border-width: 2px; }
+    #route-builder.crm .rm-profile-name-row { margin-bottom: .2rem; }
+    #route-builder.crm .rm-profile-name { font-size: 1.05rem; }
+    #route-builder.crm .rm-profile-meta { font-size: .78rem; gap: .25rem; }
+    #route-builder.crm .rm-profile-meta-item { padding: .05rem .5rem; }
+    #route-builder.crm .rm-icon-btn { width: 32px; height: 32px; font-size: .82rem; border-radius: 8px; }
+    #route-builder.crm .rm-quick-actions { padding: .45rem .9rem; gap: .35rem; }
+    #route-builder.crm .rm-qa-btn { padding: .3rem .7rem; font-size: .8rem; border-radius: 8px; }
+    #route-builder.crm .rm-stats-row { gap: .5rem; padding: .5rem .9rem .65rem; }
+    #route-builder.crm .rm-stat-item { padding: .45rem .7rem; border-radius: 10px; }
+    #route-builder.crm .rm-stat-icon { width: 32px; height: 32px; font-size: .85rem; }
+    #route-builder.crm .rm-stat-label { font-size: .72rem; }
+    #route-builder.crm .rm-stat-value { font-size: 1.05rem; }
+
+    /* التبويبات والمحتوى */
+    #route-builder.crm .rm-nav-tabs { gap: .3rem; padding: .35rem; margin-bottom: 8px; border-radius: 12px; }
+    #route-builder.crm .rm-nav-tab { padding: .32rem .7rem; font-size: .8rem; border-radius: 8px; }
+    #route-builder.crm .tab-badge { min-width: 18px; height: 18px; font-size: .68rem; }
+    #route-builder.crm .rm-tab-content { padding: .6rem; border-radius: 12px; }
+    #route-builder.crm .rm-overview-grid { gap: .5rem; }
+    #route-builder.crm .rm-overview-card { padding: .55rem .75rem; gap: .5rem; border-radius: 10px; }
+    #route-builder.crm .rm-overview-card-icon { width: 32px; height: 32px; font-size: .85rem; }
+    #route-builder.crm .rm-overview-card-value { font-size: 1rem; }
+    #route-builder.crm .rm-table thead th { padding: .45rem .55rem; font-size: .78rem; }
+    #route-builder.crm .rm-table tbody td { padding: .4rem .55rem; font-size: .82rem; }
+    #route-builder.crm .rm-empty-state,
+    #route-builder.crm .empty-state { padding: 1.25rem 1rem; }
+}

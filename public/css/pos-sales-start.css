@@ -1,0 +1,768 @@
+/*
+    ═══════════════ الطبقاتُ العائمة ═══════════════
+
+    ما بقي من الورقة القديمة: قائمةُ اختيار العميل، وجدولُ الفواتير،
+    ونوافذُ الدفع والمرتجع وتفاصيل الفاتورة.
+
+    وشاشةُ البيع نفسُها انتقلت إلى `pos-terminal.css` — وهي تُحمَّل بعد
+    هذه، وتحمل الرموزَ التي تقرأ منها القواعدُ هنا.
+
+    ولا تُعاد هنا قاعدةٌ تخصّ الشاشة: قاعدتان لعنصرٍ واحد تجعلان المظهرَ
+    رهنَ ترتيب الوسم.
+*/
+
+/* ==========================================
+   أنماط القائمة المنسدلة لاختيار العميل
+   ========================================== */
+
+.client-selector-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.client-selector {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--t-r);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: var(--t-quick-all);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+}
+
+.client-selector:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.client-selector.open {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.4);
+}
+
+.client-selector i.fa-chevron-down {
+    margin-right: auto;
+}
+
+.client-selector.open i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* القائمة المنسدلة */
+.client-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: var(--t-r);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+    max-height: 350px;
+}
+
+.client-dropdown.show {
+    display: block;
+}
+
+/* صندوق البحث */
+.client-search-box {
+    padding: 12px;
+    border-bottom: 1px solid var(--t-line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--t-ground);
+}
+
+.client-search-box i {
+    color: var(--t-ink-2);
+    font-size: 14px;
+}
+
+.client-search-box input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    outline: none;
+    color: var(--t-ink);
+    font-family: 'Cairo', sans-serif;
+}
+
+.client-search-box input::placeholder {
+    color: var(--t-ink-3);
+}
+
+/* نتائج البحث */
+.client-results {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.client-results::-webkit-scrollbar {
+    width: 4px;
+}
+
+.client-results::-webkit-scrollbar-track {
+    background: var(--t-ground);
+}
+
+.client-results::-webkit-scrollbar-thumb {
+    background: var(--t-line);
+    border-radius: 4px;
+}
+
+/* عنصر نتيجة العميل */
+/*
+    ═══════════ صفُّ نتيجة العميل ═══════════
+
+    كان الاسمُ والكودُ في عمودٍ واحد و«الهاتف» في الثاني، فالثلاثةُ على
+    سطرٍ واحدٍ يتزاحمون: اسمٌ طويلٌ يقصّ نفسَه ليفسح لكودٍ لا يُبحث به
+    غالباً.
+
+    وصار سطرين: الاسمُ وحده أوّلاً — وهو ما يُقرأ — وتحته الكودُ والهاتفُ
+    صغيرين. فيُمسح الصفُّ بالعين في لمحة.
+*/
+.client-result-item {
+    padding: 7px 11px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--t-line-2);
+    background: var(--t-surface);
+    transition: background-color 120ms;
+
+    /*
+        شبكةٌ من سطرين: الاسمُ يمتدّ في الأوّل، والكودُ والهاتفُ يتقاسمان
+        الثاني — طرفاً وطرفاً.
+
+        و`display: contents` على `.client-info` يُذيب الغلافَ فتشارك
+        أبناؤه شبكةَ الأب. وبدونه يبقى الغلافُ صفّاً والهاتفُ صفّاً ثالثاً
+        وحدَه.
+    */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    column-gap: 8px;
+}
+
+.client-info { display: contents; }
+.client-name { grid-column: 1 / -1; }
+.client-code { grid-column: 1; }
+.client-phone { grid-column: 2; justify-self: end; }
+
+.client-result-item:last-child {
+    border-bottom: none;
+}
+
+.client-result-item:hover {
+    background: var(--t-navy-tint);
+}
+
+.client-result-item.active {
+    background: var(--t-navy);
+    color: #fff;
+}
+
+.client-result-item.active .client-code,
+.client-result-item.active .client-phone {
+    color: rgba(255,255,255,0.85);
+}
+.client-name {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--t-ink);
+}
+
+/* الكودُ والهاتفُ سطرٌ ثانٍ: بيانُ تمييزٍ لا عنوان */
+.client-code {
+    font-size: 11px;
+    color: var(--t-ink-3);
+    background: transparent;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.client-code::before { content: '#'; opacity: .6; }
+
+.client-result-item.active .client-code {
+    background: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.9);
+}
+
+.client-result-item.active .client-name {
+    color: white;
+}
+
+.client-phone {
+    font-size: 11px;
+    color: var(--t-ink-3);
+    direction: ltr;
+    white-space: nowrap;
+    margin-inline-start: 8px;
+}
+
+.client-result-item:hover { background: var(--t-navy-tint); }
+
+.client-result-item.active .client-name { color: #fff; }
+
+.client-result-item.active .client-code,
+.client-result-item.active .client-phone { color: rgba(255, 255, 255, .72); }
+
+/* حالة التحميل */
+.client-loading {
+    padding: 20px;
+    text-align: center;
+    color: var(--t-ink-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.client-loading .spinner {
+    width: 24px;
+    height: 24px;
+}
+
+/* لا توجد نتائج */
+.client-no-results {
+    padding: 25px;
+    text-align: center;
+    color: var(--t-ink-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.client-no-results i {
+    font-size: 24px;
+    opacity: 0.5;
+}
+
+/* التجاوب */
+@media (max-width: 768px) {
+    .client-dropdown {
+        max-height: 280px;
+    }
+    
+    .client-result-item {
+        padding: 9px 12px;
+    }
+    
+    .client-name {
+        font-size: 13px;
+    }
+}
+/*
+    ═══════════════════ قائمةُ فواتير الجلسة ═══════════════════
+
+    ═══════ ما كانت ═══════
+
+    ترويسةٌ بنفسجيّةٌ مصمتة (`#667eea`) لا صلةَ لها بلوحة الشاشة، وثلاثةُ
+    أرقامٍ عليها بيضاء. ثم جدولٌ كلُّ عمودٍ من رؤوسه يحمل أيقونة — ستُّ
+    أيقوناتٍ في سطرٍ واحد لا تُضيف خبراً.
+
+    وفي كل صفٍّ **شارةٌ زرقاء مكتوبٌ فيها `#`** — تشغل مساحةً وتقول ما
+    يقوله العنوانُ فوقها. وحالةُ المرتجع تُلوَّن بـ`style` مكتوبٍ في
+    الشيفرة، والأزرارُ ثلاثُ حبّاتٍ باهتة: زرقاء وخضراء وبرتقالية.
+
+    ═══════ والمبدأ ═══════
+
+    هذه قائمةٌ تُمسح بالعين بحثاً عن فاتورةٍ بعينها — لا لوحةَ عرض. فما
+    يميّز الصفَّ هو **رقمُه ومبلغُه**، وما عداهما يهدأ.
+
+    والترويسةُ شريطُ أرقامٍ لا بطاقةٌ ملوّنة: الأرقامُ الثلاثة هي الخبر،
+    لا الخلفيّةُ التي تحملها.
+
+    ═══════ وحالةُ المرتجع ═══════
+
+    ثلاثُ حالاتٍ لصفّ الفاتورة، ولكلٍّ قرارٌ مختلف:
+
+      • **عاديّة** ⇒ يُمكن إنشاء مرتجع.
+      • **مرتجعةٌ جزئياً** ⇒ يُمكن، وبقيَ منها شيء — تُوسَم بحدٍّ كهرمانيّ
+        على حافّة الصفّ لا بأرضيّةٍ كاملة.
+      • **مرتجعةٌ بالكامل** ⇒ لا يُمكن، وزرُّها معطَّل. تُوسَم بحدٍّ أحمر.
+
+    والحدُّ على الحافّة لا الأرضيّة: أرضيّةٌ ورديّةٌ على صفٍّ كامل تُنافس
+    المبلغَ على الانتباه، والحافّةُ تُقرأ في المسح الرأسي بلا ضجيج.
+*/
+
+.invoices-pro-container {
+    padding: 0;
+}
+
+/* ─── شريطُ الأرقام ─── */
+
+.invoices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    background: var(--t-surface);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    color: var(--t-ink);
+}
+
+.invoices-header h5 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--t-ink-2);
+    white-space: nowrap;
+}
+
+.invoices-stats {
+    display: flex;
+    gap: 22px;
+}
+
+.stat-item {
+    text-align: center;
+    min-width: 62px;
+}
+
+.stat-value {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--t-ink);
+    letter-spacing: -.015em;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+    font-size: 10.5px;
+    color: var(--t-ink-3);
+    font-weight: 600;
+    margin-top: 1px;
+}
+
+/* ─── الجدول ─── */
+
+.invoices-table-wrapper {
+    background: var(--t-surface);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    overflow: hidden;
+}
+
+.invoices-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.invoices-table thead th {
+    background: var(--t-ground);
+    color: var(--t-ink-2);
+    font-weight: 700;
+    font-size: 11.5px;
+    text-align: start;
+    padding: 8px 11px;
+    border-bottom: 1px solid var(--t-line);
+    white-space: nowrap;
+}
+
+.invoices-table tbody td {
+    padding: 9px 11px;
+    border-bottom: 1px solid var(--t-line-2);
+    vertical-align: middle;
+    color: var(--t-ink);
+}
+
+.invoices-table tbody tr:last-child td { border-bottom: none; }
+
+.invoices-table tbody tr {
+    transition: background-color var(--t-quick);
+}
+
+.invoices-table tbody tr:hover { background: var(--t-navy-tint); }
+
+/*
+    حالةُ المرتجع: حدٌّ على حافّة الصفّ.
+
+    كانت أرضيّةً ورديّةً أو صفراءَ على الصفّ كلِّه — تُنافس المبلغَ على
+    الانتباه، وتجعل نصفَ الجدول ملوَّناً في يومٍ كثيرِ المرتجعات.
+*/
+.invoices-table tbody tr.is-returned-full td:first-child {
+    box-shadow: inset 3px 0 0 var(--t-stop);
+}
+
+.invoices-table tbody tr.is-returned-partial td:first-child {
+    box-shadow: inset 3px 0 0 var(--t-hold);
+}
+
+.invoices-table tbody tr.is-returned-full { opacity: .72; }
+
+/* ─── الخلايا ─── */
+
+.invoice-code-text {
+    font-weight: 700;
+    color: var(--t-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.invoice-type-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-top: 2px;
+    display: inline-block;
+    background: var(--t-sunken);
+    color: var(--t-ink-2);
+}
+
+.return-flag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-inline-start: 5px;
+}
+
+.return-flag--full { background: var(--t-stop-tint); color: var(--t-stop); }
+.return-flag--partial { background: var(--t-hold-tint); color: var(--t-hold); }
+
+.invoices-pro-container .client-info-cell { max-width: 170px; }
+
+.invoices-pro-container .client-name {
+    font-weight: 600;
+    color: var(--t-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.invoices-pro-container .client-phone {
+    font-size: 11px;
+    color: var(--t-ink-3);
+    direction: ltr;
+    text-align: start;
+}
+
+.invoices-table .date-main { color: var(--t-ink); }
+.invoices-table .date-time { font-size: 11px; color: var(--t-ink-3); }
+
+.amount-cell { text-align: start; }
+
+.amount-total {
+    font-weight: 700;
+    color: var(--t-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.amount-due {
+    font-size: 11px;
+    color: var(--t-stop);
+    font-variant-numeric: tabular-nums;
+}
+
+.status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.status-paid { background: var(--t-go-tint); color: var(--t-go-2); }
+.status-partial { background: var(--t-hold-tint); color: var(--t-hold); }
+.status-unpaid { background: var(--t-stop-tint); color: var(--t-stop); }
+.status-received { background: var(--t-navy-tint); color: var(--t-navy); }
+
+/* ─── الإجراءات ─── */
+
+.actions-cell { white-space: nowrap; }
+
+.action-btn-group {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-start;
+}
+
+/*
+    ثلاثةُ أزرارٍ باهتةٍ ملوّنة كانت تتساوى في الإلحاح. وهي متفاوتة:
+    العرضُ والطباعةُ قراءةٌ لا أثرَ لها، والمرتجعُ **يمسّ المخزون والقيد**.
+
+    فصارت هادئةً كلُّها، ولونُ كلٍّ يظهر عند القصد — والمرتجعُ أحمرُ
+    ليُعرف أنه ليس كالعرض.
+*/
+.invoices-pro-container .action-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: var(--t-r);
+    border: 1px solid var(--t-line);
+    background: var(--t-surface);
+    color: var(--t-ink-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    flex: none;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.invoices-pro-container .btn-view:hover {
+    background: var(--t-navy-tint);
+    border-color: var(--t-navy);
+    color: var(--t-navy);
+}
+
+.invoices-pro-container .btn-print:hover {
+    background: var(--t-navy-tint);
+    border-color: var(--t-navy);
+    color: var(--t-navy);
+}
+
+.invoices-pro-container .btn-return:hover:not(:disabled) {
+    background: var(--t-stop-tint);
+    border-color: var(--t-stop);
+    color: var(--t-stop);
+}
+
+.invoices-pro-container .action-btn:disabled {
+    opacity: .38;
+    cursor: not-allowed;
+}
+
+/* ─── الفراغ ─── */
+
+.empty-invoices {
+    text-align: center;
+    padding: 40px 18px;
+    color: var(--t-ink-3);
+}
+
+.empty-invoices i { font-size: 26px; margin-bottom: 9px; opacity: .3; }
+.empty-invoices p { font-size: 13px; margin: 0; color: var(--t-ink-2); }
+
+/* ─── التصفّح ─── */
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 11px;
+    border-top: 1px solid var(--t-line);
+    background: var(--t-ground);
+    font-size: 12px;
+    color: var(--t-ink-2);
+}
+
+.pagination-controls { display: flex; gap: 4px; align-items: center; }
+
+.page-btn {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--t-line);
+    background: var(--t-surface);
+    color: var(--t-ink-2);
+    border-radius: var(--t-r);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+    transition: background-color var(--t-quick), border-color var(--t-quick), color var(--t-quick);
+}
+
+.page-btn:hover:not(:disabled) { background: var(--t-navy-tint); color: var(--t-ink); }
+
+.page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.page-btn.active {
+    background: var(--t-navy);
+    border-color: var(--t-navy);
+    color: #fff;
+}
+
+.per-page-select {
+    padding: 5px 8px;
+    height: 28px;
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    background: var(--t-surface);
+    color: var(--t-ink);
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.per-page-select:focus {
+    outline: none;
+    border-color: var(--t-go);
+    box-shadow: 0 0 0 3px var(--t-go-tint);
+}
+
+/*
+    ═══════════ نافذةُ تفاصيل الفاتورة ═══════════
+
+    كانت هذه المئةُ وأحدَ عشرَ سطراً تُحقن في DOM داخل `<style>` مع كل
+    فتحةٍ للنافذة — عنصرُ أنماطٍ جديدٌ في كل مرّة، لا يُزال عند الإغلاق.
+    فمن فتح عشرَ فواتيرَ ترك عشرَ نسخٍ متطابقةٍ في الصفحة.
+
+    ومكانُها ملفُّ الأنماط: يُحمَّل مرّةً ويُخزَّن في المتصفّح.
+*/
+.invoice-details-pro {
+    text-align: right;
+    direction: rtl;
+}
+/*
+    ترويسةُ النافذة: كحليُّ الشاشة لا بنفسجيَّ القالب.
+
+    و`margin` السالبةُ كانت تمدّها خارج حدود الجسم لتلتصق بالحواف — حيلةٌ
+    تنكسر متى تغيّر حشوُ الجسم. فصارت كتلةً في مكانها.
+*/
+.invoice-header-pro {
+    background: var(--t-navy);
+    color: #fff;
+    padding: 13px 15px;
+    border-radius: var(--t-r);
+    margin: 0 0 14px;
+}
+.invoice-title-pro {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.invoice-code-pro {
+    font-size: 12px;
+    color: rgba(255, 255, 255, .7);
+    font-variant-numeric: tabular-nums;
+}
+/*
+    بطاقاتُ المعلومات: شبكةٌ متلاصقةٌ بخطوطٍ شعريّة.
+
+    كانت أربعَ بطاقاتٍ منفصلةٍ بفجوةٍ ١٥ وحدٍّ بنفسجيٍّ سميكٍ على حافّة
+    كلٍّ — والحدُّ الملوّن على أربع بطاقاتٍ متجاورةٍ يصير خطوطاً عموديّة
+    تُقطّع الكتلة.
+*/
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    margin-bottom: 14px;
+    background: var(--t-line);
+    border: 1px solid var(--t-line);
+    border-radius: var(--t-r);
+    overflow: hidden;
+}
+.info-card {
+    background: var(--t-surface);
+    padding: 9px 12px;
+    border-radius: 0;
+    border: none;
+}
+.info-label {
+    font-size: 11px;
+    color: var(--t-ink-3);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.info-value {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--t-ink);
+}
+.items-table-pro {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+.items-table-pro thead {
+    background: var(--t-ground);
+}
+.items-table-pro th {
+    padding: 8px 11px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--t-ink-2);
+    text-align: start;
+    border-bottom: 1px solid var(--t-line);
+}
+.items-table-pro td {
+    padding: 8px 11px;
+    font-size: 12.5px;
+    color: var(--t-ink);
+    border-bottom: 1px solid var(--t-line-2);
+    font-variant-numeric: tabular-nums;
+}
+/*
+    الإجماليُّ **ليس أخضر**.
+
+    الأخضرُ في هذه الشاشة لونُ الفعل — زرُّ الدفع وسعرُ الصنف القابل
+    للإضافة. والإجماليُّ نتيجةٌ تُقرأ، فيكبر ويسودّ لا يخضرّ.
+*/
+.totals-section {
+    background: var(--t-ground);
+    border: 1px solid var(--t-line);
+    padding: 11px 12px;
+    border-radius: var(--t-r);
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+}
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+    color: var(--t-ink-2);
+}
+.total-row.grand {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--t-ink);
+    letter-spacing: -.02em;
+    border-top: 1px solid var(--t-line);
+    margin-top: 7px;
+    padding-top: 9px;
+    margin-top: 10px;
+}
+.action-buttons-pro {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.action-btn-pro {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--t-quick-all);
+}
+.action-btn-pro:hover {
+}
+.btn-print-pro {
+    background: var(--t-go);
+    color: white;
+}
+.btn-return-pro {
+    background: var(--t-hold);
+    color: white;
+}
+.btn-close-pro {
+    background: var(--t-ink-2);
+    color: white;
+}

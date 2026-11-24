@@ -1,0 +1,45 @@
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# ملفا معالج التثبيت — يخصّان هذا الخادم وحده ولا يُنقلان بين البيئات.
+#
+# `storage/app/.gitignore` يستثنيهما ضمناً بقاعدة `*`، وهذا ذكرٌ صريح
+# لسببين: أن يقرأ من يفتح هذا الملف أنهما مقصودان بالاستثناء لا منسيّان،
+# وألّا يكشفهما تعديلٌ مستقبلي على ذلك الملف.
+#
+# - `installed`: علامة تمام التثبيت، وفيها اسم قاعدة البيانات وبريد المدير.
+#   نقلُها إلى بيئة أخرى يجعل النظام يظنّ نفسه مثبَّتاً على قاعدة فارغة.
+# - `installer-progress.json`: حالة التنفيذ أثناء التثبيت. يُحذف عند الإتمام،
+#   ويبقى إن تعثّر — وفيه بيانات المدير.
+/storage/app/installed
+/storage/app/installer-progress.json
+
+# ملفات وقت التشغيل: قوالب مُصرَّفة وعلامة التثبيت وحالته
+storage/framework/views/*.php
+storage/app/installed
+storage/app/installer-*
+resources/views/layouts/sidebar.blade.php

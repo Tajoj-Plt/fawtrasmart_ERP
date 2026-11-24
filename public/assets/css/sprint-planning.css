@@ -1,0 +1,458 @@
+/* Sprint Planning Styles */
+
+/* Tab Styles */
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.tab-content {
+    border: 1px solid #dee2e6;
+    border-top: none;
+    padding: 1.25rem;
+}
+
+/* Card Styles */
+.card {
+    margin-bottom: 1.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.card-header strong {
+    font-size: 1.1rem;
+}
+
+/* Component Card */
+.component-card {
+    border-left: 4px solid #6f42c1;
+}
+
+/* Epic Card */
+.epic-card {
+    border-left: 4px solid #007bff;
+}
+
+/* Story Card */
+.story-card {
+    border-left: 4px solid #28a745;
+}
+
+/* Sub Task Card */
+.subtask-card {
+    border-left: 4px solid #ffc107;
+}
+
+/* Bug Card */
+.bug-card {
+    border-left: 4px solid #dc3545;
+}
+
+/* Badge Styles */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Table Styles */
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.table .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.table .badge {
+    font-size: 0.75em;
+}
+
+/* Filter Styles */
+.filter-row {
+    margin-bottom: 1rem;
+}
+
+.filter-row .form-control {
+    margin-bottom: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+    margin-bottom: 0.5rem;
+}
+
+/* Pagination */
+.pagination-container {
+    margin-top: 1.5rem;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .table-responsive .btn-sm {
+        padding: 0.15rem 0.35rem;
+        font-size: 0.75rem;
+    }
+    
+    .tab-content {
+        padding: 1rem;
+    }
+}
+
+/* Priority Colors */
+.badge-success {
+    background-color: #28a745;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+}
+
+.badge-dark {
+    background-color: #343a40;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+}
+
+.badge-primary {
+    background-color: #007bff;
+}
+
+.badge-light {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+/* Alert Styles */
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Button Styles */
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* Select2 Customization */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #007bff;
+    border-color: #006fe6;
+    color: #fff;
+    padding: 0 10px;
+    margin-top: 6px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255, 255, 255, 0.7);
+    margin-right: 5px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #fff;
+}
+
+/* Sprint Selection Card */
+.sprint-selection-card {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    border: 1px solid #f0f0f0;
+}
+
+.sprint-selection-card .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1rem 1.5rem;
+}
+
+.sprint-selection-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Sprint Select Dropdown */
+#globalSprintSelect {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ced4da;
+}
+
+/* Close Sprint Button */
+#closeSprintBtn {
+    margin-left: 10px;
+}
+
+/* Task Card Improvements */
+.task-card {
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.task-card .card-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
+}
+
+.task-card .card-body {
+    padding: 1rem;
+}
+
+/* Task Actions */
+.task-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+.action-btn:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Sprint Task Card Highlight */
+.task-card.in-sprint {
+    border: 2px solid #007bff !important;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.3) !important;
+}
+
+.task-card.in-sprint .task-type-badge {
+    background-color: #007bff !important;
+}
+
+/* Pagination Improvements */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    color: #007bff;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    padding: 0.375rem 0.75rem;
+}
+
+.page-link:hover {
+    color: #0056b3;
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+
+/* Modal Improvements */
+.modal-content {
+    border-radius: 16px;
+    border: none;
+}
+
+.modal-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #f0f0f0;
+    border-radius: 16px 16px 0 0 !important;
+}
+
+.modal-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #f0f0f0;
+    border-radius: 0 0 16px 16px !important;
+}
+
+/* Form Elements */
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .sprint-selection-card .card-body .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .sprint-selection-card .card-body .row > div:last-child {
+        margin-bottom: 0;
+    }
+    
+    .task-actions {
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Sprint Info Badge */
+.sprint-info-badge {
+    background-color: #007bff;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Sprint Task Counter */
+.sprint-task-counter {
+    background-color: #28a745;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Sprint Information Display */
+.sprint-info-container {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    min-height: 80px;
+}
+
+.sprint-info-container p {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.sprint-info-container strong {
+    color: #495057;
+}
+
+.sprint-status {
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background-color: #6c757d;
+    color: white;
+}
+
+.sprint-status.active {
+    background-color: #28a745;
+}
+
+.sprint-status.planned {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.sprint-status.completed {
+    background-color: #17a2b8;
+}
+
+.sprint-status.closed {
+    background-color: #dc3545;
+}
+
+.sprint-status.canceled {
+    background-color: #6c757d;
+}

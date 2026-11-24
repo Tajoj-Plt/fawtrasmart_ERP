@@ -1,0 +1,720 @@
+/* ===================================
+   CLEAN & SIMPLE DESIGN
+   =================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body,
+h1, h2, h3, h4, h5, h6,
+.navigation,
+.header-navbar,
+.breadcrumb {
+    font-family: 'Cairo', sans-serif;
+}
+
+body {
+    direction: rtl;
+    overflow-x: hidden;
+    background-color: #f8f9fa;
+}
+
+/* ===================================
+   SIDE BY SIDE LAYOUT
+   =================================== */
+
+.app-content {
+    padding: 1.5rem !important;
+}
+
+.content-wrapper {
+    max-width: 100%;
+    width: 100%;
+}
+
+.cards-container {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+    max-height: 800px;
+}
+
+/* Tree Card - Left Side - Equal Height */
+.tree-card {
+    flex: 0 0 350px;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tree-card .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tree-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Table Card - Right Side */
+.table-card {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-card .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Responsive */
+@media (max-width: 1199px) {
+    .tree-card {
+        flex: 0 0 300px;
+        min-width: 280px;
+    }
+}
+
+@media (max-width: 991px) {
+    .cards-container {
+        flex-direction: column;
+    }
+    
+    .tree-card {
+        flex: 1;
+        max-width: 100%;
+    }
+    
+    .table-card {
+        flex: 1;
+    }
+}
+
+/* ===================================
+   CARD STYLES - MINIMAL COLORS
+   =================================== */
+
+.card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0;
+}
+
+.card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1rem 1.25rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* ===================================
+   TREE CARD CONTENT
+   =================================== */
+
+.search-section {
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}
+
+#searchInput,
+#branchFilter {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+    margin-bottom: 0.75rem;
+}
+
+#searchInput {
+    padding-right: 2.5rem;
+}
+
+#searchInput:focus,
+#branchFilter:focus {
+    border-color: #7367F0;
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(115, 103, 240, 0.1);
+}
+
+.form-control-position {
+    position: absolute;
+    right: 0.75rem;
+    top: 80%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+}
+
+/* Search Results */
+#search-results-dropdown {
+    position: absolute;
+    width: calc(100% - 2.5rem);
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+#search-results-dropdown.show {
+    display: block;
+}
+
+.search-result-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item strong {
+    color: #333;
+    font-weight: 600;
+}
+
+.search-result-item small {
+    font-size: 0.8rem;
+    color: #666;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* Tree Container */
+.tree-container {
+    flex: 1;
+    min-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.75rem;
+    background-color: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+
+/* Custom Scrollbar */
+.tree-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tree-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+.tree-container::-webkit-scrollbar-thumb {
+    background: #999;
+    border-radius: 3px;
+}
+
+.tree-container::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* JsTree Styles */
+.jstree-node {
+    margin-bottom: 0.25rem;
+}
+
+.jstree-anchor {
+    font-size: 0.875rem;
+    color: #333;
+    padding: 0.4rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.jstree-anchor:hover {
+    background-color: #f0f0f0;
+    color: #000;
+}
+
+.jstree-clicked,
+.jstree-anchor.jstree-clicked,
+.jstree-default .jstree-clicked {
+    background: #7367F0 !important;
+    color: white !important;
+    border-radius: 4px;
+}
+
+/* ===================================
+   TABLE CARD CONTENT
+   =================================== */
+
+/* Filters */
+.filters-section {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.25rem;
+    border: 1px solid #e0e0e0;
+}
+
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 140px;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #555;
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    border-color: #7367F0;
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(115, 103, 240, 0.1);
+}
+
+#apply-date-filter {
+    padding: 0.6rem 1.5rem;
+    background: #7367F0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+#apply-date-filter:hover {
+    background: #5E50EE;
+}
+
+@media (max-width: 768px) {
+    .filters-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    #apply-date-filter {
+        width: 100%;
+    }
+}
+
+/* Table */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height:550px;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    background: #7367F0;
+    color: white;
+    font-weight: 600;
+    padding: 0.9rem;
+    border: none;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s;
+    cursor: pointer;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table tbody td {
+    padding: 0.9rem;
+    vertical-align: middle;
+    font-size: 0.875rem;
+    color: #333;
+}
+
+.table-active.has-children {
+    background-color: #f8f9fa;
+}
+
+.table-primary {
+    background-color: #f0f0f0 !important;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.7rem 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table thead {
+        display: none;
+    }
+    
+    .table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 1rem;
+        background: white;
+    }
+    
+    .table tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border: none;
+    }
+    
+    .table tbody td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        margin-left: 0.5rem;
+        color: #555;
+    }
+}
+
+/* Icons */
+.folder-icon {
+    color: #666;
+    font-size: 1.4rem;
+}
+
+.file-icon {
+    color: #999;
+    font-size: 1.4rem;
+}
+
+/* Badge */
+.badge-primary {
+    background: #7367F0;
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+/* Balance Display */
+.account-opening-balance {
+    text-align: center;
+}
+
+.account-opening-balance strong {
+    font-size: 0.95rem;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #333;
+}
+
+.account-opening-balance small {
+    color: #666;
+    font-size: 0.75rem;
+}
+
+.balance-positive {
+    color: #28a745;
+}
+
+.balance-negative {
+    color: #dc3545;
+}
+
+/* Operation Buttons */
+.operation {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.operation a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.operation a:hover {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.operation .delete-button:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ===================================
+   BUTTONS - SIMPLE
+   =================================== */
+
+.btn {
+    border-radius: 6px;
+    padding: 0.65rem 1.4rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: none;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: #7367F0;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5E50EE;
+}
+
+.btn-outline-primary {
+    border: 2px solid #7367F0;
+    color: #7367F0;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: #7367F0;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+/* ===================================
+   MODALS - SIMPLE
+   =================================== */
+
+.modal-content {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background: #f8f9fa;
+    color: #333;
+    border-radius: 8px 8px 0 0;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #ddd;
+    padding: 1rem 1.5rem;
+}
+
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    padding: 0.65rem 0.9rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: #7367F0;
+    box-shadow: 0 0 0 0.15rem rgba(115, 103, 240, 0.1);
+}
+
+/* ===================================
+   PAGINATION - SIMPLE
+   =================================== */
+
+.pagination {
+    margin: 1rem 0;
+    gap: 0.25rem;
+}
+
+.page-item {
+    margin: 0 0.1rem;
+}
+
+.page-link {
+    color: #7367F0 !important;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem 0.7rem;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.page-link:hover {
+    background-color: #f0f0f0;
+    border-color: #7367F0 !important;
+}
+
+.page-item.active .page-link {
+    background: #7367F0 !important;
+    border-color: #7367F0 !important;
+    color: white !important;
+}
+
+.pagination-info {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* ===================================
+   LOADING & UTILITIES
+   =================================== */
+
+.spinner-border {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-width: 0.2em;
+}
+
+#loading-spinner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    color: #666;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+/* Mobile Toggle (Hidden by default as cards are side by side) */
+.mobile-tree-toggle {
+    display: none;
+}
+
+@media (max-width: 991px) {
+    .mobile-tree-toggle {
+        display: flex;
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #7367F0;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 12px rgba(115, 103, 240, 0.3);
+        z-index: 1000;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+}
+
+/* Accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+*:focus-visible {
+    outline: 2px solid #7367F0;
+    outline-offset: 2px;
+}

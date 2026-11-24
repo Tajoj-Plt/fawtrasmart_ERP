@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="Manufacturing">
+            <directory>tests/Unit</directory>
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory>Http</directory>
+            <directory>Services</directory>
+        </include>
+    </source>
+
+    <php>
+        <!--
+            الاختبارات تعمل على MySQL لا على SQLite، لسببين:
+
+            ١) هجراتُ النظام تستعمل `ALTER TABLE … MODIFY` وSHOW COLUMNS
+               وهي صيغةٌ لا يفهمها SQLite، فتتوقّف أوّل هجرة.
+            ٢) `lockForUpdate()` — وهو حارس التزامن الذي أضيف في المرحلة
+               ١-ب — لا أثر له إطلاقاً على SQLite. اختبارُه هناك يعطي
+               طمأنينةً كاذبة.
+
+            قاعدةٌ منفصلة تماماً عن قاعدة التطوير، واسمُها يُتحقَّق منه
+            في ManufacturingTestCase قبل أي عملية.
+        -->
+        <env name="DB_CONNECTION" value="mysql" force="true"/>
+        <env name="DB_HOST" value="127.0.0.1" force="true"/>
+        <env name="DB_PORT" value="3306" force="true"/>
+        <env name="DB_DATABASE" value="fawtra_manufacturing_test" force="true"/>
+
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+    </php>
+</phpunit>

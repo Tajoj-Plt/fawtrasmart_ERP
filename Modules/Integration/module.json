@@ -1,0 +1,16 @@
+{
+    "name": "Integration",
+    "alias": "integration",
+    "description": "واجهة الربط البرمجية لتطبيق الجوال (Flutter) — مصادقة المناديب/الموظفين وإدارة ملفاتهم الشخصية",
+    "keywords": [
+        "api",
+        "flutter",
+        "mobile",
+        "auth"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Integration\\Providers\\IntegrationServiceProvider"
+    ],
+    "files": []
+}
